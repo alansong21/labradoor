@@ -1,0 +1,31 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: express-server
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: npm run dev
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: next-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://server:4000
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    command: npm run dev

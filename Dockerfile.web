@@ -1,0 +1,19 @@
+# --- Base image ---
+FROM node:18-alpine AS base
+WORKDIR /app
+
+# --- Install deps ---
+COPY web/package*.json ./
+RUN npm install
+
+# --- Copy source ---
+COPY web/ .
+
+# --- Build Next app ---
+RUN npm run build
+
+# --- Expose port ---
+EXPOSE 3000
+
+# --- Run Next app ---
+CMD ["npm", "start"]
