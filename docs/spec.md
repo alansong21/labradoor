@@ -8,14 +8,15 @@
 
 ## 2) Users & Roles
 
-- **Student** (UCLA undergrad): browse/search, save, apply, track status, receive notifications (UI only for MVP).
+- **Student** (UCLA undergrad): browse/search, save, apply, track status, receive notifications. 
+
 - **Lab Admin** (PI, lab manager, grad/PhD delegate): create and manage postings, review applicants, communicate with candidates.
 
 ## 3) Core User Stories (with acceptance criteria)
 
 ### 3.1 Student Discovery & Application
 
-**S1. Sign-in with UCLA identity** (MVP: domain-restricted email magic link).
+**S1. Sign-in with UCLA identity** 
 
 - **AC:** @ucla.edu required to create a Student profile; name + email captured on first login.
 
@@ -61,7 +62,7 @@
 
 - **AC:** Report queue with reason, link to entity, soft delete/restore actions.
 
-## 4) Information Architecture & Data Model (MVP)
+## 4) Information Architecture & Data Model 
 
 **Entities (key fields only):**
 
@@ -80,18 +81,18 @@
 ## 5) Non-Functional Requirements
 
 - **Performance:** P95 < 500 ms for primary read/search flows; pagination everywhere.
-- **Availability:** Target 99.9% (MVP acceptable with occasional restarts).
+- **Availability:** Target 99.9% 
 - **Security & Privacy:** RBAC enforcement, least-privilege queries; PDF-only uploads; minimize PII; support user data deletion/export.
 - **Accessibility:** WCAG 2.1 AA (labels, keyboard nav, color contrast).
 - **Compliance/Brand:** UCLA marks not used unless approved.
 
-## 6) Tech Stack (MVP)
+## 6) Tech Stack 
 
 - **Frontend:** Next.js (TypeScript), Tailwind + shadcn/ui, React Hook Form + Zod, TanStack Query.
 - **Backend:** Node.js (NestJS or Express), Prisma ORM.
 - **Database:** PostgreSQL (local Docker; Neon/Supabase in staging/prod).
 - **Storage:** Local folder for resumes in dev; S3 or R2 in prod (signed URL upload flow).
-- **Auth (MVP):** domain-restricted magic link; later swap to SAML via WorkOS/Auth0.
+- **Auth:** domain-restricted magic link; later swap to SAML via WorkOS/Auth0.
 - **Observability:** Sentry (FE/BE).
 - **Email/Queues:** Deferred to later; MVP uses on-screen confirmations.
 
@@ -131,7 +132,7 @@ Consistent JSON: `{ error: { code, message, details? } }` with `400/401/403/404/
 
 Title; Summary (≤300 chars); Description (rich text); Department; Research Areas (tags); Techniques/Skills (tags); Time Commitment (hrs/week); Minimum Duration (months); Start Term; Compensation (Paid/Credit/Volunteer; pay range optional); Eligibility (major/class year optional in MVP); Screening Questions (0–3 short answers); Application Materials (Resume required; optional statement); Deadline (date) or Rolling (boolean); Expected Timeline ("review weekly; reply in 14 days").
 
-## 9) Search & Ranking (MVP)
+## 9) Search & Ranking 
 
 - Use Postgres full-text search + trigram for fuzzy title/summary/description.
 - Default sort: soonest deadline, then newest posting.
@@ -144,7 +145,7 @@ Title; Summary (≤300 chars); Description (rich text); Department; Research Are
 - **PDF-only uploads:** size limit (e.g., 5 MB); mime-type and extension checks; store signed URLs.
 8) Posting Schema (standardized fields)
 Title; Summary (≤300 chars); Description (rich text); Department; Research Areas (tags); Techniques/Skills (tags); Time Commitment (hrs/week); Minimum Duration (months); Start Term; Compensation (Paid/Credit/Volunteer; pay range optional); Eligibility (major/class year optional in MVP); Screening Questions (0–3 short answers); Application Materials (Resume required; optional statement); Deadline (date) or Rolling (boolean); Expected Timeline (“review weekly; reply in 14 days”).
-9) Search & Ranking (MVP)
+9) Search & Ranking 
 Use Postgres full-text search + trigram for fuzzy title/summary/description.
 Default sort: soonest deadline, then newest posting.
 Exact tag/technique filters via array columns and GIN index.
@@ -189,7 +190,7 @@ SSO complexity: ship MVP with domain-restricted magic link; plan SAML switch whe
 Low lab adoption: standardized posting editor + import from Google Doc; hands-on onboarding.
 Data quality inconsistency: strong required fields, real-time validation, posting preview.
 PII concerns: keep data minimal; clear retention policy (e.g., purge rejected apps after 12 months).
-15) Definition of Done (MVP)
+15) Definition of Done 
 All endpoints validated; RBAC enforced; tests for happy paths.
 FTS + trigram search working with indexes.
 Resume upload flow secured and limited (PDF only).
