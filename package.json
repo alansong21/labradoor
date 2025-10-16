@@ -1,0 +1,16 @@
+{
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "name": "labradoor",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n WEB,API -c auto \"npm:dev:web\" \"npm:dev:server\"",
+    "dev:web": "cd web && npm run dev",
+    "dev:server": "cd server && nodemon index.js",
+    "build": "cd web && npm run build",
+    "start": "concurrently -k -n WEB,API -c auto \"npm:serve:web\" \"npm:start:server\"",
+    "serve:web": "cd web && npm run start -- -p 3000",
+    "start:server": "cd server && node index.js"
+  }
+}
