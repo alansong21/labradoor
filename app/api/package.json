@@ -1,0 +1,15 @@
+{
+  "name": "labradoor",
+  "version": "1.0.0",
+  "description": "A job board for undergrad lab openings @UCLA",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
