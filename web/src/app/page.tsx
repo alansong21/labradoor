@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import "./page.css";
+import Navbar from "./components/Navbar";
 
 export default function Page() {
   const labs = [
@@ -47,27 +48,30 @@ export default function Page() {
   ];
 
   return (
-    <main className="lab-page">
-      <h1 className="title">Lab Openings</h1>
-      <p className="subtitle">Unleash Your True Potential</p>
+    <>
+      <Navbar /> {/* Add the Navbar here */}
+      <main className="lab-page">
+        <h1 className="title">Lab Openings</h1>
+        <p className="subtitle">Unleash Your True Potential</p>
 
-      <div className="card-container">
-        {labs.map((lab, idx) => (
-          <div key={idx} className="lab-card">
-            <div className="avatar" />
-            <h2 className="lab-name">{lab.name}</h2>
-            <p className="lab-desc">{lab.desc}</p>
+        <div className="card-container">
+          {labs.map((lab, idx) => (
+            <div key={idx} className="lab-card">
+              <div className="avatar" />
+              <h2 className="lab-name">{lab.name}</h2>
+              <p className="lab-desc">{lab.desc}</p>
 
-            <ul className="lab-details">
-              {lab.details.map((line, i) => (
-                <li key={i}>{line}</li>
-              ))}
-            </ul>
+              <ul className="lab-details">
+                {lab.details.map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
 
-            <button className="learn-more">Learn More</button>
-          </div>
-        ))}
-      </div>
-    </main>
+              <button className="learn-more">Learn More</button>
+            </div>
+          ))}
+        </div>
+      </main>
+    </>
   );
 }

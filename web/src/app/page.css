@@ -35,6 +35,8 @@
   box-shadow: none;
   transition: transform 0.2s ease;
   justify-content: space-between;
+  display: flex;
+  flex-direction: column;
 }
 
 .lab-card:hover {
@@ -80,9 +82,9 @@
   border-radius: 2px;
   font-weight: 500;
   cursor: pointer;
-  
 }
 
 .learn-more:hover {
   background-color: #3a5fa0;
 }
+
