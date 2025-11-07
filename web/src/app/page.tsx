@@ -1,38 +1,73 @@
 "use client";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import React from "react";
+import "./page.css";
 
-type User = { id: number; name?: string | null; email: string };
-
-export default function Home() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    fetch("/api/auth/me", { credentials: "include" })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => setUser(data?.user ?? null))
-      .catch(() => setUser(null));
-  }, []);
-
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    setUser(null);
-  }
+export default function Page() {
+  const labs = [
+    {
+      name: "Yaocoin",
+      desc: "World's premier first in first out research group",
+      details: [
+        "Must be special",
+        "Looking for EE/ECE/CS students",
+        "who have taken CS 9000",
+        "At least plat in Valorant",
+      ],
+    },
+    {
+      name: "ByteLabs",
+      desc: "Innovating low-level compute systems for next-gen AI hardware",
+      details: [
+        "Strong in embedded systems",
+        "Experience with Verilog or FPGA",
+        "Collaborative research focus",
+        "ECE majors preferred",
+      ],
+    },
+    {
+      name: "NeuroDrive",
+      desc: "Research group on perception and navigation for autonomous systems",
+      details: [
+        "Experience with ROS or OpenCV",
+        "Interested in robotics research",
+        "Comfortable with Python/C++",
+        "Enjoys hardware integration",
+      ],
+    },
+    {
+      name: "PhotonAI",
+      desc: "Merging optics and machine learning for new vision architectures",
+      details: [
+        "Interest in ML + EE intersection",
+        "Experience with PyTorch/TensorFlow",
+        "Exposure to signal processing",
+        "Creative, interdisciplinary mindset",
+      ],
+    },
+  ];
 
   return (
-    <main>
-      <h1>Labradoor</h1>
-      {user ? (
-        <>
-          <p>Welcome, {user.name ?? user.email}</p>
-          <button onClick={handleLogout}>Logout</button>
-        </>
-      ) : (
-        <>
-          <Link href="/signup">Sign up</Link>
-          <Link href="/login">Login</Link>
-        </>
-      )}
+    <main className="lab-page">
+      <h1 className="title">Lab Openings</h1>
+      <p className="subtitle">Unleash Your True Potential</p>
+
+      <div className="card-container">
+        {labs.map((lab, idx) => (
+          <div key={idx} className="lab-card">
+            <div className="avatar" />
+            <h2 className="lab-name">{lab.name}</h2>
+            <p className="lab-desc">{lab.desc}</p>
+
+            <ul className="lab-details">
+              {lab.details.map((line, i) => (
+                <li key={i}>{line}</li>
+              ))}
+            </ul>
+
+            <button className="learn-more">Learn More</button>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

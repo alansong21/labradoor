@@ -1,0 +1,88 @@
+.lab-page {
+  background-color: #e5e5e5;
+  min-height: 100vh;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.subtitle {
+  color: #c4a7ff;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-size: larger;
+}
+
+.card-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.lab-card {
+  background: white;
+  width: 250px;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  padding: 1.5rem;
+  box-shadow: none;
+  transition: transform 0.2s ease;
+  justify-content: space-between;
+}
+
+.lab-card:hover {
+  transform: translateY(-4px);
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  background-color: black;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+}
+
+.lab-name {
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0.25rem 0;
+}
+
+.lab-desc {
+  color: #333;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.lab-details {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  color: #555;
+  font-size: 0.85rem;
+  line-height: 1.6;
+    flex-grow: 1;
+}
+
+.learn-more {
+  background-color: #426bb1;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 2px;
+  font-weight: 500;
+  cursor: pointer;
+  
+}
+
+.learn-more:hover {
+  background-color: #3a5fa0;
+}
