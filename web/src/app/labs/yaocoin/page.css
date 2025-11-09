@@ -1,0 +1,64 @@
+html, body {
+  overflow-x: hidden;
+}
+.container {
+  min-height: 100vh;
+  width: 100%;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: cent;
+  padding: 3rem 2rem;
+  color: #111827;
+}
+
+.content {
+  width: 100%;
+  max-width: 48rem;
+}
+
+.lab-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.lab-tag {
+  display: inline-block;
+  background-color: #dcfce7; /* green-100 */
+  color: #15803d; /* green-700 */
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-weight: 600;
+  color: #1f2937; /* gray-800 */
+  margin-bottom: 0.5rem;
+}
+
+.section-text {
+  color: #4b5563; /* gray-600 */
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  white-space: pre-line;
+}
+
+.lab-button {
+  width: 100%;
+  background-color: #1f2937; 
+  color: white;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.lab-button:hover {
+  background-color: #374151;
+}

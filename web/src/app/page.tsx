@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import React from "react";
 import "./page.css";
 import Navbar from "./components/Navbar";
@@ -14,6 +15,7 @@ export default function Page() {
         "who have taken CS 9000",
         "At least plat in Valorant",
       ],
+      id: "yaocoin",
     },
     {
       name: "ByteLabs",
@@ -49,7 +51,7 @@ export default function Page() {
 
   return (
     <>
-      <Navbar /> {/* Add the Navbar here */}
+      <Navbar /> {}
       <main className="lab-page">
         <h1 className="title">Lab Openings</h1>
         <p className="subtitle">Unleash Your True Potential</p>
@@ -67,7 +69,13 @@ export default function Page() {
                 ))}
               </ul>
 
-              <button className="learn-more">Learn More</button>
+              {lab.id ? (
+                <Link href={`/labs/${lab.id}`} className="learn-more">
+                  Learn More
+                </Link>
+              ) : (
+                <button className="learn-more">Learn More</button>
+              )}
             </div>
           ))}
         </div>
