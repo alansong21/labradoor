@@ -1,5 +1,6 @@
 import React from "react";
 import "./Navbar.css";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
@@ -32,7 +33,9 @@ export default function Navbar() {
             <a href="/login">Login</a>
           </li>
         </ul>
-        <button className="signup-button">Sign Up</button>
+        <Link href="/signup" className="signup-button">
+          Sign Up
+        </Link>
       </div>
     </nav>
   );
