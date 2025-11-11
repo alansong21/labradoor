@@ -13,6 +13,7 @@ const publicUser = user => {
   const { passwordHash, ...rest } = user;
   return rest;
 };
+
 const signupSchema = z.object({
   email: z.string().email().regex(UCLA_EMAIL_REGEX, "Must be a valid UCLA email"),
   password: z.string().min(8),

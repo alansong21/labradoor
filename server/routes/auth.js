@@ -7,9 +7,14 @@ const {
     logout
 } = require('../controllers/authController');
 
+const {
+    requestResearcherSignup
+} = require('../controllers/researcherController');
+
 const { authMiddleware } = require('../middleware/auth');
 
 router.post('/signup', requestSignup);
+router.post('/researchers/signup', requestResearcherSignup);
 router.post('/verify-signup', verifySignup);
 router.post('/login', login);
 router.get('/me', authMiddleware, getMe);
