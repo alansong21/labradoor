@@ -11,6 +11,8 @@
     "moduleResolution": "node",
     "target": "esnext",
     "types": [],
+    "baseUrl": ".",
+    "typeRoots": ["./types", "./node_modules/@types"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -41,5 +43,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  "include": ["./**/*.ts", "./types/**/*.d.ts"],
+  "exclude": ["node_modules"]
 }
