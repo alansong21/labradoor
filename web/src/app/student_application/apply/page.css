@@ -1,0 +1,195 @@
+.apply-page {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(0deg, #D9D9D9 0%, #D9D9D9 100%), rgba(255, 255, 255, 1);
+  padding: 64px;
+  display: flex;
+  justify-content: center;
+  border: 1px solid #000;
+}
+
+.apply-container {
+  width: 1020px;
+  background: #FFF;
+  padding: 54px 62px 64px;
+  position: relative;
+}
+
+.page-title {
+  color: rgba(30, 30, 30, 1);
+  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 120%;
+  letter-spacing: -0.48px;
+  margin: 0 0 78px 0;
+}
+
+.application-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+
+.input-field {
+  position: relative;
+}
+
+.text-input {
+  width: 360px;
+  height: 64px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  background: #FFF;
+  padding: 0 25px;
+  font-family: Roboto, -apple-system, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140.625%;
+  color: #000;
+}
+
+.text-input::placeholder {
+  color: rgba(0, 0, 0, 0.50);
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.resume-section {
+  margin-top: 163px;
+}
+
+.section-heading {
+  color: rgba(30, 30, 30, 1);
+  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 120%;
+  letter-spacing: -0.48px;
+  margin: 0 0 34px 0;
+}
+
+.upload-button {
+  width: 258px;
+  height: 83px;
+  background: #D9D9D9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upload-button:hover {
+  background: #c5c5c5;
+}
+
+.upload-button span {
+  color: #000;
+  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 120%;
+  letter-spacing: -0.48px;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-name {
+  margin-top: 12px;
+  font-family: Roboto, -apple-system, Helvetica, sans-serif;
+  font-size: 16px;
+  color: rgba(30, 30, 30, 1);
+}
+
+.custom-section {
+  margin-top: 63px;
+}
+
+.textarea-input {
+  width: 878px;
+  height: 250px;
+  border-radius: 5px;
+  border: 1px solid #000;
+  background: #FFF;
+  padding: 19px 25px;
+  font-family: Roboto, -apple-system, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 140.625%;
+  color: #000;
+  resize: vertical;
+}
+
+.textarea-input::placeholder {
+  color: rgba(0, 0, 0, 0.50);
+}
+
+.textarea-input:focus {
+  outline: none;
+  border-color: #000;
+}
+
+@media (max-width: 1200px) {
+  .apply-page {
+    padding: 32px;
+  }
+
+  .apply-container {
+    width: 100%;
+    max-width: 1020px;
+    padding: 32px 24px;
+  }
+
+  .textarea-input {
+    width: 100%;
+    max-width: 878px;
+  }
+}
+
+@media (max-width: 768px) {
+  .apply-page {
+    padding: 24px;
+  }
+
+  .apply-container {
+    padding: 24px 16px;
+  }
+
+  .text-input {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .textarea-input {
+    width: 100%;
+  }
+
+  .upload-button {
+    width: 100%;
+    max-width: 258px;
+  }
+
+  .page-title {
+    margin-bottom: 48px;
+  }
+
+  .resume-section {
+    margin-top: 80px;
+  }
+
+  .custom-section {
+    margin-top: 40px;
+  }
+}

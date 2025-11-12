@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import "./page.css";
 
 export default function LabPage({ params }: { params: { id: string } }) {
@@ -23,22 +24,20 @@ The qualified candidate will become part of Northrop Grumman’s Space Sector AI
     <div className="container">
       <div className="content">
         <h1 className="lab-title">{lab.name}</h1>
-
         <div className="lab-tag">{lab.tag}</div>
-
         <section>
           <h2 className="section-title">Description:</h2>
           <p className="section-text">{lab.description.trim()}</p>
         </section>
-
         <section>
           <h2 className="section-title">Required Qualifications:</h2>
           <p className="section-text">{lab.required}</p>
           <h2 className="section-title">Preferred Qualifications:</h2>
           <p className="section-text">{lab.preferred}</p>
         </section>
-
-        <button className="lab-button">Apply</button>
+        <Link href="/student_application/apply" className="lab-button">
+          Apply
+        </Link>
       </div>
     </div>
   );
