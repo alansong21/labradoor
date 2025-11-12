@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -9,36 +10,47 @@ datasource db {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  email           String    @unique
+  id              Int                 @id @default(autoincrement())
+  createdAt       DateTime            @default(now())
+  email           String              @unique
   name            String?
-  uclaId          String?   @unique
-  passwordHash    String
   emailVerifiedAt DateTime?
+  passwordHash    String
+  uclaId          String?             @unique
+  updatedAt       DateTime            @updatedAt
+  posts           Post[]
   sessions        Session[]
   tokens          VerificationToken[]
 }
 
 model Session {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
   userId    Int
   tokenHash String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model VerificationToken {
-  id         Int               @id @default(autoincrement())
-  user       User              @relation(fields: [userId], references: [id])
+  id         Int              @id @default(autoincrement())
   userId     Int
   type       VerificationType
-  tokenHash  String            @unique
+  tokenHash  String           @unique
   expiresAt  DateTime
   consumedAt DateTime?
-  createdAt  DateTime          @default(now())
+  createdAt  DateTime         @default(now())
+  user       User             @relation(fields: [userId], references: [id])
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  authorId  Int?
+  body      String
+  author    User?    @relation(fields: [authorId], references: [id])
 }
 
 enum VerificationType {
