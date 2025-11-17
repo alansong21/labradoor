@@ -1,81 +1,32 @@
-"use client";
 import Link from "next/link";
-import React from "react";
-import "./page.css";
+import { getLabs } from "@/lib/labs";
 import Navbar from "./components/Navbar";
 
-export default function Page() {
-  const labs = [
-    {
-      name: "Yaocoin",
-      desc: "World's premier first in first out research group",
-      details: [
-        "Must be special",
-        "Looking for EE/ECE/CS students",
-        "who have taken CS 9000",
-        "At least plat in Valorant",
-      ],
-      id: "yaocoin",
-    },
-    {
-      name: "ByteLabs",
-      desc: "Innovating low-level compute systems for next-gen AI hardware",
-      details: [
-        "Strong in embedded systems",
-        "Experience with Verilog or FPGA",
-        "Collaborative research focus",
-        "ECE majors preferred",
-      ],
-    },
-    {
-      name: "NeuroDrive",
-      desc: "Research group on perception and navigation for autonomous systems",
-      details: [
-        "Experience with ROS or OpenCV",
-        "Interested in robotics research",
-        "Comfortable with Python/C++",
-        "Enjoys hardware integration",
-      ],
-    },
-    {
-      name: "PhotonAI",
-      desc: "Merging optics and machine learning for new vision architectures",
-      details: [
-        "Interest in ML + EE intersection",
-        "Experience with PyTorch/TensorFlow",
-        "Exposure to signal processing",
-        "Creative, interdisciplinary mindset",
-      ],
-    },
-  ];
+export default async function Page() {
+  const labs = await getLabs();
 
   return (
     <>
-      <Navbar /> {}
+      <Navbar />
+
       <main className="lab-page">
         <h1 className="title">Lab Openings</h1>
-        <p className="subtitle">Unleash Your True Potential</p>
-
+        ...
         <div className="card-container">
-          {labs.map((lab, idx) => (
-            <div key={idx} className="lab-card">
-              <div className="avatar" />
+          {labs.map((lab) => (
+            <div key={lab.id} className="lab-card">
               <h2 className="lab-name">{lab.name}</h2>
               <p className="lab-desc">{lab.desc}</p>
 
               <ul className="lab-details">
-                {lab.details.map((line, i) => (
-                  <li key={i}>{line}</li>
+                {lab.details.map((line) => (
+                  <li key={line}>{line}</li>
                 ))}
               </ul>
 
-              {lab.id ? (
-                <Link href={`/labs/${lab.id}`} className="learn-more">
-                  Learn More
-                </Link>
-              ) : (
-                <button className="learn-more">Learn More</button>
-              )}
+              <Link href={`/labs/${lab.id}`} className="learn-more">
+                Learn More
+              </Link>
             </div>
           ))}
         </div>
