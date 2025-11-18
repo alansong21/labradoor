@@ -12,15 +12,16 @@ datasource db {
 model User {
   id              Int                 @id @default(autoincrement())
   createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
   email           String              @unique
   name            String?
-  emailVerifiedAt DateTime?
-  passwordHash    String
   uclaId          String?             @unique
-  updatedAt       DateTime            @updatedAt
-  posts           Post[]
+  passwordHash    String
+  emailVerifiedAt DateTime?
   sessions        Session[]
   tokens          VerificationToken[]
+  student         Student?
+  researcher      Researcher?
 }
 
 model Session {
@@ -43,17 +44,95 @@ model VerificationToken {
   user       User             @relation(fields: [userId], references: [id])
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String
-  authorId  Int?
-  body      String
-  author    User?    @relation(fields: [authorId], references: [id])
-}
-
 enum VerificationType {
   SIGNUP
   LOGIN
+}
+
+model Student {
+  userId       Int       @id
+  user         User      @relation(fields: [userId], references: [id])
+  year         String    
+  major        String
+  description  String?
+  applications Application[]
+}
+
+model Researcher {
+  userId       Int        @id
+  user         User       @relation(fields: [userId], references: [id])
+  verifyStatus verification
+  department   String
+  posts        Post[]
+}
+
+enum verification {
+  VERIFIED
+  PENDING
+  UNVERIFIED
+}
+
+model Admin {
+  email            String     @unique
+  passwordHash     String
+}
+
+model Post {
+  id          Int          @id @default(autoincrement())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  title       String
+  body        String
+  researcherId Int
+  researcher   Researcher   @relation(fields: [researcherId], references: [userId])
+  questions   Question[]
+  tags        String[]
+  applications Application[]
+}
+
+model Application {
+  id         Int               @id @default(autoincrement())
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  status     ApplicationStatus
+  studentId  Int
+  postId     Int
+  student    Student           @relation(fields: [studentId], references: [userId])
+  post       Post              @relation(fields: [postId], references: [id])
+  answers    Answer[]
+}
+
+enum ApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+model Question {
+  id        Int           @id @default(autoincrement())
+  postId    Int
+  type      QuestionType  
+  body      Json         
+
+  post      Post          @relation(fields: [postId], references: [id])
+  answers   Answer[]
+}
+
+model Answer {
+  id            Int           @id @default(autoincrement())
+  type          QuestionType
+  questionId    Int
+  applicationId Int
+  body          Json
+
+  question      Question      @relation(fields: [questionId], references: [id])
+  application   Application   @relation(fields: [applicationId], references: [id])
+}
+
+enum QuestionType {
+  SHORT_TEXT
+  LONG_TEXT
+  MULTIPLE_CHOICE
+  CHECKBOX
 }
