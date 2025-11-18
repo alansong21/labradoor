@@ -62,7 +62,7 @@ model Researcher {
   userId       Int        @id
   user         User       @relation(fields: [userId], references: [id])
   verifyStatus verification
-  department   string
+  department   String
   posts        Post[]
 }
 
