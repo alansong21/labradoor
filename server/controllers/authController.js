@@ -5,14 +5,10 @@ const { createSession, deleteSession } = require("../services/sessionService");
 const { sendVerificationLink } = require("../services/emailService");
 const { SESSION_COOKIE } = require("../middleware/auth");
 const { hashPassword, verifyPassword } = require("../services/passwordService");
+const { publicUser } = require("../utils/user");
 
 const UCLA_EMAIL_REGEX = /^[^@]+@(?:ucla|g\.ucla)\.edu$/i;
 
-const publicUser = user => {
-  if (!user) return null;
-  const { passwordHash, ...rest } = user;
-  return rest;
-};
 const signupSchema = z.object({
   email: z.string().email().regex(UCLA_EMAIL_REGEX, "Must be a valid UCLA email"),
   password: z.string().min(8),
