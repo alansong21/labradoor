@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
+import "./login.css";
 
 export default function LoginPage() {
   const [status, setStatus] = useState<string | null>(null);
@@ -28,14 +30,43 @@ export default function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="email" name="email" placeholder="UCLA email" required />
-        <input type="password" name="password" placeholder="Password" minLength={8} required />
-        <button type="submit">Log in</button>
-      </form>
-      {status && <p>{status}</p>}
-    </main>
+    <div className="login-page">
+      <div className="login-container">
+        <h1 className="login-title">Log In</h1>
+        
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="input-wrapper">
+            <input 
+              type="email" 
+              name="email" 
+              placeholder="Email" 
+              className="login-input"
+              required 
+            />
+          </div>
+          
+          <div className="input-wrapper">
+            <input 
+              type="password" 
+              name="password" 
+              placeholder="Password" 
+              className="login-input"
+              minLength={8} 
+              required 
+            />
+          </div>
+          
+          <button type="submit" className="login-submit-button">
+            Sign In
+          </button>
+        </form>
+
+        {status && <p className="status-message">{status}</p>}
+        
+        <p className="signup-prompt">
+          Don't have an account yet? <Link href="/signup" className="signup-link">Create Account</Link>
+        </p>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,100 @@
+.verify-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fa;
+  padding: 20px;
+}
+
+.verify-card {
+  background: white;
+  padding: 40px 35px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+.verify-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 20px;
+  color: #333;
+}
+
+.verify-title.success {
+  color: #0a8a2a;
+}
+
+.verify-title.error {
+  color: #d7263d;
+}
+
+.verify-text {
+  font-size: 0.95rem;
+  color: #666;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+/* Icons */
+.verify-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.verify-icon.success {
+  color: #0a8a2a;
+}
+
+.verify-icon.error {
+  color: #d7263d;
+}
+
+/* Buttons */
+.verify-button {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-decoration: none;
+  font-weight: 500;
+  color: white;
+  transition: background 0.25s ease;
+}
+
+.verify-button.success {
+  background: #0a8a2a;
+}
+
+.verify-button.success:hover {
+  background: #086e22;
+}
+
+.verify-button.error {
+  background: #d7263d;
+}
+
+.verify-button.error:hover {
+  background: #b91f32;
+}
+
+/* Spinner */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ddd;
+  border-top: 5px solid #4a90e2;
+  border-radius: 50%;
+  margin: 0 auto 20px auto;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
