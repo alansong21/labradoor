@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import "./page.css";
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
 
 interface FormEntry {
   id: string;
