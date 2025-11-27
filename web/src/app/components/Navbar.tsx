@@ -2,7 +2,11 @@ import React from "react";
 import "./Navbar.css";
 import Link from "next/link";
 
-export default function Navbar() {
+interface NavbarProps {
+  isLoggedIn?: boolean;
+}
+
+export default function Navbar({ isLoggedIn = false }: NavbarProps) {
   return (
     <nav className="navbar">
       <div className="navbar-left">
@@ -23,19 +27,18 @@ export default function Navbar() {
       </div>
       <div className="navbar-right">
         <ul className="navbar-links">
-          <li>
-            <a href="/api">API</a>
-          </li>
-          <li>
-            <a href="/help">Help</a>
-          </li>
-          <li>
-            <a href="/login">Login</a>
-          </li>
+
+          {!isLoggedIn && (
+            <li>
+              <a href="/login">Login</a>
+            </li>
+          )}
         </ul>
-        <Link href="/signup" className="signup-button">
-          Sign Up
-        </Link>
+        {!isLoggedIn && (
+          <Link href="/signup" className="signup-button">
+            Sign Up
+          </Link>
+        )}
       </div>
     </nav>
   );
