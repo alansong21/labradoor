@@ -14,6 +14,7 @@ const signupSchema = z.object({
   password: z.string().min(8),
   name: z.string().min(1).optional(),
   uclaId: z.string().min(7).optional(),
+  role: z.enum(["STUDENT", "RESEARCHER"]).optional(),
 });
 
 const tokenSchema = z.object({
@@ -29,12 +30,13 @@ async function requestSignup(req, res) {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const { email, name, uclaId, password } = parsed.data;
+  const { email, name, uclaId, password, role } = parsed.data;
   const passwordHash = await hashPassword(password);
   const baseData = {
     name: name ?? null,
     passwordHash,
     emailVerifiedAt: null,
+    role: role || "STUDENT",
   };
   if (uclaId) {
     baseData.uclaId = uclaId;

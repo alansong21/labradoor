@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import "./page.css";
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
 
 interface FormEntry {
   id: string;
@@ -84,25 +84,78 @@ const PostCreationPage: React.FC = () => {
     );
   };
 
+  const [postTitle, setPostTitle] = useState("");
+  const [postDescription, setPostDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSavePost() {
+    if (!postTitle) return alert("Please enter a post title");
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: postTitle,
+          description: postDescription,
+          questions: entries.map((e) => ({
+            type: e.type,
+            question: e.title,
+            options: e.options,
+          })),
+        }),
+      });
+
+      if (res.ok) {
+        window.location.href = "/researcher-myposts";
+      } else {
+        const body = await res.json();
+        alert(body.error || "Failed to save post");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <>
-      <Navbar />
+      <Navbar isLoggedIn={true} />
       <div className="post-creation-page">
         <div className="post-creation-container">
           <h1 className="post-creation-title">Post Creation</h1>
+
+          <div className="post-meta-section">
+            <input
+              type="text"
+              className="post-title-input"
+              placeholder="Post Title (e.g., Research Assistant needed for AI Lab)"
+              value={postTitle}
+              onChange={(e) => setPostTitle(e.target.value)}
+            />
+            <textarea
+              className="post-description-input"
+              placeholder="Post Description (Describe the role, requirements, etc.)"
+              value={postDescription}
+              onChange={(e) => setPostDescription(e.target.value)}
+            />
+          </div>
 
           <button
             className="add-entry-button"
             onClick={() => setShowEntryMenu(true)}
           >
-            Add Entry
+            Add Question
           </button>
 
           <div className="entries-list">
             {entries.map((entry, index) => (
               <div key={entry.id} className="entry-card">
                 <div className="entry-header">
-                  <span className="entry-number">Entry {index + 1}</span>
+                  <span className="entry-number">Question {index + 1}</span>
                   <span className="entry-type-badge">{entry.type}</span>
                   <button
                     className="delete-entry-button"
@@ -114,11 +167,11 @@ const PostCreationPage: React.FC = () => {
 
                 <div className="entry-fields">
                   <div className="field-group">
-                    <label className="field-label">Question Title</label>
+                    <label className="field-label">Question</label>
                     <input
                       type="text"
                       className="entry-input"
-                      placeholder="Enter question title"
+                      placeholder="Enter question"
                       value={entry.title}
                       onChange={(e) =>
                         updateEntry(entry.id, "title", e.target.value)
@@ -177,9 +230,13 @@ const PostCreationPage: React.FC = () => {
             ))}
           </div>
 
-          {entries.length > 0 && (
-            <button className="save-post-button">Save Post</button>
-          )}
+          <button 
+            className="save-post-button" 
+            onClick={handleSavePost}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Saving..." : "Save Post"}
+          </button>
         </div>
 
         {showEntryMenu && (
