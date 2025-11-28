@@ -2,7 +2,15 @@ import Link from "next/link";
 import { getLabs } from "@/lib/labs";
 import Navbar from "./components/Navbar";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import "./landing.css";
+
+interface Lab {
+  id: string;
+  name: string;
+  desc: string;
+  details: string[];
+}
 
 export default async function Page() {
   const cookieStore = await cookies();
@@ -10,19 +18,19 @@ export default async function Page() {
   const isLoggedIn = !!session;
 
   if (isLoggedIn) {
-    const labs = await getLabs();
+    const labs: Lab[] = await getLabs();
     return (
       <>
         <Navbar isLoggedIn={true} />
         <main className="lab-page">
           <h1 className="title">Lab Openings</h1>
           <div className="card-container">
-            {labs.map((lab) => (
+            {labs.map((lab: Lab) => (
               <div key={lab.id} className="lab-card">
                 <h2 className="lab-name">{lab.name}</h2>
                 <p className="lab-desc">{lab.desc}</p>
                 <ul className="lab-details">
-                  {lab.details.map((line) => (
+                  {lab.details.map((line: string) => (
                     <li key={line}>{line}</li>
                   ))}
                 </ul>
@@ -53,7 +61,7 @@ export default async function Page() {
                 <Link href="/signup?role=student" className="role-button primary">
                   Join as Student
                 </Link>
-                <Link href="/login" className="role-button secondary">
+                <Link href="/login?role=student" className="role-button secondary">
                   Login
                 </Link>
               </div>
@@ -66,7 +74,7 @@ export default async function Page() {
                 <Link href="/signup?role=researcher" className="role-button primary">
                   Join as Researcher
                 </Link>
-                <Link href="/login" className="role-button secondary">
+                <Link href="/login?role=researcher" className="role-button secondary">
                   Login
                 </Link>
               </div>

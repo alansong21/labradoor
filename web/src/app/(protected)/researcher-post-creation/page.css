@@ -1,277 +1,233 @@
 .post-creation-page {
-  width: 100%;
   min-height: 100vh;
-  background: linear-gradient(0deg, #D9D9D9 0%, #D9D9D9 100%), rgba(255, 255, 255, 1);
-  padding: 64px;
-  display: flex;
-  justify-content: center;
-  border: 1px solid #000;
+  background-color: #f8f9fa;
+  padding: 2rem;
 }
 
 .post-creation-container {
-  width: 1020px;
-  min-height: 1700px;
-  background: #FFF;
-  padding: 54px 62px 64px;
-  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .post-creation-title {
-  color: rgba(30, 30, 30, 1);
-  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
-  font-size: 24px;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #1a1a1a;
+}
+
+.post-meta-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #eaeaea;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-title-input {
+  font-size: 1.5rem;
   font-weight: 600;
-  line-height: 120%;
-  letter-spacing: -0.48px;
-  margin: 0 0 84px 0;
+  padding: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.post-title-input:focus {
+  border-color: #000;
+  outline: none;
+}
+
+.post-description-input {
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
 }
 
 .add-entry-button {
-  width: 193px;
-  height: 58px;
-  border-radius: 5px;
-  background: #3284BF;
-  border: none;
-  color: #000;
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 20px;
+  width: 100%;
+  padding: 1rem;
+  background: white;
+  border: 2px dashed #e5e5e5;
+  border-radius: 12px;
+  color: #666;
   font-weight: 600;
-  line-height: 140.625%;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  margin-bottom: 2rem;
 }
 
 .add-entry-button:hover {
-  background: #2a6fa3;
+  border-color: #000;
+  color: #000;
+  background: #fafafa;
 }
 
 .entries-list {
-  margin-top: 48px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .entry-card {
-  border: 1px solid #000;
-  border-radius: 5px;
-  padding: 24px;
-  background: #FFF;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eaeaea;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .entry-header {
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  gap: 1rem;
 }
 
 .entry-number {
-  color: rgba(30, 30, 30, 1);
-  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
-  font-size: 18px;
   font-weight: 600;
-  flex: 1;
+  color: #666;
 }
 
 .entry-type-badge {
   background: #e5e5e5;
-  color: rgba(30, 30, 30, 1);
-  padding: 4px 12px;
-  border-radius: 3px;
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 14px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
   font-weight: 500;
-  text-transform: capitalize;
 }
 
 .delete-entry-button {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid #000;
-  background: #FFF;
-  color: #000;
-  font-size: 24px;
-  line-height: 1;
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #999;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
+  padding: 0 0.5rem;
 }
 
 .delete-entry-button:hover {
-  background: #f5f5f5;
+  color: #ef4444;
 }
 
 .entry-fields {
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
 }
 
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .field-label {
-  color: rgba(30, 30, 30, 1);
-  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
-  font-size: 16px;
+  font-size: 0.875rem;
   font-weight: 600;
+  color: #4b5563;
 }
 
-.entry-input {
+.entry-input,
+.entry-textarea {
+  padding: 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 1rem;
   width: 100%;
-  height: 48px;
-  border-radius: 5px;
-  border: 1px solid #000;
-  background: #FFF;
-  padding: 0 16px;
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 16px;
-  font-weight: 400;
   color: #000;
-}
-
-.entry-input::placeholder {
-  color: rgba(0, 0, 0, 0.50);
-}
-
-.entry-input:focus {
-  outline: none;
-  border-color: #3284BF;
 }
 
 .entry-textarea {
-  width: 100%;
-  min-height: 100px;
-  border-radius: 5px;
-  border: 1px solid #000;
-  background: #FFF;
-  padding: 12px 16px;
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #000;
+  min-height: 80px;
   resize: vertical;
-}
-
-.entry-textarea::placeholder {
-  color: rgba(0, 0, 0, 0.50);
-}
-
-.entry-textarea:focus {
-  outline: none;
-  border-color: #3284BF;
 }
 
 .options-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .option-item {
   display: flex;
+  gap: 0.5rem;
   align-items: center;
-  gap: 8px;
 }
 
 .option-input {
   flex: 1;
-  height: 40px;
-  border-radius: 5px;
-  border: 1px solid #000;
-  background: #FFF;
-  padding: 0 12px;
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #000;
-}
-
-.option-input::placeholder {
-  color: rgba(0, 0, 0, 0.50);
-}
-
-.option-input:focus {
-  outline: none;
-  border-color: #3284BF;
+  padding: 0.5rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
 }
 
 .remove-option-button {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1px solid #000;
-  background: #FFF;
-  color: #000;
-  font-size: 18px;
-  line-height: 1;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.25rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-  flex-shrink: 0;
+  padding: 0 0.5rem;
 }
 
 .remove-option-button:hover {
-  background: #f5f5f5;
+  color: #ef4444;
 }
 
 .add-option-button {
   align-self: flex-start;
-  background: transparent;
-  border: 1px dashed #000;
-  border-radius: 3px;
-  padding: 8px 16px;
-  color: rgba(30, 30, 30, 1);
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 14px;
+  background: none;
+  border: none;
+  color: #2563eb;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.add-option-button:hover {
-  background: rgba(0, 0, 0, 0.05);
+  padding: 0.5rem 0;
 }
 
 .save-post-button {
-  width: 193px;
-  height: 58px;
-  border-radius: 5px;
-  background: #3284BF;
+  width: 100%;
+  padding: 1rem;
+  background: #000;
+  color: white;
   border: none;
-  color: #000;
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 20px;
+  border-radius: 12px;
+  font-size: 1.125rem;
   font-weight: 600;
-  line-height: 140.625%;
   cursor: pointer;
-  margin-top: 48px;
   transition: background 0.2s;
 }
 
 .save-post-button:hover {
-  background: #2a6fa3;
+  background: #333;
 }
 
+.save-post-button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+/* Modal/Overlay Styles */
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  z-index: 100;
 }
 
 .entry-type-menu {
@@ -279,149 +235,78 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 500px;
-  background: #FFF;
-  border: 1px solid #000;
-  border-radius: 8px;
-  padding: 32px;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  z-index: 101;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .menu-title {
-  color: rgba(30, 30, 30, 1);
-  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 120%;
-  letter-spacing: -0.48px;
-  margin: 0 0 24px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .menu-options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .menu-option {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: #FFF;
-  border: 1px solid #000;
-  border-radius: 5px;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   text-align: left;
 }
 
 .menu-option:hover {
-  background: #f5f5f5;
+  border-color: #000;
+  background: #f8f9fa;
 }
 
 .option-icon {
-  font-size: 32px;
+  font-size: 1.5rem;
+  background: #f3f4f6;
   width: 48px;
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-}
-
-.option-content {
-  flex: 1;
+  border-radius: 10px;
 }
 
 .option-name {
-  color: rgba(30, 30, 30, 1);
-  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
-  font-size: 18px;
   font-weight: 600;
-  margin: 0 0 4px 0;
+  margin-bottom: 0.25rem;
 }
 
 .option-description {
-  color: rgba(30, 30, 30, 0.7);
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
 }
 
 .cancel-button {
   width: 100%;
-  height: 48px;
-  border-radius: 5px;
-  background: #e5e5e5;
-  border: none;
-  color: rgba(30, 30, 30, 1);
-  font-family: Roboto, -apple-system, Helvetica, sans-serif;
-  font-size: 16px;
+  padding: 0.75rem;
+  background: none;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
 }
 
 .cancel-button:hover {
-  background: #d5d5d5;
-}
-
-@media (max-width: 1200px) {
-  .post-creation-page {
-    padding: 32px;
-  }
-
-  .post-creation-container {
-    width: 100%;
-    max-width: 1020px;
-    padding: 32px 24px;
-  }
-
-  .entry-type-menu {
-    width: 90%;
-    max-width: 500px;
-  }
-}
-
-@media (max-width: 768px) {
-  .post-creation-page {
-    padding: 24px;
-  }
-
-  .post-creation-container {
-    padding: 24px 16px;
-    min-height: auto;
-  }
-
-  .post-creation-title {
-    margin-bottom: 48px;
-  }
-
-  .add-entry-button,
-  .save-post-button {
-    width: 100%;
-  }
-
-  .entry-type-menu {
-    width: 90%;
-    padding: 24px;
-  }
-
-  .menu-title {
-    font-size: 20px;
-  }
-
-  .option-icon {
-    font-size: 24px;
-    width: 40px;
-    height: 40px;
-  }
-
-  .option-name {
-    font-size: 16px;
-  }
+  background: #f8f9fa;
 }
