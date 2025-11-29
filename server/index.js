@@ -5,6 +5,7 @@ const posts = require("./routes/posts");
 const auth = require("./routes/auth");
 const users = require("./routes/users"); 
 const applications = require("./routes/applications");
+const answers = require("./routes/answers");
 
 const app = express();
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
@@ -20,6 +21,7 @@ app.use("/api/posts", posts);
 app.use("/api/auth", auth);
 app.use("/api/users", users);
 app.use("/api/applications", applications);
+app.use("/api/answers", answers);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
