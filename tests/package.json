@@ -1,0 +1,14 @@
+{
+    "name": "labradoor-tests",
+    "version": "1.0.0",
+    "description": "End-to-end tests for Labradoor",
+    "main": "index.js",
+    "scripts": {
+        "test": "cucumber-js"
+    },
+    "dependencies": {
+        "@cucumber/cucumber": "^10.3.1",
+        "chai": "^5.1.0",
+        "puppeteer": "^22.6.0"
+    }
+}
