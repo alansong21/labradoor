@@ -7,6 +7,7 @@ const users = require("./routes/users");
 const applications = require("./routes/applications");
 const debugRoutes = require("./routes/debug");
 const researcherRoutes = require("./routes/researcher");
+const studentRoutes = require("./routes/student");
 
 const app = express();
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
@@ -23,6 +24,7 @@ app.use("/api/users", users);
 app.use("/api/applications", applications);
 app.use("/api/debug", debugRoutes);
 app.use("/api/researcher", researcherRoutes);
+app.use("/api/student", studentRoutes);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
