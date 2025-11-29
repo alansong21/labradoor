@@ -5,19 +5,16 @@ const { createSession, deleteSession } = require("../services/sessionService");
 const { sendVerificationLink } = require("../services/emailService");
 const { SESSION_COOKIE } = require("../middleware/auth");
 const { hashPassword, verifyPassword } = require("../services/passwordService");
+const { publicUser } = require("../utils/user");
 
 const UCLA_EMAIL_REGEX = /^[^@]+@(?:ucla|g\.ucla)\.edu$/i;
 
-const publicUser = user => {
-  if (!user) return null;
-  const { passwordHash, ...rest } = user;
-  return rest;
-};
 const signupSchema = z.object({
   email: z.string().email().regex(UCLA_EMAIL_REGEX, "Must be a valid UCLA email"),
   password: z.string().min(8),
   name: z.string().min(1).optional(),
   uclaId: z.string().min(7).optional(),
+  role: z.enum(["STUDENT", "RESEARCHER"]).optional(),
 });
 
 const tokenSchema = z.object({
@@ -33,12 +30,13 @@ async function requestSignup(req, res) {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const { email, name, uclaId, password } = parsed.data;
+  const { email, name, uclaId, password, role } = parsed.data;
   const passwordHash = await hashPassword(password);
   const baseData = {
     name: name ?? null,
     passwordHash,
     emailVerifiedAt: null,
+    role: role || "STUDENT",
   };
   if (uclaId) {
     baseData.uclaId = uclaId;

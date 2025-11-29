@@ -1,4 +1,5 @@
 "use client";
+import "./page.css";
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -29,10 +30,43 @@ function VerifySignupContent() {
   }, [params]);
 
   return (
-    <main>
-      <h1>{status}</h1>
-    </main>
-  );
+  <main className="verify-container">
+    <div className="verify-card">
+      {status === "Verifying..." && (
+        <>
+          <div className="spinner" />
+          <h1 className="verify-title">Verifying your account…</h1>
+          <p className="verify-text">Please wait a moment.</p>
+        </>
+      )}
+
+      {status.includes("successful") && (
+        <>
+          <div className="verify-icon success">✔</div>
+          <h1 className="verify-title success">Email Verified!</h1>
+          <p className="verify-text">You can now log in to your account.</p>
+
+          <a href="/login" className="verify-button success">
+            Go to Login
+          </a>
+        </>
+      )}
+
+      {status !== "Verifying..." && !status.includes("successful") && (
+        <>
+          <div className="verify-icon error">✖</div>
+          <h1 className="verify-title error">Verification Failed</h1>
+          <p className="verify-text">{status}</p>
+
+          <a href="/" className="verify-button error">
+            Return Home
+          </a>
+        </>
+      )}
+    </div>
+  </main>
+);
+
 }
 
 export default function VerifySignupPage() {

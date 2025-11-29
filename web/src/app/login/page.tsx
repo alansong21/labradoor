@@ -1,8 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import Navbar from "../components/Navbar";
+import "./login.css";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role");
   const [status, setStatus] = useState<string | null>(null);
+
+  const getTitle = () => {
+    if (role === "student") return "Student Login";
+    if (role === "researcher") return "Researcher Login";
+    return "Log In";
+  };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -20,7 +32,7 @@ export default function LoginPage() {
 
     if (res.ok) {
       setStatus("Logged in!");
-      window.location.href = "/";
+      window.location.href = "/researcher-myposts";
     } else {
       const body = await res.json().catch(() => null);
       setStatus(body?.error ? JSON.stringify(body.error) : "Login failed.");
@@ -28,14 +40,54 @@ export default function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="email" name="email" placeholder="UCLA email" required />
-        <input type="password" name="password" placeholder="Password" minLength={8} required />
-        <button type="submit">Log in</button>
-      </form>
-      {status && <p>{status}</p>}
-    </main>
+    <>
+      <Navbar isLoggedIn={false} hideAuthButtons={true} />
+      <div className="login-page">
+        <div className="login-container">
+          <h1 className="login-title">{getTitle()}</h1>
+          
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="input-wrapper">
+              <input 
+                type="email" 
+                name="email" 
+                placeholder="Email" 
+                className="login-input"
+                required 
+              />
+            </div>
+            
+            <div className="input-wrapper">
+              <input 
+                type="password" 
+                name="password" 
+                placeholder="Password" 
+                className="login-input"
+                minLength={8} 
+                required 
+              />
+            </div>
+            
+            <button type="submit" className="login-submit-button">
+              Sign In
+            </button>
+          </form>
+
+          {status && <p className="status-message">{status}</p>}
+          
+          <p className="signup-prompt">
+            Don't have an account yet? <Link href="/signup" className="signup-link">Create Account</Link>
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

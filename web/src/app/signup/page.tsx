@@ -1,40 +1,153 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import Navbar from "../components/Navbar";
+import "./signup.css";
 
-export default function SignupPage() {
-  const [status, setStatus] = useState<string | null>(null);
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role") || "STUDENT";
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    name: "",
+    uclaId: "",
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        email: form.get("email"),
-        password: form.get("password"),
-      }),
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
 
-    if (res.ok) {
-      setStatus("Check the server logs for your verification link.");
-    } else {
-      const body = await res.json().catch(() => null);
-      setStatus(body?.error ? JSON.stringify(body.error) : "Signup failed.");
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
     }
-  }
+
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          uclaId: formData.uclaId || undefined,
+          role: role.toUpperCase(),
+        }),
+      });
+
+      if (res.ok) {
+        setSuccess(true);
+        setError("Account created! Redirecting to login...");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        const body = await res.json().catch(() => null);
+        setError(body?.error ? JSON.stringify(body.error) : "Signup failed.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred.");
+    }
+  };
 
   return (
-    <main>
-      <h1>Student Signup</h1>
-      <form onSubmit={handleSubmit}>
-        <input name="email" type="email" placeholder="UCLA email" required />
-        <input name="password" type="password" placeholder="Password" minLength={8} required />
-        <button type="submit">Sign up</button>
-      </form>
-      {status && <p>{status}</p>}
-    </main>
+    <>
+      <Navbar isLoggedIn={false} hideAuthButtons={true} />
+      <div className="signup-page">
+        <div className="signup-container">
+          <h1 className="signup-title">Sign Up ({role})</h1>
+
+          <form onSubmit={handleSubmit} className="signup-form">
+            <div className="input-wrapper">
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                className="signup-input"
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="input-wrapper">
+              <input
+                type="email"
+                name="email"
+                placeholder="UCLA Email"
+                className="signup-input"
+                required
+                onChange={handleChange}
+              />
+            </div>
+
+            {role === "STUDENT" && (
+              <div className="input-wrapper">
+                <input
+                  type="text"
+                  name="uclaId"
+                  placeholder="UCLA ID (UID)"
+                  className="signup-input"
+                  onChange={handleChange}
+                />
+              </div>
+            )}
+
+            <div className="input-wrapper">
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                className="signup-input"
+                minLength={8}
+                required
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="input-wrapper">
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                className="signup-input"
+                minLength={8}
+                required
+                onChange={handleChange}
+              />
+            </div>
+
+            <button type="submit" className="signup-submit-button">
+              Sign Up
+            </button>
+          </form>
+
+          {error && <p className={`status-message ${success ? "success" : "error"}`}>{error}</p>}
+
+          <p className="login-prompt">
+            Already have an account?{" "}
+            <Link href="/login" className="login-link">
+              Log In
+            </Link>
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignupForm />
+    </Suspense>
   );
 }
