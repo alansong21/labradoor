@@ -5,10 +5,15 @@ const { authMiddleware } = require("../middleware/auth");
 
 // Public routes
 router.get("/", getAllPosts);
-router.get("/:id", getPost);
 
 // Protected routes
 router.get("/my-posts", authMiddleware, getMyPosts);
+
+// Public: MUST be after /my-posts
+router.get("/:id", getPost);
+
+// Protected create
 router.post("/", authMiddleware, createPost);
+
 
 module.exports = router;
