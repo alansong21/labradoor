@@ -47,10 +47,7 @@ function SignupForm() {
 
       if (res.ok) {
         setSuccess(true);
-        setError("Account created! Redirecting to login...");
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
+        setError("Account created! Please check your inbox for the verification email.");
       } else {
         const body = await res.json().catch(() => null);
         setError(body?.error ? JSON.stringify(body.error) : "Signup failed.");
