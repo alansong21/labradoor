@@ -100,6 +100,10 @@ const PostCreationPage: React.FC = () => {
       alert(`Tag must be ${MAX_TAG_LENGTH} characters or less`);
       return;
     }
+    if(tags.length >= 10) {
+      alert("You can only add up to 10 tags");
+      return;
+    }
     if (tags.includes(trimmedTag)) {
       alert("This tag has already been added");
       return;
