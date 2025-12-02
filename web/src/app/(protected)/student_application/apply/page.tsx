@@ -6,14 +6,19 @@ import "./page.css";
 
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "CHECKBOX" | "MULTIPLE_CHOICE";
 
+interface QuestionBody {
+  prompt?: string;
+  description?: string;
+  options?: string[];
+}
+
 interface Question {
   id: number;
-  type: QuestionType;
-  body: {
-    prompt: string;
-    description?: string;
-    options?: string[];
-  };
+  type: QuestionType | string;
+  body?: QuestionBody | string | null;
+  question?: string;
+  description?: string;
+  options?: string[];
 }
 
 interface Post {
@@ -50,6 +55,20 @@ function ApplyForm() {
         setLoading(false);
       });
   }, [postId]);
+
+  useEffect(() => {
+    if (!post) return;
+    const defaults: Record<number, string> = {};
+    post.questions.forEach((q) => {
+      const rawType = typeof q.type === "string" ? q.type.toUpperCase().replace(/-/g, "_") : "";
+      if (rawType === "CHECKBOX" && responses[q.id] === undefined) {
+        defaults[q.id] = "false";
+      }
+    });
+    if (Object.keys(defaults).length > 0) {
+      setResponses((prev) => ({ ...defaults, ...prev }));
+    }
+  }, [post]); 
 
   const handleResponseChange = (questionId: number, value: string) => {
     setResponses((prev) => ({ ...prev, [questionId]: value }));
@@ -102,59 +121,68 @@ function ApplyForm() {
 
         <form className="application-form" onSubmit={handleSubmit}>
           {post.questions.map((q) => {
-            const fieldType =
-              q.type === "MULTIPLE_CHOICE"
-                ? "multiple-choice"
-                : q.type === "CHECKBOX"
-                ? "checkbox"
-                : "text";
-            const prompt = q.body?.prompt ?? "Question";
-            const options = q.body?.options ?? [];
+            const rawType = typeof q.type === "string" ? q.type.toUpperCase().replace(/-/g, "_") : "LONG_TEXT";
+            const normalizedType =
+              rawType === "TEXT" ? "LONG_TEXT" : (["LONG_TEXT", "SHORT_TEXT", "CHECKBOX", "MULTIPLE_CHOICE"].includes(rawType) ? (rawType as QuestionType) : "LONG_TEXT");
+            const body = typeof q.body === "object" && q.body !== null ? q.body : undefined;
+            const prompt = body?.prompt ?? q.question ?? (typeof q.body === "string" ? q.body : "Question");
+            const helper = body?.description ?? q.description ?? "";
+            const options = body?.options ?? q.options ?? [];
 
             return (
               <div key={q.id} className="form-section">
                 <label className="field-label">{prompt}</label>
-                {q.body?.description && (
-                  <p className="field-helper">{q.body.description}</p>
+                {helper && (
+                  <p className="field-helper">{helper}</p>
                 )}
 
-              {fieldType === "text" && (
-                <textarea
-                  className="textarea-input"
-                  value={responses[q.id] || ""}
-                  onChange={(e) => handleResponseChange(q.id, e.target.value)}
-                  required
-                />
-              )}
+                {normalizedType === "LONG_TEXT" && (
+                  <textarea
+                    className="textarea-input"
+                    value={responses[q.id] || ""}
+                    onChange={(e) => handleResponseChange(q.id, e.target.value)}
+                    required
+                  />
+                )}
 
-              {fieldType === "checkbox" && (
-                <div className="checkbox-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={responses[q.id] === "Yes"}
-                      onChange={(e) => handleResponseChange(q.id, e.target.checked ? "Yes" : "No")}
-                    />
-                    Yes
-                  </label>
-                </div>
-              )}
+                {normalizedType === "SHORT_TEXT" && (
+                  <input
+                    type="text"
+                    className="text-input"
+                    value={responses[q.id] || ""}
+                    onChange={(e) => handleResponseChange(q.id, e.target.value)}
+                    required
+                  />
+                )}
 
-              {fieldType === "multiple-choice" && (
-                <select
-                  className="select-input"
-                  value={responses[q.id] || ""}
-                  onChange={(e) => handleResponseChange(q.id, e.target.value)}
-                  required
-                >
-                  <option value="">Select an option</option>
-                  {options.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              )}
+                {normalizedType === "CHECKBOX" && (
+                  <div className="checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={responses[q.id] === "true"}
+                        onChange={(e) => handleResponseChange(q.id, e.target.checked ? "true" : "false")}
+                      />
+                      Yes
+                    </label>
+                  </div>
+                )}
+
+                {normalizedType === "MULTIPLE_CHOICE" && (
+                  <select
+                    className="select-input"
+                    value={responses[q.id] || ""}
+                    onChange={(e) => handleResponseChange(q.id, e.target.value)}
+                    required
+                  >
+                    <option value="">Select an option</option>
+                    {options.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             );
           })}
