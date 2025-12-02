@@ -31,6 +31,11 @@ async function createPost(req, res) {
             },
             include: {
                 questions: true,
+                researcher: {
+                    include: {
+                        user: true,
+                    },
+                },
             },
         });
         res.status(201).json(post);
@@ -66,6 +71,11 @@ async function getPost(req, res) {
             where: { id: parsed.data.id },
             include: {
                 questions: true,
+                researcher: {
+                    include: {
+                        user: true,
+                    },
+                },
             },
         });
 
