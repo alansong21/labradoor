@@ -135,12 +135,14 @@ const PostCreationPage: React.FC = () => {
               placeholder="Post Title (e.g., Research Assistant needed for AI Lab)"
               value={postTitle}
               onChange={(e) => setPostTitle(e.target.value)}
+              maxLength={50}
             />
             <textarea
               className="post-description-input"
               placeholder="Post Description (Describe the role, requirements, etc.)"
               value={postDescription}
               onChange={(e) => setPostDescription(e.target.value)}
+              maxLength={500}
             />
           </div>
 
