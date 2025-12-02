@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import Navbar from "../../../../components/Navbar";
 import "./page.css";
 
@@ -26,13 +26,14 @@ interface Application {
 export default function PostApplicationsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = use(params);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/applications/post/${params.id}`)
+    fetch(`/api/applications/post/${id}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -44,7 +45,7 @@ export default function PostApplicationsPage({
         console.error(err);
         setLoading(false);
       });
-  }, [params.id]);
+  }, [id]);
 
   return (
     <>
