@@ -25,6 +25,7 @@ export async function getLabs() {
       name: p.title,
       desc: p.body,
       details: [`Posted by ${p.researcher?.user?.name || "Unknown"}`], // We can add more details if we want
+      tags: p.tags || [],
     }));
   } catch (error) {
     console.error("Failed to fetch labs:", error);
@@ -43,7 +44,8 @@ export async function getLab(id: string) {
       name: p.title,
       desc: p.body,
       details: [`Posted by ${p.researcher?.user?.name || "Unknown"}`],
-      questions: p.questions
+      questions: p.questions,
+      tags: p.tags || [],
     };
   } catch (error) {
     console.error("Failed to fetch lab:", error);
