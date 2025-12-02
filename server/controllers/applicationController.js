@@ -8,6 +8,7 @@ const validationError = message => {
 };
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
+const postIdParam = z.object({ postId: z.coerce.number().int().positive() });
 
 const answerSchema = z.object({
     questionId: z.number().int().positive(),
@@ -142,12 +143,13 @@ async function submitApplication(req, res) {
 }
 
 async function getPostApplications(req, res) {
-    const parsed = idParam.safeParse(req.params);
+    const parsed = postIdParam.safeParse(req.params);
     if (!parsed.success) return res.status(400).json({ error: "Invalid post id" });
+    const postId = parsed.data.postId;
 
     try {
         const post = await prisma.post.findUnique({
-            where: { id: parsed.data.id },
+            where: { id: postId },
         });
 
         if (!post) return res.status(404).json({ error: "Post not found" });
@@ -156,9 +158,14 @@ async function getPostApplications(req, res) {
         }
 
         const applications = await prisma.application.findMany({
-            where: { postId: parsed.data.id },
+            where: { postId },
             include: {
                 answers: true,
+                student: {
+                    include: {
+                        user: true,
+                    },
+                },
             },
             orderBy: { createdAt: "desc" },
         });
