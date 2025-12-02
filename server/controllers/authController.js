@@ -14,6 +14,7 @@ const signupSchema = z.object({
   password: z.string().min(8),
   name: z.string().min(1).optional(),
   uclaId: z.string().min(7).optional(),
+  role: z.enum(["STUDENT", "RESEARCHER"]),
 });
 
 const tokenSchema = z.object({
@@ -29,7 +30,7 @@ async function requestSignup(req, res) {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const { email, name, uclaId, password } = parsed.data;
+  const { email, name, uclaId, password, role } = parsed.data;
   const passwordHash = await hashPassword(password);
   const baseData = {
     name: name ?? null,
@@ -61,7 +62,11 @@ async function requestSignup(req, res) {
     });
   }
 
-  const rawToken = await createVerificationToken({ userId: user.id, type: "SIGNUP" });
+  const rawToken = await createVerificationToken({
+    userId: user.id,
+    type: "SIGNUP",
+    metadata: { role },
+  });
   const url = `${process.env.APP_BASE_URL ?? "http://localhost:3000"}/verify-signup?token=${rawToken}`;
   sendVerificationLink({ email, url, type: "SIGNUP" });
 
@@ -72,16 +77,45 @@ async function verifySignup(req, res) {
   const parsed = tokenSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Token required" });
 
-  let token;
+  let tokenPayload;
   try {
-    token = await consumeVerificationToken(parsed.data.token, "SIGNUP");
+    tokenPayload = await consumeVerificationToken(parsed.data.token, "SIGNUP");
   } catch (err) {
     return res.status(400).json({ error: err.message });
   }
 
-  await prisma.user.update({
-    where: { id: token.userId },
-    data: { emailVerifiedAt: new Date() },
+  const { token, metadata } = tokenPayload;
+  const intendedRole = metadata?.role === "RESEARCHER" ? "RESEARCHER" : "STUDENT";
+
+  await prisma.$transaction(async tx => {
+    await tx.user.update({
+      where: { id: token.userId },
+      data: { emailVerifiedAt: new Date() },
+    });
+
+    if (intendedRole === "RESEARCHER") {
+      await tx.researcher.upsert({
+        where: { userId: token.userId },
+        update: {},
+        create: {
+          userId: token.userId,
+          verifyStatus: "PENDING",
+          department: "Unspecified",
+        },
+      });
+      return;
+    }
+
+    await tx.student.upsert({
+      where: { userId: token.userId },
+      update: {},
+      create: {
+        userId: token.userId,
+        year: "Unspecified",
+        major: "Undeclared",
+        description: null,
+      },
+    });
   });
 
   return res.json({ message: "Email verified. You can now log in." });
