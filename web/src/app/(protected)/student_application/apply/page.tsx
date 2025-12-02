@@ -4,17 +4,22 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import "./page.css";
 
+type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "CHECKBOX" | "MULTIPLE_CHOICE";
+
 interface Question {
   id: number;
-  type: "text" | "checkbox" | "multiple-choice";
-  question: string;
-  options: string[];
+  type: QuestionType;
+  body: {
+    prompt: string;
+    description?: string;
+    options?: string[];
+  };
 }
 
 interface Post {
   id: number;
   title: string;
-  content: string;
+  body: string;
   questions: Question[];
 }
 
@@ -93,14 +98,27 @@ function ApplyForm() {
     <div className="apply-page">
       <div className="apply-container">
         <h1 className="page-title">Apply to {post.title}</h1>
-        <p className="post-desc">{post.content}</p>
+        <p className="post-desc">{post.body}</p>
 
         <form className="application-form" onSubmit={handleSubmit}>
-          {post.questions.map((q) => (
-            <div key={q.id} className="form-section">
-              <label className="field-label">{q.question}</label>
-              
-              {q.type === "text" && (
+          {post.questions.map((q) => {
+            const fieldType =
+              q.type === "MULTIPLE_CHOICE"
+                ? "multiple-choice"
+                : q.type === "CHECKBOX"
+                ? "checkbox"
+                : "text";
+            const prompt = q.body?.prompt ?? "Question";
+            const options = q.body?.options ?? [];
+
+            return (
+              <div key={q.id} className="form-section">
+                <label className="field-label">{prompt}</label>
+                {q.body?.description && (
+                  <p className="field-helper">{q.body.description}</p>
+                )}
+
+              {fieldType === "text" && (
                 <textarea
                   className="textarea-input"
                   value={responses[q.id] || ""}
@@ -109,7 +127,7 @@ function ApplyForm() {
                 />
               )}
 
-              {q.type === "checkbox" && (
+              {fieldType === "checkbox" && (
                 <div className="checkbox-group">
                   <label>
                     <input
@@ -122,7 +140,7 @@ function ApplyForm() {
                 </div>
               )}
 
-              {q.type === "multiple-choice" && (
+              {fieldType === "multiple-choice" && (
                 <select
                   className="select-input"
                   value={responses[q.id] || ""}
@@ -130,15 +148,16 @@ function ApplyForm() {
                   required
                 >
                   <option value="">Select an option</option>
-                  {q.options.map((opt) => (
+                  {options.map((opt) => (
                     <option key={opt} value={opt}>
                       {opt}
                     </option>
                   ))}
                 </select>
               )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
 
           <button type="submit" className="submit-button" disabled={submitting}>
             {submitting ? "Submitting..." : "Submit Application"}
