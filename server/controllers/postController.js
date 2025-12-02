@@ -94,6 +94,11 @@ async function getAllPosts(req, res) {
             orderBy: { createdAt: "desc" },
             include: {
                 questions: true,
+                researcher: {
+                    include: {
+                        user: true,
+                    },
+                },
             },
         });
         res.json(posts);
