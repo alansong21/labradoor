@@ -18,7 +18,7 @@ async function createPost(req, res) {
 
     try {
         const researcher = await prisma.researcher.findUnique({ where: { userId } });
-        if (!researcher) {
+        if (researcher?.verifyStatus !== "VERIFIED") {
             return res.status(403).json({ error: "Only verified researchers can create posts" });
         }
 
@@ -33,6 +33,7 @@ async function createPost(req, res) {
                 questions: true,
             },
         });
+        
         res.status(201).json(post);
     } catch (e) {
         console.error(e);
