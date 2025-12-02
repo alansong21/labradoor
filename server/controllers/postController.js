@@ -3,31 +3,61 @@ const { z } = require("zod");
 
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
+const questionInputSchema = z.object({
+    type: z.enum(["text", "checkbox", "multiple-choice"]),
+    question: z.string().min(1),
+    description: z.string().optional(),
+    options: z.array(z.string().min(1)).optional(),
+});
+
 const createPostSchema = z.object({
     title: z.string().min(1),
     body: z.string().optional(),
+    description: z.string().optional(),
     tags: z.array(z.string()).optional(),
+    questions: z.array(questionInputSchema).optional(),
 });
+
+const QUESTION_TYPE_MAP = {
+    text: "LONG_TEXT",
+    checkbox: "CHECKBOX",
+    "multiple-choice": "MULTIPLE_CHOICE",
+};
 
 async function createPost(req, res) {
     const parsed = createPostSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-    const { title, body, tags } = parsed.data;
+    const { title, body, description, tags, questions } = parsed.data;
+    const resolvedBody = body ?? description ?? "";
     const userId = req.user.id;
+    const formattedQuestions =
+        questions?.map(q => ({
+            type: QUESTION_TYPE_MAP[q.type],
+            body: {
+                prompt: q.question,
+                description: q.description ?? "",
+                options: q.type === "multiple-choice" ? (q.options ?? []).filter(opt => opt?.trim()) : [],
+            },
+        })) ?? [];
 
     try {
         const researcher = await prisma.researcher.findUnique({ where: { userId } });
-        if (!researcher) {
+        if (researcher?.verifyStatus !== "VERIFIED") {
             return res.status(403).json({ error: "Only verified researchers can create posts" });
         }
 
         const post = await prisma.post.create({
             data: {
                 title,
-                body: body || "",
+                body: resolvedBody,
                 researcherId: userId,
                 tags: tags || [],
+                questions: formattedQuestions.length
+                    ? {
+                          create: formattedQuestions,
+                      }
+                    : undefined,
             },
             include: {
                 questions: true,
@@ -38,6 +68,7 @@ async function createPost(req, res) {
                 },
             },
         });
+        
         res.status(201).json(post);
     } catch (e) {
         console.error(e);
