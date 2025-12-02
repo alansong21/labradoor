@@ -64,6 +64,49 @@
   margin-bottom: 1rem;
 }
 
+.lab-tags {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  padding-bottom: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d1d1 transparent;
+}
+
+.lab-tags::-webkit-scrollbar {
+  height: 4px;
+}
+
+.lab-tags::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lab-tags::-webkit-scrollbar-thumb {
+  background: #d1d1d1;
+  border-radius: 2px;
+}
+
+.lab-tags::-webkit-scrollbar-thumb:hover {
+  background: #b1b1b1;
+}
+
+.lab-tag {
+  display: inline-block;
+  background: #e5e5e5;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .lab-details {
   list-style: none;
   padding: 0;
