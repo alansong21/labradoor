@@ -32,7 +32,11 @@ function LoginForm() {
 
     if (res.ok) {
       setStatus("Logged in!");
-      window.location.href = "/";
+      if (role === "researcher") {
+        window.location.href = "/my-posts";
+      } else {
+        window.location.href = "/";
+      }
     } else {
       const body = await res.json().catch(() => null);
       setStatus(body?.error ? JSON.stringify(body.error) : "Login failed.");
