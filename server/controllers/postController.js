@@ -1,9 +1,12 @@
 const prisma = require("../db/prisma");
 const { z } = require("zod");
 
+// Frontend sends question types as: "text" | "checkbox" | "multiple-choice"
+// Database expects Question.type as enum: SHORT_TEXT | LONG_TEXT | MULTIPLE_CHOICE | CHECKBOX
 const questionSchema = z.object({
     type: z.enum(["text", "checkbox", "multiple-choice"]),
     question: z.string().min(1),
+    description: z.string().optional(),
     options: z.array(z.string()).optional(),
 });
 
@@ -24,21 +27,32 @@ async function createPost(req, res) {
         const post = await prisma.post.create({
             data: {
                 title,
-                content: description,
-                authorId,
+                body: description || "",
+                researcherId: authorId,
                 questions: {
                     create: questions?.map((q) => ({
-                        type: q.type,
-                        question: q.question,
-                        options: q.options || [],
+                        // map frontend types to DB enum
+                        type: q.type === "text" ? "SHORT_TEXT" : q.type === "multiple-choice" ? "MULTIPLE_CHOICE" : "CHECKBOX",
+                        body: {
+                            question: q.question,
+                            description: q.description || null,
+                            options: q.options || [],
+                        },
                     })),
                 },
             },
             include: {
                 questions: true,
+                researcher: { include: { user: { select: { name: true, email: true } } } },
             },
         });
-        res.status(201).json(post);
+        // normalize response to include `author` like older frontend expects
+        const result = {
+            ...post,
+            author: post.researcher?.user ? { name: post.researcher.user.name, email: post.researcher.user.email } : null,
+        };
+        delete result.researcher;
+        res.status(201).json(result);
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Failed to create post" });
@@ -48,15 +62,20 @@ async function createPost(req, res) {
 async function getMyPosts(req, res) {
     try {
         const posts = await prisma.post.findMany({
-            where: { authorId: req.user.id },
+            where: { researcherId: req.user.id },
             orderBy: { createdAt: "desc" },
             include: {
-                _count: {
-                    select: { applications: true },
-                },
+                _count: { select: { applications: true } },
+                researcher: { include: { user: { select: { name: true, email: true } } } },
             },
         });
-        res.json(posts);
+        const formatted = posts.map((p) => ({
+            ...p,
+            author: p.researcher?.user ? { name: p.researcher.user.name, email: p.researcher.user.email } : null,
+        }));
+        // remove researcher key to keep response shape stable
+        formatted.forEach((p) => delete p.researcher);
+        res.json(formatted);
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Failed to fetch posts" });
@@ -70,15 +89,19 @@ async function getPost(req, res) {
             where: { id: parseInt(id) },
             include: {
                 questions: true,
-                author: {
-                    select: { name: true, email: true },
-                },
+                researcher: { include: { user: { select: { name: true, email: true } } } },
             },
         });
 
         if (!post) return res.status(404).json({ error: "Post not found" });
 
-        res.json(post);
+        const result = {
+            ...post,
+            author: post.researcher?.user ? { name: post.researcher.user.name, email: post.researcher.user.email } : null,
+        };
+        delete result.researcher;
+
+        res.json(result);
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Failed to fetch post" });
@@ -90,12 +113,14 @@ async function getAllPosts(req, res) {
         const posts = await prisma.post.findMany({
             orderBy: { createdAt: "desc" },
             include: {
-                author: {
-                    select: { name: true },
-                },
+                researcher: { include: { user: { select: { name: true } } } },
             },
         });
-        res.json(posts);
+        const formatted = posts.map((p) => ({
+            ...p,
+            author: p.researcher?.user ? { name: p.researcher.user.name } : null,
+        }));
+        res.json(formatted);
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Failed to fetch posts" });
