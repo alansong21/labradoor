@@ -4,7 +4,10 @@ const {
     verifySignup,
     login,
     getMe,
-    logout
+    logout,
+    adminLogin,
+    adminVerify,
+    adminLogout
 } = require('../controllers/authController');
 
 const { authMiddleware } = require('../middleware/auth');
@@ -14,5 +17,8 @@ router.post('/verify-signup', verifySignup);
 router.post('/login', login);
 router.get('/me', authMiddleware, getMe);
 router.post('/logout', authMiddleware, logout);
+router.post('/admin/login', adminLogin);
+router.get('/admin/verify', adminVerify);
+router.post('/admin/logout', adminLogout);
 
 module.exports = router;

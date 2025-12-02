@@ -124,10 +124,68 @@ async function logout(req, res) {
   res.clearCookie(SESSION_COOKIE).json({ ok: true });
 }
 
+const adminLoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+async function adminLogin(req, res) {
+  const parsed = adminLoginSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const admin = await prisma.admin.findUnique({ where: { email: parsed.data.email } });
+  if (!admin) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+
+  const passwordValid = await verifyPassword(parsed.data.password, admin.passwordHash);
+  if (!passwordValid) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+
+  const adminToken = Buffer.from(JSON.stringify({ email: admin.email, timestamp: Date.now() })).toString('base64');
+
+  res
+    .cookie('admin_session', adminToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000, 
+    })
+    .json({ admin: { email: admin.email } });
+}
+
+async function adminVerify(req, res) {
+  const adminToken = req.cookies?.admin_session;
+  if (!adminToken) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  try {
+    const decoded = JSON.parse(Buffer.from(adminToken, 'base64').toString());
+    const admin = await prisma.admin.findUnique({ where: { email: decoded.email } });
+    
+    if (!admin) {
+      return res.status(401).json({ error: "Invalid session" });
+    }
+
+    res.json({ admin: { email: admin.email } });
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid session" });
+  }
+}
+
+async function adminLogout(req, res) {
+  res.clearCookie('admin_session').json({ ok: true });
+}
+
 module.exports = {
   requestSignup,
   verifySignup,
   login,
   getMe,
   logout,
+  adminLogin,
+  adminVerify,
+  adminLogout,
 };
