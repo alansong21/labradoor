@@ -86,7 +86,38 @@ const PostCreationPage: React.FC = () => {
 
   const [postTitle, setPostTitle] = useState("");
   const [postDescription, setPostDescription] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const addTag = () => {
+    const trimmedTag = tagInput.trim();
+    const MAX_TAG_LENGTH = 30;
+    if (!trimmedTag) {
+      return;
+    }
+    if (trimmedTag.length > MAX_TAG_LENGTH) {
+      alert(`Tag must be ${MAX_TAG_LENGTH} characters or less`);
+      return;
+    }
+    if (tags.includes(trimmedTag)) {
+      alert("This tag has already been added");
+      return;
+    }
+    setTags([...tags, trimmedTag]);
+    setTagInput("");
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addTag();
+    }
+  };
 
   async function handleSavePost() {
     if (!postTitle) return alert("Please enter a post title");
@@ -99,6 +130,7 @@ const PostCreationPage: React.FC = () => {
         body: JSON.stringify({
           title: postTitle,
           description: postDescription,
+          tags: tags,
           questions: entries.map((e) => ({
             type: e.type,
             question: e.title,
@@ -142,6 +174,43 @@ const PostCreationPage: React.FC = () => {
               value={postDescription}
               onChange={(e) => setPostDescription(e.target.value)}
             />
+
+            <div className="tags-section">
+              <label className="field-label">Tags</label>
+              <div className="tags-input-container">
+                <input
+                  type="text"
+                  className="tag-input"
+                  placeholder="Add a tag (e.g. AI, Machine Learning, Biology)"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagInputKeyDown}
+                />
+                <button 
+                  className="add-tag-btn" 
+                  onClick={addTag}
+                  type="button"
+                >
+                  Add Tag
+                </button>
+              </div>
+              {tags.length > 0 && (
+                <div className="tags-display">
+                  {tags.map((tag) => (
+                    <span key={tag} className="tag-chip">
+                      {tag}
+                      <button
+                        className="tag-remove-btn"
+                        onClick={() => removeTag(tag)}
+                        type="button"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <button
