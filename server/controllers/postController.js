@@ -1,38 +1,27 @@
 const prisma = require("../db/prisma");
 const { z } = require("zod");
 
-const questionSchema = z.object({
-    type: z.enum(["text", "checkbox", "multiple-choice"]),
-    question: z.string().min(1),
-    options: z.array(z.string()).optional(),
-});
+const idParam = z.object({ id: z.coerce.number().int().positive() });
 
 const createPostSchema = z.object({
     title: z.string().min(1),
-    description: z.string().optional(),
-    questions: z.array(questionSchema).optional(),
+    body: z.string().optional(),
+    tags: z.array(z.string()).optional(),
 });
 
 async function createPost(req, res) {
     const parsed = createPostSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-    const { title, description, questions } = parsed.data;
-    const authorId = req.user.id;
+    const { title, body, tags } = parsed.data;
 
     try {
         const post = await prisma.post.create({
             data: {
                 title,
-                content: description,
-                authorId,
-                questions: {
-                    create: questions?.map((q) => ({
-                        type: q.type,
-                        question: q.question,
-                        options: q.options || [],
-                    })),
-                },
+                body: body || "",
+                researcherId: req.user.id,
+                tags: tags || [],
             },
             include: {
                 questions: true,
@@ -48,12 +37,11 @@ async function createPost(req, res) {
 async function getMyPosts(req, res) {
     try {
         const posts = await prisma.post.findMany({
-            where: { authorId: req.user.id },
+            where: { researcherId: req.user.id },
             orderBy: { createdAt: "desc" },
             include: {
-                _count: {
-                    select: { applications: true },
-                },
+                questions: true,
+                _count: { select: { applications: true } },
             },
         });
         res.json(posts);
@@ -64,15 +52,14 @@ async function getMyPosts(req, res) {
 }
 
 async function getPost(req, res) {
-    const { id } = req.params;
+    const parsed = idParam.safeParse(req.params);
+    if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+
     try {
         const post = await prisma.post.findUnique({
-            where: { id: parseInt(id) },
+            where: { id: parsed.data.id },
             include: {
                 questions: true,
-                author: {
-                    select: { name: true, email: true },
-                },
             },
         });
 
@@ -90,9 +77,7 @@ async function getAllPosts(req, res) {
         const posts = await prisma.post.findMany({
             orderBy: { createdAt: "desc" },
             include: {
-                author: {
-                    select: { name: true },
-                },
+                questions: true,
             },
         });
         res.json(posts);
