@@ -21,14 +21,14 @@ async function createPost(req, res) {
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
     const { title, description, questions } = parsed.data;
-    const authorId = req.user.id;
+    const researcherId = req.user.id;
 
     try {
         const post = await prisma.post.create({
             data: {
                 title,
                 body: description || "",
-                researcherId: authorId,
+                researcherId: researcherId,
                 questions: {
                     create: questions?.map((q) => ({
                         // map frontend types to DB enum
@@ -46,9 +46,10 @@ async function createPost(req, res) {
                 researcher: { include: { user: { select: { name: true, email: true } } } },
             },
         });
-        // normalize response to include `author` like older frontend expects
+        // normalize response to include `author` and `content` like older frontend expects
         const result = {
             ...post,
+            content: post.body,
             author: post.researcher?.user ? { name: post.researcher.user.name, email: post.researcher.user.email } : null,
         };
         delete result.researcher;
@@ -71,6 +72,7 @@ async function getMyPosts(req, res) {
         });
         const formatted = posts.map((p) => ({
             ...p,
+            content: p.body,
             author: p.researcher?.user ? { name: p.researcher.user.name, email: p.researcher.user.email } : null,
         }));
         // remove researcher key to keep response shape stable
@@ -97,6 +99,7 @@ async function getPost(req, res) {
 
         const result = {
             ...post,
+            content: post.body,
             author: post.researcher?.user ? { name: post.researcher.user.name, email: post.researcher.user.email } : null,
         };
         delete result.researcher;
@@ -118,6 +121,7 @@ async function getAllPosts(req, res) {
         });
         const formatted = posts.map((p) => ({
             ...p,
+            content: p.body,
             author: p.researcher?.user ? { name: p.researcher.user.name } : null,
         }));
         res.json(formatted);

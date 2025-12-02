@@ -16,14 +16,14 @@ async function submitApplication(req, res) {
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
     const { postId, responses } = parsed.data;
-    const applicantId = req.user.id;
+    const studentId = req.user.id;
 
     try {
         // Check if already applied
         const existing = await prisma.application.findFirst({
             where: {
                 postId,
-                applicantId,
+                studentId,
             },
         });
 
@@ -31,23 +31,40 @@ async function submitApplication(req, res) {
             return res.status(409).json({ error: "You have already applied to this post" });
         }
 
+        // fetch question types to populate Answer.type (required by schema)
+        const questionIds = responses.map((r) => r.questionId);
+        const questions = await prisma.question.findMany({ where: { id: { in: questionIds } }, select: { id: true, type: true } });
+        const qById = Object.fromEntries(questions.map((q) => [q.id, q.type]));
+
         const application = await prisma.application.create({
             data: {
                 postId,
-                applicantId,
-                responses: {
+                studentId,
+                status: "PENDING",
+                answers: {
                     create: responses.map((r) => ({
                         questionId: r.questionId,
-                        answer: r.answer,
+                        type: qById[r.questionId] || "SHORT_TEXT",
+                        body: { answer: r.answer },
                     })),
                 },
             },
             include: {
-                responses: true,
+                answers: { include: { question: true } },
             },
         });
 
-        res.status(201).json(application);
+        // normalize answers to include `answer` field for frontend convenience
+        const normalized = {
+            ...application,
+            responses: application.answers.map((a) => ({
+                id: a.id,
+                question: a.question,
+                answer: a.body?.answer ?? null,
+            })),
+        };
+
+        res.status(201).json(normalized);
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Failed to submit application" });
@@ -65,26 +82,33 @@ async function getPostApplications(req, res) {
         });
 
         if (!post) return res.status(404).json({ error: "Post not found" });
-        if (post.authorId !== userId) {
+        if (post.researcherId !== userId) {
             return res.status(403).json({ error: "Unauthorized" });
         }
 
         const applications = await prisma.application.findMany({
             where: { postId: parseInt(postId) },
             include: {
-                applicant: {
-                    select: { name: true, email: true, uclaId: true },
+                student: {
+                    include: { user: { select: { name: true, email: true, uclaId: true } } },
                 },
-                responses: {
-                    include: {
-                        question: true,
-                    },
+                answers: {
+                    include: { question: true },
                 },
             },
             orderBy: { createdAt: "desc" },
         });
+        // normalize applications to previous frontend shape: applicant + responses
+        const formatted = applications.map((app) => ({
+            id: app.id,
+            createdAt: app.createdAt,
+            updatedAt: app.updatedAt,
+            status: app.status,
+            applicant: app.student?.user ? { name: app.student.user.name, email: app.student.user.email, uclaId: app.student.user.uclaId } : null,
+            responses: app.answers.map((a) => ({ question: a.question, answer: a.body?.answer ?? null, id: a.id })),
+        }));
 
-        res.json(applications);
+        res.json(formatted);
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Failed to fetch applications" });
@@ -94,15 +118,24 @@ async function getPostApplications(req, res) {
 async function getMyApplications(req, res) {
     try {
         const applications = await prisma.application.findMany({
-            where: { applicantId: req.user.id },
+            where: { studentId: req.user.id },
             include: {
-                post: {
-                    select: { title: true, id: true },
-                },
+                post: { select: { title: true, id: true } },
+                answers: { include: { question: true } },
             },
             orderBy: { createdAt: "desc" },
         });
-        res.json(applications);
+
+        const formatted = applications.map((app) => ({
+            id: app.id,
+            createdAt: app.createdAt,
+            updatedAt: app.updatedAt,
+            status: app.status,
+            post: app.post,
+            responses: app.answers.map((a) => ({ question: a.question, answer: a.body?.answer ?? null, id: a.id })),
+        }));
+
+        res.json(formatted);
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Failed to fetch applications" });

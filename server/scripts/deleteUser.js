@@ -25,8 +25,8 @@ async function findUser({ email, id }) {
 }
 
 async function deleteUserAndRelated(userId) {
-  return prisma.$transaction([
-    prisma.post.deleteMany({ where: { authorId: userId } }),
+    return prisma.$transaction([
+    prisma.post.deleteMany({ where: { researcherId: userId } }),
     prisma.session.deleteMany({ where: { userId } }),
     prisma.verificationToken.deleteMany({ where: { userId } }),
     prisma.user.delete({ where: { id: userId } }),
