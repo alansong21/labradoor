@@ -4,105 +4,105 @@ const { z } = require("zod");
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
 const createQuestionSchema = z.object({
-  postId: z.number().int().positive(),
-  type: z.enum(["SHORT_TEXT", "LONG_TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]),
-  body: z.any(),
+	postId: z.number().int().positive(),
+	type: z.enum(["SHORT_TEXT", "LONG_TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]),
+	body: z.any(),
 });
 
 async function createQuestion(req, res) {
-  const parsed = createQuestionSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+	const parsed = createQuestionSchema.safeParse(req.body);
+	if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const { postId, type, body } = parsed.data;
+	const { postId, type, body } = parsed.data;
 
-  try {
-    const post = await prisma.post.findUnique({ where: { id: postId } });
-    if (!post) return res.status(404).json({ error: "Post not found" });
+	try {
+		const post = await prisma.post.findUnique({ where: { id: postId } });
+		if (!post) return res.status(404).json({ error: "Post not found" });
 
-    // Only researcher who owns the post can create questions
-    if (post.researcherId !== req.user.id) return res.status(403).json({ error: "Unauthorized" });
+		// Only researcher who owns the post can create questions
+		if (post.researcherId !== req.user.id) return res.status(403).json({ error: "Unauthorized" });
 
-    const question = await prisma.question.create({
-      data: { postId, type, body },
-    });
-    res.status(201).json(question);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to create question" });
-  }
+		const question = await prisma.question.create({
+			data: { postId, type, body },
+		});
+		res.status(201).json(question);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: "Failed to create question" });
+	}
 }
 
 async function getQuestion(req, res) {
-  const parsed = idParam.safeParse(req.params);
-  if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+	const parsed = idParam.safeParse(req.params);
+	if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
 
-  try {
-    const question = await prisma.question.findUnique({ where: { id: parsed.data.id } });
-    if (!question) return res.status(404).json({ error: "Question not found" });
-    res.json(question);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to fetch question" });
-  }
+	try {
+		const question = await prisma.question.findUnique({ where: { id: parsed.data.id } });
+		if (!question) return res.status(404).json({ error: "Question not found" });
+		res.json(question);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: "Failed to fetch question" });
+	}
 }
 
 async function getPostQuestions(req, res) {
-  const parsed = z.object({ postId: z.coerce.number().int().positive() }).safeParse(req.params);
-  if (!parsed.success) return res.status(400).json({ error: "Invalid post id" });
+	const parsed = z.object({ postId: z.coerce.number().int().positive() }).safeParse(req.params);
+	if (!parsed.success) return res.status(400).json({ error: "Invalid post id" });
 
-  try {
-    const questions = await prisma.question.findMany({ where: { postId: parsed.data.postId }, orderBy: { id: "asc" } });
-    res.json(questions);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to fetch questions" });
-  }
+	try {
+		const questions = await prisma.question.findMany({ where: { postId: parsed.data.postId }, orderBy: { id: "asc" } });
+		res.json(questions);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: "Failed to fetch questions" });
+	}
 }
 
 async function updateQuestion(req, res) {
-  const parsedParams = idParam.safeParse(req.params);
-  if (!parsedParams.success) return res.status(400).json({ error: "Invalid id" });
+	const parsedParams = idParam.safeParse(req.params);
+	if (!parsedParams.success) return res.status(400).json({ error: "Invalid id" });
 
-  const parsedBody = z.object({ body: z.any().optional(), type: z.enum(["SHORT_TEXT", "LONG_TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]).optional() }).safeParse(req.body);
-  if (!parsedBody.success) return res.status(400).json({ error: parsedBody.error.flatten() });
+	const parsedBody = z.object({ body: z.any().optional(), type: z.enum(["SHORT_TEXT", "LONG_TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]).optional() }).safeParse(req.body);
+	if (!parsedBody.success) return res.status(400).json({ error: parsedBody.error.flatten() });
 
-  try {
-    const question = await prisma.question.findUnique({ where: { id: parsedParams.data.id }, include: { post: true } });
-    if (!question) return res.status(404).json({ error: "Question not found" });
+	try {
+		const question = await prisma.question.findUnique({ where: { id: parsedParams.data.id }, include: { post: true } });
+		if (!question) return res.status(404).json({ error: "Question not found" });
 
-    // Only the researcher who owns the post can update the question
-    if (question.post.researcherId !== req.user.id) return res.status(403).json({ error: "Unauthorized" });
+		// Only the researcher who owns the post can update the question
+		if (question.post.researcherId !== req.user.id) return res.status(403).json({ error: "Unauthorized" });
 
-    const updated = await prisma.question.update({ where: { id: parsedParams.data.id }, data: parsedBody.data });
-    res.json(updated);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to update question" });
-  }
+		const updated = await prisma.question.update({ where: { id: parsedParams.data.id }, data: parsedBody.data });
+		res.json(updated);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: "Failed to update question" });
+	}
 }
 
 async function deleteQuestion(req, res) {
-  const parsed = idParam.safeParse(req.params);
-  if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+	const parsed = idParam.safeParse(req.params);
+	if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
 
-  try {
-    const question = await prisma.question.findUnique({ where: { id: parsed.data.id }, include: { post: true } });
-    if (!question) return res.status(404).json({ error: "Question not found" });
+	try {
+		const question = await prisma.question.findUnique({ where: { id: parsed.data.id }, include: { post: true } });
+		if (!question) return res.status(404).json({ error: "Question not found" });
 
-    if (question.post.researcherId !== req.user.id) return res.status(403).json({ error: "Unauthorized" });
+		if (question.post.researcherId !== req.user.id) return res.status(403).json({ error: "Unauthorized" });
 
-    await prisma.question.delete({ where: { id: parsed.data.id } });
-    res.status(204).send();
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to delete question" });
-  }
+		await prisma.question.delete({ where: { id: parsed.data.id } });
+		res.status(204).send();
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: "Failed to delete question" });
+	}
 }
 
 module.exports = {
-  createQuestion,
-  getQuestion,
-  getPostQuestions,
-  updateQuestion,
-  deleteQuestion,
+	createQuestion,
+	getQuestion,
+	getPostQuestions,
+	updateQuestion,
+	deleteQuestion,
 };
