@@ -56,12 +56,60 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0.25rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d1d1 transparent;
+}
+
+.lab-name::-webkit-scrollbar {
+  height: 2px;
+}
+
+.lab-name::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lab-name::-webkit-scrollbar-thumb {
+  background: #d1d1d1;
+  border-radius: 1px;
+}
+
+.lab-name::-webkit-scrollbar-thumb:hover {
+  background: #b1b1b1;
 }
 
 .lab-desc {
   color: #333;
   font-size: 0.9rem;
   margin-bottom: 1rem;
+  max-height: 6rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  line-height: 1.5;
+  text-align: left;
+  word-wrap: break-word;
+  white-space: normal;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d1d1 transparent;
+}
+
+.lab-desc::-webkit-scrollbar {
+  width: 2px;
+}
+
+.lab-desc::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lab-desc::-webkit-scrollbar-thumb {
+  background: #d1d1d1;
+  border-radius: 1px;
+}
+
+.lab-desc::-webkit-scrollbar-thumb:hover {
+  background: #b1b1b1;
 }
 
 .lab-details {
