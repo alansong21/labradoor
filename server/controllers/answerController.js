@@ -7,7 +7,7 @@ const createAnswerSchema = z.object({
 	questionId: z.number().int().positive(),
 	applicationId: z.number().int().positive(),
 	body: z.any(),
-	type: z.enum(["TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]).optional(),
+	type: z.enum(["SHORT_TEXT", "LONG_TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]).optional(),
 });
 
 async function createAnswer(req, res) {
