@@ -2,9 +2,9 @@ const prisma = require("../db/prisma");
 const { z } = require("zod");
 
 const questionSchema = z.object({
-    postId: z.number().int().positive(),
-    type: z.enum(["SHORT_TEXT", "LONG_TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]),
-    body: z.any(),
+    type: z.enum(["text", "checkbox", "multiple-choice"]),
+    question: z.string().min(1),
+    options: z.array(z.string()).optional(),
 });
 
 const createPostSchema = z.object({
