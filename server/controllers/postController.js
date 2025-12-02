@@ -14,13 +14,19 @@ async function createPost(req, res) {
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
     const { title, body, tags } = parsed.data;
+    const userId = req.user.id;
 
     try {
+        const researcher = await prisma.researcher.findUnique({ where: { userId } });
+        if (!researcher) {
+            return res.status(403).json({ error: "Only verified researchers can create posts" });
+        }
+
         const post = await prisma.post.create({
             data: {
                 title,
                 body: body || "",
-                researcherId: req.user.id,
+                researcherId: userId,
                 tags: tags || [],
             },
             include: {
