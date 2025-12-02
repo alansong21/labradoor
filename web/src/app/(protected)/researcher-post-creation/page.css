@@ -34,6 +34,7 @@
   border: 1px solid transparent;
   border-radius: 6px;
   width: 100%;
+  color: #000;
 }
 
 .post-title-input:focus {
@@ -49,6 +50,7 @@
   width: 100%;
   min-height: 100px;
   resize: vertical;
+  color: #000;
 }
 
 .add-entry-button {
@@ -309,4 +311,9 @@
 
 .cancel-button:hover {
   background: #f8f9fa;
+}
+
+::placeholder {
+  color: #6b7280;
+  /* darker gray */
 }
