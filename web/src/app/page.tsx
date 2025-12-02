@@ -10,6 +10,7 @@ interface Lab {
   name: string;
   desc: string;
   details: string[];
+  tags?: string[];
 }
 
 export default async function Page() {
@@ -29,6 +30,15 @@ export default async function Page() {
               <div key={lab.id} className="lab-card">
                 <h2 className="lab-name">{lab.name}</h2>
                 <p className="lab-desc">{lab.desc}</p>
+                {lab.tags && lab.tags.length > 0 && (
+                  <div className="lab-tags">
+                    {lab.tags.map((tag) => (
+                      <span key={tag} className="lab-tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <ul className="lab-details">
                   {lab.details.map((line: string) => (
                     <li key={line}>{line}</li>
