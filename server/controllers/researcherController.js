@@ -2,19 +2,17 @@ const { z } = require("zod");
 const prisma = require("../db/prisma");
 
 const idParamSchema = z.object({ id: z.coerce.number().int().positive() });
-const updateStudentSchema = z.object({
-    year: z.string().min(1).optional(),
-    major: z.string().min(1).optional(),
-    description: z.string().optional(),
+const updateResearcherSchema = z.object({
+    department: z.string().min(1).optional(),
 });
 
-async function updateStudent(req, res) {
+async function updateResearcher(req, res) {
     const parsedParams = idParamSchema.safeParse(req.params);
     if (!parsedParams.success) {
         return res.status(400).json({ error: "Invalid user id" });
     }
 
-    const parsedBody = updateStudentSchema.safeParse(req.body);
+    const parsedBody = updateResearcherSchema.safeParse(req.body);
     if (!parsedBody.success) {
         return res.status(400).json({ error: parsedBody.error.flatten() });
     }
@@ -25,22 +23,22 @@ async function updateStudent(req, res) {
     }
 
     try {
-        const student = await prisma.student.update({
+        const researcher = await prisma.researcher.update({
             where: { userId: parsedParams.data.id },
             data: parsedBody.data,
             include: { user: true },
         });
 
-        res.json({ student });
+        res.json({ researcher });
     } catch (err) {
         if (err?.code === "P2025") {
-            return res.status(404).json({ error: "Student not found" });
+            return res.status(404).json({ error: "Researcher not found" });
         }
-        console.error("Error updating student:", err);
-        res.status(500).json({ error: "Failed to update student" });
+        console.error("Error updating researcher:", err);
+        res.status(500).json({ error: "Failed to update researcher" });
     }
 }
 
 module.exports = {
-    updateStudent,
+    updateResearcher,
 };

@@ -96,7 +96,10 @@ export default function ProfilePage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Failed to update profile");
+        const errorMsg = typeof data.error === 'string' 
+          ? data.error 
+          : JSON.stringify(data.error) || "Failed to update profile";
+        setError(errorMsg);
         return;
       }
 
@@ -117,14 +120,39 @@ export default function ProfilePage() {
 
         if (!studentRes.ok) {
           const data = await studentRes.json();
-          setError(data.error || "Failed to update student information");
+          const errorMsg = typeof data.error === 'string' 
+            ? data.error 
+            : JSON.stringify(data.error) || "Failed to update student information";
+          setError(errorMsg);
           return;
         }
       }
 
-      setSuccess("Profile updated successfully!");
-      setEditing(false);
-      fetchUserProfile();
+      if (user?.researcher) {
+        const researcherRes = await fetch(`/api/researchers/${user.id}`, {
+          method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                department: formData.department,
+            }),
+        });
+
+        if (!researcherRes.ok) {
+            const data = await researcherRes.json();
+            const errorMsg = typeof data.error === 'string' 
+              ? data.error 
+              : JSON.stringify(data.error) || "Failed to update researcher information";
+            setError(errorMsg);
+            return;
+        }
+    }
+
+    setSuccess("Profile updated successfully!");
+    setEditing(false);
+    fetchUserProfile();
     } catch (error) {
       setError("An error occurred while updating profile");
     }
@@ -277,11 +305,11 @@ export default function ProfilePage() {
                     <label>Department</label>
                     <input
                       type="text"
+                      name="department"
                       value={formData.department}
-                      disabled
-                      className="disabled-input"
+                      onChange={handleInputChange}
+                      placeholder="Enter your department"
                     />
-                    <small>Department cannot be changed</small>
                   </div>
 
                   <div className="form-group">
