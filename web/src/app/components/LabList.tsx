@@ -14,9 +14,10 @@ export interface Lab {
 
 interface Props {
   labs: Lab[];
+  userRole?: string | null;
 }
 
-export default function LabList({ labs }: Props) {
+export default function LabList({ labs, userRole }: Props) {
   const [query, setQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagInputOpen, setTagInputOpen] = useState(false);
@@ -56,7 +57,7 @@ export default function LabList({ labs }: Props) {
 
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar isLoggedIn={true} role={userRole || undefined} />
       <main className="lab-page">
         <h1 className="title">Lab Openings</h1>
         <div className="lab-search">
