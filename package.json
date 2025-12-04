@@ -1,6 +1,10 @@
 {
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "express": "^5.2.1",
+    "jest": "^30.2.0",
+    "supertest": "^7.1.4",
+    "zod": "^4.1.13"
   },
   "name": "labradoor",
   "private": true,
@@ -12,6 +16,9 @@
     "start": "concurrently -k -n WEB,API -c auto \"npm:serve:web\" \"npm:start:server\"",
     "serve:web": "cd web && npm run start -- -p 3000",
     "start:server": "cd server && node index.js",
-    "dev:delete-user": "node server/scripts/deleteUser.js"
+    "dev:delete-user": "node server/scripts/deleteUser.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest"
   }
 }

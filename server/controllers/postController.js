@@ -32,14 +32,27 @@ async function createPost(req, res) {
     const resolvedBody = body ?? description ?? "";
     const userId = req.user.id;
     const formattedQuestions =
-        questions?.map(q => ({
-            type: QUESTION_TYPE_MAP[q.type],
-            body: {
-                prompt: q.question,
-                description: q.description ?? "",
-                options: q.type === "multiple-choice" ? (q.options ?? []).filter(opt => opt?.trim()) : [],
-            },
-        })) ?? [];
+        questions?.map(q => {
+            const mappedType = QUESTION_TYPE_MAP[q.type];
+            const requiresOptions = q.type === "multiple-choice" || q.type === "checkbox";
+            const sanitizedOptions = requiresOptions
+                ? (q.options ?? []).map(opt => opt.trim()).filter(Boolean)
+                : [];
+            return {
+                type: mappedType,
+                body: {
+                    prompt: q.question,
+                    description: q.description ?? "",
+                    options: sanitizedOptions,
+                },
+            };
+        }) ?? [];
+    const invalidQuestion = formattedQuestions.find(
+        q => (q.type === "MULTIPLE_CHOICE" || q.type === "CHECKBOX") && (!q.body.options || q.body.options.length === 0)
+    );
+    if (invalidQuestion) {
+        return res.status(400).json({ error: "Multiple choice and checkbox questions require at least one option." });
+    }
 
     try {
         const researcher = await prisma.researcher.findUnique({ where: { userId } });
@@ -139,9 +152,43 @@ async function getAllPosts(req, res) {
     }
 }
 
+async function deletePost(req, res) {
+    const parsed = idParam.safeParse(req.params);
+    if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+
+    try {
+        const post = await prisma.post.findUnique({
+            where: { id: parsed.data.id },
+        });
+
+        if (!post) return res.status(404).json({ error: "Post not found" });
+        if (post.researcherId !== req.user.id) {
+            return res.status(403).json({ error: "Unauthorized" });
+        }
+
+        await prisma.$transaction(async tx => {
+            await tx.answer.deleteMany({
+                where: { application: { postId: parsed.data.id } },
+            });
+            await tx.question.deleteMany({
+                where: { postId: parsed.data.id },
+            });
+            await tx.application.deleteMany({
+                where: { postId: parsed.data.id },
+            });
+            await tx.post.delete({ where: { id: parsed.data.id } });
+        });
+        res.status(204).send();
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: "Failed to delete post" });
+    }
+}
+
 module.exports = {
     createPost,
     getMyPosts,
     getPost,
     getAllPosts,
+    deletePost,
 };

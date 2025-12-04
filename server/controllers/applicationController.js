@@ -67,12 +67,22 @@ async function submitApplication(req, res) {
 
             switch (question.type) {
                 case "CHECKBOX": {
-                    normalizedValue = Boolean(
-                        rawAnswer === true ||
-                            rawAnswer === "true" ||
-                            rawAnswer === "Yes" ||
-                            rawAnswer === "YES"
-                    );
+                    const options = Array.isArray(question.body?.options) ? question.body.options : [];
+                    const rawSelections = Array.isArray(rawAnswer)
+                        ? rawAnswer
+                        : typeof rawAnswer === "string" && rawAnswer.length
+                        ? [rawAnswer]
+                        : [];
+                    if (
+                        rawSelections.some(
+                            selection =>
+                                typeof selection !== "string" ||
+                                (options.length > 0 && !options.includes(selection))
+                        )
+                    ) {
+                        throw validationError("Invalid answer for checkbox question");
+                    }
+                    normalizedValue = rawSelections;
                     break;
                 }
                 case "MULTIPLE_CHOICE": {
