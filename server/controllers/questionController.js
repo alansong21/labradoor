@@ -1,13 +1,19 @@
 const prisma = require("../db/prisma");
 const { z } = require("zod");
 
+// idParam – validates question/post id param
+
 const idParam = z.object({ id: z.coerce.number().int().positive() });
+
+// createQuestionSchema – validates payload for creating a question
 
 const createQuestionSchema = z.object({
   postId: z.number().int().positive(),
   type: z.enum(["SHORT_TEXT", "LONG_TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]),
   body: z.any(),
 });
+
+// createQuestion – creates a new question on a post (must be owned by the researcher)
 
 async function createQuestion(req, res) {
   const parsed = createQuestionSchema.safeParse(req.body);
@@ -32,6 +38,8 @@ async function createQuestion(req, res) {
   }
 }
 
+// getQuestion – fetches a single question by id
+
 async function getQuestion(req, res) {
   const parsed = idParam.safeParse(req.params);
   if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
@@ -46,6 +54,8 @@ async function getQuestion(req, res) {
   }
 }
 
+// getPostQuestions – fetches all questions for a specific post
+
 async function getPostQuestions(req, res) {
   const parsed = z.object({ postId: z.coerce.number().int().positive() }).safeParse(req.params);
   if (!parsed.success) return res.status(400).json({ error: "Invalid post id" });
@@ -58,6 +68,8 @@ async function getPostQuestions(req, res) {
     res.status(500).json({ error: "Failed to fetch questions" });
   }
 }
+
+// updateQuestion – updates a question’s type or body (researcher must own the post)
 
 async function updateQuestion(req, res) {
   const parsedParams = idParam.safeParse(req.params);
@@ -80,6 +92,9 @@ async function updateQuestion(req, res) {
     res.status(500).json({ error: "Failed to update question" });
   }
 }
+
+// deleteQuestion – deletes a question (researcher must own the post)
+
 
 async function deleteQuestion(req, res) {
   const parsed = idParam.safeParse(req.params);

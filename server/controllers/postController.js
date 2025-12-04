@@ -1,7 +1,11 @@
 const prisma = require("../db/prisma");
 const { z } = require("zod");
 
+// idParam - validates route param id for fetching a single post
+
 const idParam = z.object({ id: z.coerce.number().int().positive() });
+
+// questionInputSchema - validates researcher question inputs for a post
 
 const questionInputSchema = z.object({
     type: z.enum(["text", "checkbox", "multiple-choice"]),
@@ -9,6 +13,8 @@ const questionInputSchema = z.object({
     description: z.string().optional(),
     options: z.array(z.string().min(1)).optional(),
 });
+
+// createPostSchema - validates the request body for creating a new post
 
 const createPostSchema = z.object({
     title: z.string().min(1),
@@ -18,11 +24,15 @@ const createPostSchema = z.object({
     questions: z.array(questionInputSchema).optional(),
 });
 
+// QUESTION_TYPE_MAP - maps client-side question types to internal enum values
+
 const QUESTION_TYPE_MAP = {
     text: "LONG_TEXT",
     checkbox: "CHECKBOX",
     "multiple-choice": "MULTIPLE_CHOICE",
 };
+
+// createPost - creates a new researcher post with optional tags and questions
 
 async function createPost(req, res) {
     const parsed = createPostSchema.safeParse(req.body);
@@ -55,8 +65,8 @@ async function createPost(req, res) {
                 tags: tags || [],
                 questions: formattedQuestions.length
                     ? {
-                          create: formattedQuestions,
-                      }
+                        create: formattedQuestions,
+                    }
                     : undefined,
             },
             include: {
@@ -68,13 +78,15 @@ async function createPost(req, res) {
                 },
             },
         });
-        
+
         res.status(201).json(post);
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Failed to create post" });
     }
 }
+
+// getMyPosts - returns all posts created by the authenticated researcher
 
 async function getMyPosts(req, res) {
     try {
@@ -92,6 +104,8 @@ async function getMyPosts(req, res) {
         res.status(500).json({ error: "Failed to fetch posts" });
     }
 }
+
+// getPost - returns a single post with questions and researcher info by id
 
 async function getPost(req, res) {
     const parsed = idParam.safeParse(req.params);
@@ -118,6 +132,8 @@ async function getPost(req, res) {
         res.status(500).json({ error: "Failed to fetch post" });
     }
 }
+
+// getAllPosts - returns all posts in the system with researcher and question data
 
 async function getAllPosts(req, res) {
     try {

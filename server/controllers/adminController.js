@@ -1,6 +1,9 @@
 const { z } = require("zod");
 const prisma = require("../db/prisma");
 
+//getAllResearchers - fetches researchers from the database
+
+
 async function getAllResearchers(req, res) {
   try {
     const researchers = await prisma.researcher.findMany({
@@ -36,6 +39,9 @@ async function getAllResearchers(req, res) {
 const updateVerificationSchema = z.object({
   verifyStatus: z.enum(["VERIFIED", "PENDING", "UNVERIFIED"]),
 });
+
+// updateResearcherVerification - update researcher verification status
+
 
 async function updateResearcherVerification(req, res) {
   const userId = parseInt(req.params.userId);

@@ -9,6 +9,8 @@ const { publicUser } = require("../utils/user");
 
 const UCLA_EMAIL_REGEX = /^[^@]+@(?:ucla|g\.ucla)\.edu$/i;
 
+// signupSchema - validates and constrains fields for starting a new user signup
+
 const signupSchema = z.object({
   email: z.string().email().regex(UCLA_EMAIL_REGEX, "Must be a valid UCLA email"),
   password: z.string().min(8),
@@ -17,14 +19,20 @@ const signupSchema = z.object({
   role: z.enum(["STUDENT", "RESEARCHER"]),
 });
 
+// tokenSchema - validates the verification token payload
+
 const tokenSchema = z.object({
   token: z.string().min(10),
 });
+
+// loginSchema - validates the login request body
 
 const loginSchema = z.object({
   email: z.string().email().regex(UCLA_EMAIL_REGEX),
   password: z.string().min(8),
 });
+
+// requestSignup - creates or updates a user, hashes the password, and sends a signup verification link
 
 async function requestSignup(req, res) {
   const parsed = signupSchema.safeParse(req.body);
@@ -72,6 +80,8 @@ async function requestSignup(req, res) {
 
   res.status(202).json({ message: "Verification link sent (check server logs)" });
 }
+
+// verifySignup - verifies the token, marks email as verified, and creates the Student/Researcher profile
 
 async function verifySignup(req, res) {
   const parsed = tokenSchema.safeParse(req.body);
@@ -121,6 +131,8 @@ async function verifySignup(req, res) {
   return res.json({ message: "Email verified. You can now log in." });
 }
 
+// login - verifies credentials and email status, then creates a session cookie
+
 async function login(req, res) {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -147,9 +159,13 @@ async function login(req, res) {
     .json({ user: publicUser(user) });
 }
 
+// getMe - returns the authenticated user from the session
+
 async function getMe(req, res) {
   res.json({ user: req.user });
 }
+
+// logout - deletes the active session and clears the session cookie
 
 async function logout(req, res) {
   if (req.sessionId) {
@@ -158,11 +174,14 @@ async function logout(req, res) {
   res.clearCookie(SESSION_COOKIE).json({ ok: true });
 }
 
+// adminLoginSchema - validates admin login input
+
 const adminLoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
 
+// adminLogin - logs in an admin and issues a base64 session token (separate from user sessions)
 async function adminLogin(req, res) {
   const parsed = adminLoginSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -184,10 +203,13 @@ async function adminLogin(req, res) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000, 
+      maxAge: 24 * 60 * 60 * 1000,
     })
     .json({ admin: { email: admin.email } });
 }
+
+// adminVerify - validates the admin session token and returns the admin
+
 
 async function adminVerify(req, res) {
   const adminToken = req.cookies?.admin_session;
@@ -198,7 +220,7 @@ async function adminVerify(req, res) {
   try {
     const decoded = JSON.parse(Buffer.from(adminToken, 'base64').toString());
     const admin = await prisma.admin.findUnique({ where: { email: decoded.email } });
-    
+
     if (!admin) {
       return res.status(401).json({ error: "Invalid session" });
     }
@@ -208,6 +230,8 @@ async function adminVerify(req, res) {
     return res.status(401).json({ error: "Invalid session" });
   }
 }
+
+// adminLogout - clears the admin session cookie
 
 async function adminLogout(req, res) {
   res.clearCookie('admin_session').json({ ok: true });

@@ -2,6 +2,10 @@ const { z } = require("zod");
 const prisma = require("../db/prisma");
 const { publicUser } = require("../utils/user");
 
+// UCLA_EMAIL_REGEX – enforces UCLA-only email domain
+// idParamSchema – validates user id param
+// updateSchema – validates fields allowed during user update
+
 const UCLA_EMAIL_REGEX = /^[^@]+@(?:ucla|g\.ucla)\.edu$/i;
 const idParamSchema = z.object({ id: z.coerce.number().int().positive() });
 const updateSchema = z.object({
@@ -9,6 +13,12 @@ const updateSchema = z.object({
     email: z.string().email().regex(UCLA_EMAIL_REGEX).optional(),
     uclaId: z.string().min(7).optional(),
 });
+
+
+
+
+// listUsers – returns all users (students + researchers) ordered by creation date
+
 
 // List all users, ordered by creation date descending
 // Includes students and researchers
@@ -34,6 +44,8 @@ async function getUserById(req, res) {
     res.json({ user: publicUser(user) });
 }
 
+
+
 // Updates a user in any of the fields allowed by updateSchema (see above). 
 async function updateUser(req, res) {
     const parsedParams = idParamSchema.safeParse(req.params);
@@ -55,6 +67,7 @@ async function updateUser(req, res) {
     }
 }
 
+// Deletes a user by ID.
 async function deleteUser(req, res) {
     const parsedParams = idParamSchema.safeParse(req.params);
     if (!parsedParams.success) return res.status(400).json({ error: "Invalid user id" });
