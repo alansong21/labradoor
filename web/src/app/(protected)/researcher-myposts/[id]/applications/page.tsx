@@ -6,6 +6,7 @@
 "use client";
 import React, { useEffect, useState, use } from "react";
 import Navbar from "../../../../components/Navbar";
+import { useUser } from "@/hooks/useUser";
 import "./page.css";
 
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "MULTIPLE_CHOICE" | "CHECKBOX";
@@ -42,6 +43,7 @@ export default function PostApplicationsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { user } = useUser();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +64,7 @@ export default function PostApplicationsPage({
 
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <div className="applications-page">
         <div className="container">
           <h1 className="page-title">Applications</h1>

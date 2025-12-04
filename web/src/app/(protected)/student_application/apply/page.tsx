@@ -8,6 +8,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "../../../components/Navbar";
+import { useUser } from "@/hooks/useUser";
 import "./page.css";
 
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "CHECKBOX" | "MULTIPLE_CHOICE";
@@ -38,6 +39,7 @@ function ApplyForm() {
   const searchParams = useSearchParams();
   const postId = searchParams.get("lab");
   const router = useRouter();
+  const { user } = useUser();
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -214,9 +216,11 @@ function ApplyForm() {
 }
 
 export default function ApplyPage() {
+  const { user } = useUser();
+  
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <Suspense fallback={<div>Loading...</div>}>
         <ApplyForm />
       </Suspense>

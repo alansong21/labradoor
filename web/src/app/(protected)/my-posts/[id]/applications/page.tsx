@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Navbar from "../../../../components/Navbar";
+import { useUser } from "@/hooks/useUser";
 import "./page.css";
 
 interface Response {
@@ -28,6 +29,7 @@ export default function PostApplicationsPage({
 }: {
   params: { id: string };
 }) {
+  const { user } = useUser();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +50,7 @@ export default function PostApplicationsPage({
 
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <div className="applications-page">
         <div className="container">
           <h1 className="page-title">Applications</h1>
