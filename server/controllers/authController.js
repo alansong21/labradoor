@@ -13,7 +13,7 @@ const signupSchema = z.object({
   email: z.string().email().regex(UCLA_EMAIL_REGEX, "Must be a valid UCLA email"),
   password: z.string().min(8),
   name: z.string().min(1).optional(),
-  uclaId: z.string().min(7).optional(),
+  uclaId: z.string().length(9).or(z.literal("")).optional(),
   role: z.enum(["STUDENT", "RESEARCHER"]),
 });
 

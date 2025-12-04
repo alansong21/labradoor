@@ -7,7 +7,7 @@ const idParamSchema = z.object({ id: z.coerce.number().int().positive() });
 const updateSchema = z.object({
     name: z.string().min(1).optional(),
     email: z.string().email().regex(UCLA_EMAIL_REGEX).optional(),
-    uclaId: z.string().min(7).optional(),
+    uclaId: z.string().length(9).or(z.literal("")).optional(),
 });
 
 // List all users, ordered by creation date descending
