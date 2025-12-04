@@ -348,7 +348,7 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Loading fullPage message="Loading signup page..." />}>
       <SignupForm />
     </Suspense>
   );

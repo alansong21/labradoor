@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import Navbar from "./components/Navbar";
+import Loading from "./components/Loading";
 import { cookies } from "next/headers";
 import { getLabs } from "@/lib/labs";
 import LabList from "./components/LabList";
@@ -10,35 +12,39 @@ export default async function Page() {
   const isLoggedIn = !!session;
 
   if (isLoggedIn && session?.value) {
-    const labs = await getLabs();
-    let userRole: "RESEARCHER" | "STUDENT" | null = null;
+    // Parallel fetch for better performance
+    const baseUrl =
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.API_URL ||
+      "http://localhost:4000";
 
-    try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_API_URL ||
-        process.env.API_URL ||
-        "http://localhost:4000";
-
-      const response = await fetch(`${baseUrl}/api/auth/me`, {
+    const [labs, userData] = await Promise.allSettled([
+      getLabs(),
+      fetch(`${baseUrl}/api/auth/me`, {
         headers: {
           Cookie: `session=${session.value}`,
         },
         cache: "no-store",
-      });
+      }).then((res) => (res.ok ? res.json() : null)).catch(() => null),
+    ]);
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.user?.researcher) {
-          userRole = "RESEARCHER";
-        } else if (data.user?.student) {
-          userRole = "STUDENT";
-        }
+    let userRole: "RESEARCHER" | "STUDENT" | null = null;
+    const labsData = labs.status === "fulfilled" ? labs.value : [];
+
+    if (userData.status === "fulfilled" && userData.value) {
+      const data = userData.value;
+      if (data.user?.researcher) {
+        userRole = "RESEARCHER";
+      } else if (data.user?.student) {
+        userRole = "STUDENT";
       }
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
     }
 
-    return <LabList labs={labs} userRole={userRole} />;
+    return (
+      <Suspense fallback={<Loading fullPage message="Loading labs..." />}>
+        <LabList labs={labsData} userRole={userRole} />
+      </Suspense>
+    );
   }
 
   return (

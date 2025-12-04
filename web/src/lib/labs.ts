@@ -14,7 +14,11 @@ const getApiUrl = () => {
 export async function getLabs() {
   try {
     const apiUrl = getApiUrl();
-    const res = await fetch(`${apiUrl}/api/posts`, { cache: "no-store" });
+    // Use revalidate for better caching in production
+    const res = await fetch(`${apiUrl}/api/posts`, {
+      next: { revalidate: 60 }, // Revalidate every 60 seconds
+      cache: "no-store", // Keep no-store for development
+    });
     if (!res.ok) return [];
 
     const posts = await res.json();

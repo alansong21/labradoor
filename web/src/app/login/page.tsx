@@ -218,7 +218,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Loading fullPage message="Loading login page..." />}>
       <LoginForm />
     </Suspense>
   );
