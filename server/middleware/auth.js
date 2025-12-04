@@ -1,3 +1,8 @@
+/**
+ * Auth Middleware
+ * Verifies the session cookie attached to requests.
+ * Attaches the authenticated user to the request object if valid.
+ */
 const crypto = require("crypto");
 const prisma = require("../db/prisma");
 
