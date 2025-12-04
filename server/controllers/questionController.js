@@ -1,3 +1,8 @@
+/**
+ * Question Controller
+ * Handles CRUD operations for questions attached to posts.
+ * Ensures only the researcher who owns the post can modify its questions.
+ */
 const prisma = require("../db/prisma");
 const { z } = require("zod");
 

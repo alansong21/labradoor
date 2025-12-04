@@ -1,3 +1,8 @@
+/**
+ * User Controller
+ * Handles general user management: listing, retrieving, updating, and deleting users.
+ * Supports both Student and Researcher profiles.
+ */
 const { z } = require("zod");
 const prisma = require("../db/prisma");
 const { publicUser } = require("../utils/user");

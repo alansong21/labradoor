@@ -1,3 +1,7 @@
+/**
+ * Admin Controller
+ * Handles administrative actions such as fetching all researchers and updating their verification status.
+ */
 const { z } = require("zod");
 const prisma = require("../db/prisma");
 

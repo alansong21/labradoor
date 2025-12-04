@@ -1,3 +1,8 @@
+/**
+ * Answer Controller
+ * Handles CRUD operations for answers submitted to application questions.
+ * Ensures authorization checks so only applicants and researchers can access answers.
+ */
 const prisma = require("../db/prisma");
 const { z } = require("zod");
 
