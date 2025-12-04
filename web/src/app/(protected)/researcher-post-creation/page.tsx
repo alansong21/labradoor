@@ -28,12 +28,13 @@ const PostCreationPage: React.FC = () => {
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
 
   const addEntry = (type: "text" | "checkbox" | "multiple-choice") => {
+    const needsOptions = type === "multiple-choice" || type === "checkbox";
     const newEntry: FormEntry = {
       id: `entry-${Date.now()}`,
       type,
       title: "",
       description: "",
-      options: type === "multiple-choice" ? [""] : undefined,
+      options: needsOptions ? [""] : undefined,
     };
     setEntries([...entries, newEntry]);
     setEditingEntry(newEntry.id);
@@ -149,6 +150,7 @@ const PostCreationPage: React.FC = () => {
           questions: entries.map((e) => ({
             type: e.type,
             question: e.title,
+            description: e.description,
             options: e.options,
           })),
         }),
@@ -277,9 +279,11 @@ const PostCreationPage: React.FC = () => {
                     />
                   </div>
 
-                  {entry.type === "multiple-choice" && (
+                  {(entry.type === "multiple-choice" || entry.type === "checkbox") && (
                     <div className="field-group">
-                      <label className="field-label">Options</label>
+                      <label className="field-label">
+                        {entry.type === "checkbox" ? "Selectable Options" : "Options"}
+                      </label>
                       <div className="options-list">
                         {entry.options?.map((option, optIndex) => (
                           <div key={optIndex} className="option-item">

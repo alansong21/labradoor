@@ -13,23 +13,25 @@ Run the **Next.js (web)** + **Express (server)** app with Docker.
 
 ## 1) Environment variables
 
-Create `server/.env`:
+Create `server/.env` with at least the Prisma connection strings below.
 
-* **Using local Postgres via Compose** (recommended for dev):
+> The provided `docker-compose.yml` only launches the web and API containers. You must supply your own Postgres instance (local, cloud, Prisma Accelerate, etc.) and point the backend to it.
+
+* **Using a Postgres instance on your host machine** (common for local dev):
 
   ```dotenv
-  DATABASE_URL="postgresql://postgres:postgres@db:5432/appdb?schema=public"
-  DIRECT_URL="postgresql://postgres:postgres@db:5432/appdb?schema=public"
+  DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/appdb?schema=public"
+  DIRECT_URL="postgresql://postgres:postgres@host.docker.internal:5432/appdb?schema=public"
   ```
 
-* **Using a remote Postgres / Prisma Accelerate**:
+* **Using a managed Postgres / Prisma Accelerate**:
 
   ```dotenv
   DATABASE_URL="postgresql://<user>:<pass>@<host>:<port>/<db>?schema=public"
   DIRECT_URL="postgresql://<user>:<pass>@<host>:<port>/<db>?schema=public"
   ```
 
-> `DIRECT_URL` is used by Prisma for migrations/introspection; `DATABASE_URL` is used at runtime.
+> `DIRECT_URL` is used by Prisma for migrations/introspection; `DATABASE_URL` is used at runtime. Add any other required secrets (e.g., `APP_BASE_URL`, email provider keys) to the same file.
 
 ## 2) Start services (dev with hot reload)
 
@@ -43,13 +45,12 @@ What starts:
 
 * **web**: Next.js dev server on [http://localhost:3000](http://localhost:3000)
 * **server**: Express API on [http://localhost:4000](http://localhost:4000)
-* **db**: Postgres on port 5432 (if included in `docker-compose.yml`)
 
-> Code changes in `web/` and `server/` hot-reload thanks to mounted volumes.
+> Code changes in `web/` and `server/` hot-reload thanks to mounted volumes. Postgres is **not** bundled in this compose file—start it separately before bringing the stack up.
 
 ## 3) Apply Prisma migrations (first time or after schema changes)
 
-Open a shell into the server container and run migrations:
+Ensure your Postgres instance is reachable, then run migrations from inside the server container:
 
 ```bash
 docker compose exec server npx prisma migrate dev --name init
@@ -79,17 +80,9 @@ docker compose exec server sh
 docker compose exec web sh
 ```
 
-## Production (optional)
+## Production / deployment
 
-Build and run optimized servers (no volumes, Next built):
-
-```bash
-# Build images defined for prod (example)
-docker compose -f docker-compose.prod.yml up --build -d
-
-# Run DB migrations in prod
-docker compose -f docker-compose.prod.yml exec server npx prisma migrate deploy
-```
+There is no dedicated `docker-compose.prod.yml` checked in. To create a production image, clone or adapt `Dockerfile.web` / `Dockerfile.server`, build them manually, and deploy alongside a managed Postgres database. If you need a compose file for prod, create one in your fork so it matches your hosting environment.
 
 ## Troubleshooting
 

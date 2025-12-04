@@ -23,6 +23,7 @@ interface Post {
 export default function MyPostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/posts/my-posts")
@@ -81,6 +82,32 @@ export default function MyPostsPage() {
                     >
                       View Applications
                     </Link>
+                    <button
+                      className="delete-button"
+                      disabled={deleting === post.id}
+                      onClick={async () => {
+                        if (!confirm("Delete this post?")) return;
+                        setDeleting(post.id);
+                        try {
+                          const res = await fetch(`/api/posts/${post.id}`, {
+                            method: "DELETE",
+                          });
+                          if (res.ok) {
+                            setPosts((prev) => prev.filter((p) => p.id !== post.id));
+                          } else {
+                            const body = await res.json().catch(() => null);
+                            alert(body?.error ?? "Failed to delete post");
+                          }
+                        } catch (err) {
+                          console.error(err);
+                          alert("Failed to delete post");
+                        } finally {
+                          setDeleting(null);
+                        }
+                      }}
+                    >
+                      {deleting === post.id ? "Deleting..." : "Delete"}
+                    </button>
                   </div>
                 </div>
               ))}

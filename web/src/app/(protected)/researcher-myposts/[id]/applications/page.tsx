@@ -96,20 +96,29 @@ export default function PostApplicationsPage({
                       {app.answers.length === 0 && (
                         <p className="empty-responses">No responses submitted.</p>
                       )}
-                      {app.answers.map((answer) => (
-                        <div key={answer.id} className="response-item">
-                          <p className="question-text">
-                            {answer.question?.body && typeof answer.question.body === "object"
-                              ? answer.question.body.prompt ?? "Question"
-                              : "Question"}
-                          </p>
-                          <p className="answer-text">
-                            {typeof answer.body?.value === "boolean"
-                              ? answer.body.value ? "Yes" : "No"
-                              : String(answer.body?.value ?? "")}
-                          </p>
-                        </div>
-                      ))}
+                      {app.answers.map((answer) => {
+                        const prompt =
+                          answer.question?.body && typeof answer.question.body === "object"
+                            ? answer.question.body.prompt ?? "Question"
+                            : "Question";
+                        const value = answer.body?.value;
+                        let displayValue: string;
+                        if (Array.isArray(value)) {
+                          displayValue = value.length ? value.join(", ") : "No selections";
+                        } else if (typeof value === "boolean") {
+                          displayValue = value ? "Yes" : "No";
+                        } else if (value === null || value === undefined || value === "") {
+                          displayValue = "No response";
+                        } else {
+                          displayValue = String(value);
+                        }
+                        return (
+                          <div key={answer.id} className="response-item">
+                            <p className="question-text">{prompt}</p>
+                            <p className="answer-text">{displayValue}</p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );

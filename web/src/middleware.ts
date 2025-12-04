@@ -1,31 +1,50 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-/**
- * Middleware to handle authentication and route protection.
- * Checks for session cookies and redirects unauthenticated users to login.
- * Allows access to public paths and admin routes (handled separately).
- */
-export function middleware(request: NextRequest) {
+const PUBLIC_PATHS = ['/login', '/signup', '/verify', '/verify-signup', '/']
+const RESEARCHER_ONLY_PATHS = [/^\/my-posts(?:\/.*)?$/, /^\/researcher-myposts(?:\/.*)?$/, /^\/researcher-post-creation(?:\/.*)?$/]
+const STUDENT_ONLY_PATHS = [/^\/student_application(?:\/.*)?$/]
+const API_BASE_URLS = [
+    process.env.INTERNAL_API_URL,
+    process.env.API_BASE_URL,
+    process.env.NEXT_PUBLIC_API_URL,
+    'http://server:4000/api',
+    'http://localhost:4000/api',
+].filter(Boolean) as string[]
+
+type Role = 'STUDENT' | 'RESEARCHER' | null
+
+const pathMatches = (pathname: string, patterns: RegExp[]) => patterns.some(pattern => pattern.test(pathname))
+
+async function fetchUserRole(sessionValue: string | undefined): Promise<Role> {
+    if (!sessionValue) return null
+    for (const base of API_BASE_URLS) {
+        try {
+            const res = await fetch(`${base.replace(/\/$/, '')}/auth/me`, {
+                headers: {
+                    Cookie: `session=${sessionValue}`,
+                },
+                cache: 'no-store',
+            })
+            if (!res.ok) continue
+            const body = await res.json()
+            const user = body?.user
+            if (user?.researcher) return 'RESEARCHER'
+            if (user?.student) return 'STUDENT'
+            return null
+        } catch (error) {
+            continue
+        }
+    }
+    return null
+}
+
+export async function middleware(request: NextRequest) {
+    const pathname = request.nextUrl.pathname
     const session = request.cookies.get('session')
-    const adminSession = request.cookies.get('admin_session')
+    const isAdminPath = pathname.startsWith('/admin')
+    const isPublicPath = PUBLIC_PATHS.some(path => pathname === path || pathname.startsWith(path + '/'))
 
-    // Define paths that don't require authentication
-    const publicPaths = [
-        '/login',
-        '/signup',
-        '/verify',
-        '/verify-signup',
-        '/', // Landing page
-    ]
-    const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
-
-    // Check if the current path is public
-    const isPublicPath = publicPaths.some(path =>
-        request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + '/')
-    )
-
-    // Admin paths are handled by their own layout/page logic or separate middleware logic if needed
     if (isAdminPath) {
         return NextResponse.next()
     }
@@ -35,18 +54,33 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
+    const requiresResearcherRole = pathMatches(pathname, RESEARCHER_ONLY_PATHS)
+    const requiresStudentRole = pathMatches(pathname, STUDENT_ONLY_PATHS)
+    const shouldRedirectResearcherFromLanding = pathname === '/' && !!session
+
+    if (!(requiresResearcherRole || requiresStudentRole || shouldRedirectResearcherFromLanding)) {
+        return NextResponse.next()
+    }
+
+    const role = await fetchUserRole(session?.value)
+
+    if (requiresResearcherRole && role !== 'RESEARCHER') {
+        return NextResponse.redirect(new URL('/', request.url))
+    }
+
+    if (requiresStudentRole && role !== 'STUDENT') {
+        return NextResponse.redirect(new URL('/my-posts', request.url))
+    }
+
+    if (shouldRedirectResearcherFromLanding && role === 'RESEARCHER') {
+        return NextResponse.redirect(new URL('/my-posts', request.url))
+    }
+
     return NextResponse.next()
 }
 
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         */
         '/((?!api|_next/static|_next/image|favicon.ico).*)',
     ],
 }

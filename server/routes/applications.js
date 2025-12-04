@@ -5,10 +5,10 @@
 const express = require("express");
 const router = express.Router();
 const { submitApplication, getPostApplications, getMyApplications } = require("../controllers/applicationController");
-const { authMiddleware } = require("../middleware/auth");
+const { authMiddleware, requireRole } = require("../middleware/auth");
 
-router.post("/", authMiddleware, submitApplication);
-router.get("/post/:postId", authMiddleware, getPostApplications);
-router.get("/my-applications", authMiddleware, getMyApplications);
+router.post("/", authMiddleware, requireRole("STUDENT"), submitApplication);
+router.get("/post/:postId", authMiddleware, requireRole("RESEARCHER"), getPostApplications);
+router.get("/my-applications", authMiddleware, requireRole("STUDENT"), getMyApplications);
 
 module.exports = router;

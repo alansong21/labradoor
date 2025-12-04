@@ -113,6 +113,26 @@
     background: #f8f9fa;
 }
 
+.delete-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #fca5a5;
+    border-radius: 6px;
+    color: #b91c1c;
+    background: #fff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-button:hover:not(:disabled) {
+    background: #fee2e2;
+}
+
+.delete-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .empty-state {
     text-align: center;
     padding: 4rem;
