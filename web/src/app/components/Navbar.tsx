@@ -61,11 +61,6 @@ export default function Navbar({ user, hideAuthButtons = false }: NavbarProps) {
                   <a href="/my-applications">My Applications</a>
                 </li>
               )}
-              {role === "RESEARCHER" && (
-                <li>
-                  <a href="/researcher-myposts">My Posts</a>
-                </li>
-              )}
               {isLoggedIn && (
                 <>
                   <li>
