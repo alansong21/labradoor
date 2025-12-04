@@ -2,6 +2,9 @@ const router = require('express').Router();
 const {
     getAllResearchers,
     updateResearcherVerification,
+    listAllUsers,
+    getUserById,
+    deleteUser,
 } = require('../controllers/adminController');
 
 function adminAuth(req, res, next) {
@@ -19,7 +22,13 @@ function adminAuth(req, res, next) {
     }
 }
 
+// Researcher management routes
 router.get('/researchers', adminAuth, getAllResearchers);
 router.patch('/researchers/:userId/verify', adminAuth, updateResearcherVerification);
+
+// User management routes
+router.get('/users', adminAuth, listAllUsers);
+router.get('/users/:id', adminAuth, getUserById);
+router.delete('/users/:id', adminAuth, deleteUser);
 
 module.exports = router;
