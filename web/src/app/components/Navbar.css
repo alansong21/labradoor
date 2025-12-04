@@ -18,9 +18,17 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: white;
-  border-bottom: 1px solid #ddd;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   font-family: Arial, sans-serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
 .navbar-left,
@@ -30,11 +38,17 @@
 }
 
 .navbar-brand {
-  font-weight: bold;
-  font-size: 1.5rem;
-  color: black;
+  display: flex;
+  align-items: center;
   text-decoration: none;
   margin-right: 2rem;
+  height: 40px;
+}
+
+.navbar-brand img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
 }
 
 .navbar-links {
