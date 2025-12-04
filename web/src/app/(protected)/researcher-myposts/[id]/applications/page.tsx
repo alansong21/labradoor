@@ -27,6 +27,7 @@ interface AnswerPayload {
 interface Application {
   id: number;
   createdAt: string;
+  status: string;
   student?: {
     user?: {
       name?: string | null;
@@ -47,7 +48,7 @@ export default function PostApplicationsPage({
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchApplications = () => {
     fetch(`/api/applications/post/${id}`)
       .then((res) => res.json())
       .then((data) => {
@@ -60,7 +61,40 @@ export default function PostApplicationsPage({
         console.error(err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const handleStatusUpdate = async (applicationId: number, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/applications/${applicationId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        // Update the local state
+        setApplications((prev) =>
+          prev.map((app) =>
+            app.id === applicationId ? { ...app, status: newStatus } : app
+          )
+        );
+      } else {
+        const error = await res.json().catch(() => ({ error: "Failed to update status" }));
+        alert(error.error || "Failed to update application status");
+      }
+    } catch (err) {
+      console.error("Error updating status:", err);
+      alert("Failed to update application status");
+    }
+  };
 
   return (
     <>
@@ -83,14 +117,21 @@ export default function PostApplicationsPage({
                 return (
                   <div key={app.id} className="application-card">
                     <div className="applicant-info">
-                      <h2>{applicant?.name || "Unknown Name"}</h2>
-                      <p className="applicant-email">{applicant?.email ?? "No email"}</p>
-                      {applicant?.uclaId && (
-                        <p className="applicant-id">UID: {applicant.uclaId}</p>
-                      )}
-                      <p className="applied-date">
-                        Applied on {new Date(app.createdAt).toLocaleDateString()}
-                      </p>
+                      <div className="applicant-header">
+                        <div>
+                          <h2>{applicant?.name || "Unknown Name"}</h2>
+                          <p className="applicant-email">{applicant?.email ?? "No email"}</p>
+                          {applicant?.uclaId && (
+                            <p className="applicant-id">UID: {applicant.uclaId}</p>
+                          )}
+                          <p className="applied-date">
+                            Applied on {new Date(app.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className={`status-badge status-${app.status.toLowerCase().replace("_", "-")}`}>
+                          {app.status.replace("_", " ")}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="responses-section">
@@ -121,6 +162,33 @@ export default function PostApplicationsPage({
                           </div>
                         );
                       })}
+                    </div>
+
+                    <div className="actions-section">
+                      <h3>Actions</h3>
+                      <div className="action-buttons">
+                        <button
+                          onClick={() => handleStatusUpdate(app.id, "UNDER_REVIEW")}
+                          className={`action-btn ${app.status === "UNDER_REVIEW" ? "active" : ""}`}
+                          disabled={app.status === "UNDER_REVIEW"}
+                        >
+                          Under Review
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(app.id, "ACCEPTED")}
+                          className={`action-btn accept-btn ${app.status === "ACCEPTED" ? "active" : ""}`}
+                          disabled={app.status === "ACCEPTED"}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(app.id, "REJECTED")}
+                          className={`action-btn reject-btn ${app.status === "REJECTED" ? "active" : ""}`}
+                          disabled={app.status === "REJECTED"}
+                        >
+                          Reject
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

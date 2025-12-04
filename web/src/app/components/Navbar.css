@@ -71,6 +71,7 @@
 
 .navbar-links li a:hover {
   color: black;
+  text-decoration: underline;
 }
 
 .signup-button {
