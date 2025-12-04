@@ -4,13 +4,13 @@
  * Redirects to appropriate dashboard upon success.
  */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "../components/Navbar";
 import "./login.css";
 
-type StatusState = { tone: "success" | "error"; message: string } | null;
+type ToastState = { id: number; tone: "success" | "error" | "loading"; message: string } | null;
 
 const ROLE_COPY: Record<"student" | "researcher", { title: string; blurb: string }> = {
   student: {
@@ -31,39 +31,70 @@ const ROLE_TOGGLE = [
 function LoginForm() {
   const searchParams = useSearchParams();
   const roleParam = (searchParams.get("role") || "student").toLowerCase() as "student" | "researcher";
-  const [status, setStatus] = useState<StatusState>(null);
+  const [toast, setToast] = useState<ToastState>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const roleCopy = useMemo(() => ROLE_COPY[roleParam], [roleParam]);
 
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus(null);
+    setHasError(false);
+    setIsLoading(true);
+    setToast({ id: Date.now(), tone: "loading", message: "Signing in..." });
 
     const form = new FormData(e.currentTarget);
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        email: form.get("email"),
-        password: form.get("password"),
-      }),
-    });
-
-    if (res.ok) {
-      setStatus({ tone: "success", message: "Logged in! Redirecting..." });
-      if (roleParam === "researcher") {
-        window.location.href = "/my-posts";
-      } else {
-        window.location.href = "/";
-      }
-    } else {
-      const body = await res.json().catch(() => null);
-      setStatus({
-        tone: "error",
-        message: body?.error ? JSON.stringify(body.error) : "Login failed.",
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: form.get("email"),
+          password: form.get("password"),
+        }),
       });
+
+      if (res.ok) {
+        setHasError(false);
+        setToast({ id: Date.now(), tone: "success", message: "Redirecting..." });
+        setTimeout(() => {
+          if (roleParam === "researcher") {
+            window.location.href = "/my-posts";
+          } else {
+            window.location.href = "/";
+          }
+        }, 500);
+      } else {
+        setHasError(true);
+        const body = await res.json().catch(() => null);
+        setToast({
+          id: Date.now(),
+          tone: "error",
+          message: "Login invalid. Try again.",
+        });
+      }
+    } catch (err) {
+      setHasError(true);
+      setToast({
+        id: Date.now(),
+        tone: "error",
+        message: "Login invalid. Try again.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -95,33 +126,57 @@ function LoginForm() {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <label className="auth-field">
+            <label className={`auth-field ${hasError ? "auth-field--error" : ""}`}>
               <span className="auth-label">UCLA email</span>
-              <input type="email" name="email" className="auth-input" placeholder="you@ucla.edu" required />
+              <input
+                type="email"
+                name="email"
+                className={`auth-input ${hasError ? "auth-input--error" : ""}`}
+                placeholder="you@ucla.edu"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (hasError) setHasError(false);
+                }}
+                required
+              />
             </label>
 
-            <label className="auth-field">
+            <label className={`auth-field ${hasError ? "auth-field--error" : ""}`}>
               <span className="auth-label">Password</span>
               <input
                 type="password"
                 name="password"
-                className="auth-input"
+                className={`auth-input ${hasError ? "auth-input--error" : ""}`}
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (hasError) setHasError(false);
+                }}
                 minLength={8}
                 required
               />
             </label>
 
-            <button type="submit" className="auth-button primary">
-              Sign in
+            {hasError && (
+              <div className="auth-form-error">
+                <span className="auth-form-error__icon">⚠</span>
+                <span className="auth-form-error__text">Login invalid, try again</span>
+              </div>
+            )}
+
+            <button type="submit" className="auth-button primary" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <span className="auth-button-spinner" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
             </button>
           </form>
-
-          {status && (
-            <p className={`status-message status-${status.tone}`} role="status">
-              {status.message}
-            </p>
-          )}
 
           <p className="auth-footer">
             Don&apos;t have an account yet?{" "}
@@ -130,6 +185,32 @@ function LoginForm() {
             </Link>
           </p>
         </div>
+
+        {toast && (
+          <div
+            className={`toast toast--${toast.tone} ${isDismissing ? "toast--dismissing" : ""}`}
+            role="alert"
+            onAnimationEnd={() => {
+              if (isDismissing) {
+                setToast(null);
+                setIsDismissing(false);
+              }
+            }}
+          >
+            {toast.tone === "loading" && <span className="toast-spinner" />}
+            {toast.tone === "error" && <span className="toast-icon">⚠</span>}
+            <span>{toast.message}</span>
+            {toast.tone !== "loading" && (
+              <button
+                className="toast-close"
+                onClick={() => setIsDismissing(true)}
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

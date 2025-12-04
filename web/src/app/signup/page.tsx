@@ -5,13 +5,13 @@
  * Sends verification email upon success.
  */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "../components/Navbar";
 import "./signup.css";
 
-type StatusState = { tone: "success" | "error"; message: string } | null;
+type ToastState = { id: number; tone: "success" | "error" | "loading"; message: string } | null;
 
 const ROLE_COPY: Record<
   "student" | "researcher",
@@ -44,22 +44,49 @@ function SignupForm() {
     name: "",
     uclaId: "",
   });
-  const [status, setStatus] = useState<StatusState>(null);
+  const [toast, setToast] = useState<ToastState>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorField, setErrorField] = useState<string | null>(null);
 
   const roleCopy = useMemo(() => ROLE_COPY[roleParam], [roleParam]);
 
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (hasError) {
+      setHasError(false);
+      setErrorField(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus(null);
+    setHasError(false);
+    setErrorField(null);
 
     if (formData.password !== formData.confirmPassword) {
-      setStatus({ tone: "error", message: "Passwords do not match." });
+      setHasError(true);
+      setErrorField("confirmPassword");
+      setToast({
+        id: Date.now(),
+        tone: "error",
+        message: "Passwords do not match.",
+      });
+      setIsLoading(false);
       return;
     }
+
+    setIsLoading(true);
+    setToast({ id: Date.now(), tone: "loading", message: "Creating account..." });
 
     try {
       const res = await fetch("/api/auth/signup", {
@@ -75,19 +102,70 @@ function SignupForm() {
       });
 
       if (res.ok) {
-        setStatus({
+        setHasError(false);
+        setToast({
+          id: Date.now(),
           tone: "success",
           message: "Account created! Check your UCLA inbox for the verification email.",
         });
       } else {
+        setHasError(true);
         const body = await res.json().catch(() => null);
-        setStatus({
+        let errorMsg = "Signup failed. Please try again.";
+        
+        if (body?.error) {
+          const error = body.error;
+          // Handle different error formats
+          if (typeof error === "string") {
+            errorMsg = error;
+          } else if (typeof error === "object") {
+            // Handle validation errors from zod or similar
+            if (error.email) {
+              errorMsg = error.email.includes("ucla") || error.email.includes("UCLA") 
+                ? "Invalid UCLA email. Use your @ucla.edu or @g.ucla.edu address."
+                : "Invalid email format.";
+            } else if (error.password) {
+              if (error.password.includes("8") || error.password.includes("length")) {
+                errorMsg = "Password must be at least 8 characters.";
+              } else {
+                errorMsg = error.password;
+              }
+            } else if (error.uclaId) {
+              errorMsg = "Invalid UCLA ID. Must be 9 digits.";
+            } else if (error.name) {
+              errorMsg = "Please enter your full name.";
+            } else {
+              // Try to extract first error message
+              const firstError = Object.values(error)[0];
+              errorMsg = typeof firstError === "string" ? firstError : errorMsg;
+            }
+          }
+          
+          // Clean up common error messages
+          if (errorMsg.toLowerCase().includes("email") && errorMsg.toLowerCase().includes("ucla")) {
+            errorMsg = "Invalid UCLA email. Use your @ucla.edu or @g.ucla.edu address.";
+          } else if (errorMsg.toLowerCase().includes("password") && (errorMsg.toLowerCase().includes("8") || errorMsg.toLowerCase().includes("length"))) {
+            errorMsg = "Password must be at least 8 characters.";
+          } else if (errorMsg.toLowerCase().includes("already exists") || errorMsg.toLowerCase().includes("taken")) {
+            errorMsg = "An account with this email already exists.";
+          }
+        }
+        
+        setToast({
+          id: Date.now(),
           tone: "error",
-          message: body?.error ? JSON.stringify(body.error) : "Signup failed.",
+          message: errorMsg,
         });
       }
     } catch (err) {
-      setStatus({ tone: "error", message: "An unexpected error occurred." });
+      setHasError(true);
+      setToast({
+        id: Date.now(),
+        tone: "error",
+        message: "An unexpected error occurred.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -120,79 +198,115 @@ function SignupForm() {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <label className="auth-field">
+            <label className={`auth-field ${errorField === "name" ? "auth-field--error" : ""}`}>
               <span className="auth-label">Full name</span>
               <input
                 type="text"
                 name="name"
                 placeholder="First Last"
-                className="auth-input"
+                className={`auth-input ${errorField === "name" ? "auth-input--error" : ""}`}
+                value={formData.name}
                 onChange={handleChange}
                 required
               />
+              {errorField === "name" && hasError && (
+                <div className="auth-field-error">
+                  <span className="auth-field-error__icon">⚠</span>
+                  <span className="auth-field-error__text">Please check this field</span>
+                </div>
+              )}
             </label>
 
-            <label className="auth-field">
+            <label className={`auth-field ${errorField === "email" ? "auth-field--error" : ""}`}>
               <span className="auth-label">UCLA email</span>
               <input
                 type="email"
                 name="email"
                 placeholder="you@ucla.edu"
-                className="auth-input"
-                required
+                className={`auth-input ${errorField === "email" ? "auth-input--error" : ""}`}
+                value={formData.email}
                 onChange={handleChange}
+                required
               />
+              {errorField === "email" && hasError && (
+                <div className="auth-field-error">
+                  <span className="auth-field-error__icon">⚠</span>
+                  <span className="auth-field-error__text">Please check this field</span>
+                </div>
+              )}
             </label>
 
             {roleParam === "student" && (
-              <label className="auth-field">
+              <label className={`auth-field ${errorField === "uclaId" ? "auth-field--error" : ""}`}>
                 <span className="auth-label">UCLA ID (UID)</span>
                 <input
                   type="text"
                   name="uclaId"
                   placeholder="000000000"
-                  className="auth-input"
+                  className={`auth-input ${errorField === "uclaId" ? "auth-input--error" : ""}`}
+                  value={formData.uclaId}
                   onChange={handleChange}
                 />
+                {errorField === "uclaId" && hasError && (
+                  <div className="auth-field-error">
+                    <span className="auth-field-error__icon">⚠</span>
+                    <span className="auth-field-error__text">Please check this field</span>
+                  </div>
+                )}
               </label>
             )}
 
-            <label className="auth-field">
+            <label className={`auth-field ${errorField === "password" ? "auth-field--error" : ""}`}>
               <span className="auth-label">Password</span>
               <input
                 type="password"
                 name="password"
                 placeholder="Create at least 8 characters"
-                className="auth-input"
+                className={`auth-input ${errorField === "password" ? "auth-input--error" : ""}`}
+                value={formData.password}
                 minLength={8}
                 required
                 onChange={handleChange}
               />
+              {errorField === "password" && hasError && (
+                <div className="auth-field-error">
+                  <span className="auth-field-error__icon">⚠</span>
+                  <span className="auth-field-error__text">Please check this field</span>
+                </div>
+              )}
             </label>
 
-            <label className="auth-field">
+            <label className={`auth-field ${errorField === "confirmPassword" ? "auth-field--error" : ""}`}>
               <span className="auth-label">Confirm password</span>
               <input
                 type="password"
                 name="confirmPassword"
                 placeholder="Re-enter password"
-                className="auth-input"
+                className={`auth-input ${errorField === "confirmPassword" ? "auth-input--error" : ""}`}
+                value={formData.confirmPassword}
                 minLength={8}
                 required
                 onChange={handleChange}
               />
+              {errorField === "confirmPassword" && hasError && (
+                <div className="auth-field-error">
+                  <span className="auth-field-error__icon">⚠</span>
+                  <span className="auth-field-error__text">Passwords do not match</span>
+                </div>
+              )}
             </label>
 
-            <button type="submit" className="auth-button primary">
-              Create account
+            <button type="submit" className="auth-button primary" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <span className="auth-button-spinner" />
+                  Creating account...
+                </>
+              ) : (
+                "Create account"
+              )}
             </button>
           </form>
-
-          {status && (
-            <p className={`status-message status-${status.tone}`} role="status">
-              {status.message}
-            </p>
-          )}
 
           <p className="auth-footer">
             Already have an account?{" "}
@@ -201,6 +315,32 @@ function SignupForm() {
             </Link>
           </p>
         </div>
+
+        {toast && (
+          <div
+            className={`toast toast--${toast.tone} ${isDismissing ? "toast--dismissing" : ""}`}
+            role="alert"
+            onAnimationEnd={() => {
+              if (isDismissing) {
+                setToast(null);
+                setIsDismissing(false);
+              }
+            }}
+          >
+            {toast.tone === "loading" && <span className="toast-spinner" />}
+            {toast.tone === "error" && <span className="toast-icon">⚠</span>}
+            <span>{toast.message}</span>
+            {toast.tone !== "loading" && (
+              <button
+                className="toast-close"
+                onClick={() => setIsDismissing(true)}
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

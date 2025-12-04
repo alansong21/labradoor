@@ -5,7 +5,7 @@
  */
 "use client";
 
-import React from "react";
+import { useState, type SyntheticEvent } from "react";
 import "./Navbar.css";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,6 +19,7 @@ interface NavbarProps {
 
 export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = false }: NavbarProps) {
   const router = useRouter();
+  const [logoFailed, setLogoFailed] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -35,27 +36,25 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
     <nav className="navbar">
       <div className="navbar-left">
         <a href="/" className="navbar-brand">
-          <Image
-            src="/logo.png"
-            alt="Labradoor"
-            width={120}
-            height={40}
-            priority
-            style={{ height: "auto", width: "auto", objectFit: "contain" }}
-            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-              // Fallback to text if image doesn't exist
-              const target = e.target as HTMLImageElement;
-              const parent = target.closest(".navbar-brand") as HTMLElement;
-              if (parent) {
-                target.style.display = "none";
-                const textFallback = document.createTextNode("LABRADOOR");
-                parent.appendChild(textFallback);
-                parent.style.fontWeight = "bold";
-                parent.style.fontSize = "1.5rem";
-                parent.style.color = "black";
-              }
-            }}
-          />
+          {logoFailed ? (
+            <span style={{ fontWeight: "bold", fontSize: "1.5rem", color: "black" }}>
+              LABRADOOR
+            </span>
+          ) : (
+            <Image
+              src="/logo.png"
+              alt="Labradoor"
+              width={120}
+              height={40}
+              priority
+              style={{ height: "auto", width: "auto", objectFit: "contain" }}
+              onError={(e: SyntheticEvent<HTMLImageElement, Event>) => {
+                // Hide broken image and switch to text fallback
+                e.currentTarget.style.display = "none";
+                setLogoFailed(true);
+              }}
+            />
+          )}
         </a>
         <ul className="navbar-links">
           {role === "STUDENT" && (
