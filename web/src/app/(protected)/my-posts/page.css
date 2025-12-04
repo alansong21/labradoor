@@ -1,11 +1,15 @@
 .my-posts-page {
     min-height: 100vh;
-    background-color: #f8f9fa;
+    background: transparent;
     padding: 2rem;
+    padding-top: 100px; /* Account for fixed navbar */
+    color: black;
+    position: relative;
+    z-index: 1;
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
@@ -23,17 +27,20 @@
 }
 
 .create-button {
-    background: #000;
+    background: #2563eb;
     color: white;
     padding: 0.75rem 1.5rem;
-    border-radius: 8px;
+    border-radius: 999px;
     font-weight: 600;
     text-decoration: none;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28), 0 0 18px rgba(59, 130, 246, 0.18);
+    font-size: 0.875rem;
 }
 
 .create-button:hover {
-    background: #333;
+    background: #1e40af;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.32), 0 0 20px rgba(59, 130, 246, 0.22);
 }
 
 .posts-grid {
@@ -42,18 +49,22 @@
 }
 
 .post-card {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #eaeaea;
-    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(24px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: box-shadow 0.2s;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .post-card:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .post-content {
@@ -61,7 +72,7 @@
 }
 
 .post-card h2 {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: #1a1a1a;
@@ -100,45 +111,54 @@
 
 .view-apps-button {
     padding: 0.5rem 1rem;
-    border: 1px solid #e5e5e5;
-    border-radius: 6px;
-    color: #1a1a1a;
+    background: transparent;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+    border-radius: 999px;
     text-decoration: none;
     font-weight: 500;
+    font-size: 0.875rem;
     transition: all 0.2s;
 }
 
 .view-apps-button:hover {
-    border-color: #000;
-    background: #f8f9fa;
+    background: rgba(37, 99, 235, 0.05);
+    border-color: #1e40af;
+    color: #1e40af;
 }
 
 .delete-button {
     padding: 0.5rem 1rem;
-    border: 1px solid #fca5a5;
-    border-radius: 6px;
-    color: #b91c1c;
-    background: #fff;
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    border-radius: 999px;
     font-weight: 500;
+    font-size: 0.875rem;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .delete-button:hover:not(:disabled) {
-    background: #fee2e2;
+    background: rgba(220, 38, 38, 0.05);
+    border-color: #b91c1c;
+    color: #b91c1c;
 }
 
 .delete-button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    border-color: rgba(220, 38, 38, 0.5);
+    color: rgba(220, 38, 38, 0.5);
 }
 
 .empty-state {
     text-align: center;
     padding: 4rem;
-    background: white;
-    border-radius: 12px;
-    border: 1px dashed #e5e5e5;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px dashed rgba(226, 232, 240, 0.8);
 }
 
 .empty-state p {

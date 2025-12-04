@@ -12,7 +12,7 @@ const Navbar = dynamic(() => import("./components/Navbar"), {
 
 // Lazy load LabList component - only loads when user is logged in
 const LabList = dynamic(() => import("./components/LabList"), {
-  loading: () => <Loading fullPage message="Loading labs..." />,
+  loading: () => <Loading fullPage message="Loading..." />,
   ssr: true, // Enable SSR for better initial load
 });
 
@@ -56,7 +56,7 @@ export default async function Page() {
     }
 
     return (
-      <Suspense fallback={<Loading fullPage message="Loading labs..." />}>
+      <Suspense fallback={<Loading fullPage message="Loading..." />}>
         <LabList labs={labsData} userRole={userRole} />
       </Suspense>
     );

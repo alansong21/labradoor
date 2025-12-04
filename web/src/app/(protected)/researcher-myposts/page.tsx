@@ -52,7 +52,7 @@ export default function MyPostsPage() {
           </div>
 
           {loading ? (
-            <div className="loading">Loading posts...</div>
+            <div className="loading">Loading...</div>
           ) : posts.length === 0 ? (
             <div className="empty-state">
               <p>You haven't created any posts yet.</p>
@@ -82,7 +82,7 @@ export default function MyPostsPage() {
                   </div>
                   <div className="post-footer">
                     <div className="app-count-badge">
-                      {post._count.applications} Applications
+                      {post._count.applications} {post._count.applications === 1 ? 'Application' : 'Applications'}
                     </div>
                     <Link
                       href={`/researcher-myposts/${post.id}/applications`}
