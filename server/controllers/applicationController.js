@@ -208,6 +208,9 @@ async function getMyApplications(req, res) {
             orderBy: { createdAt: "desc" },
         });
 
+        if (applications.length === 0) {
+            return res.status(204).send();
+        }
         res.json(applications);
     } catch (e) {
         console.error(e);

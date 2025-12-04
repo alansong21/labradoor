@@ -51,11 +51,6 @@ export default function Navbar({ user, hideAuthButtons = false }: NavbarProps) {
         {!hideAuthButtons && (
           <>
             <ul className="navbar-links">
-              {role === "STUDENT" && (
-                <li>
-                  <a href="/my-applications">My Applications</a>
-                </li>
-              )}
               {isLoggedIn && (
                 <>
                   <li>
@@ -63,6 +58,11 @@ export default function Navbar({ user, hideAuthButtons = false }: NavbarProps) {
                       {user.name || "Profile"}
                     </a>
                   </li>
+                  {role === "STUDENT" && (
+                    <li>
+                      <a href="/my-applications">My Applications</a>
+                    </li>
+                  )}
                   <li>
                     <button onClick={handleLogout} className="logout-button">
                       Logout
