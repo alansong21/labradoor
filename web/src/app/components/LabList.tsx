@@ -12,12 +12,20 @@ export interface Lab {
   tags?: string[];
 }
 
-interface Props {
-  labs: Lab[];
-  userRole?: string | null;
+interface User {
+  id: number;
+  email: string;
+  name?: string | null;
+  student?: any;
+  researcher?: any;
 }
 
-export default function LabList({ labs, userRole }: Props) {
+interface Props {
+  labs: Lab[];
+  user?: User | null;
+}
+
+export default function LabList({ labs, user }: Props) {
   const [query, setQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagInputOpen, setTagInputOpen] = useState(false);
@@ -57,7 +65,7 @@ export default function LabList({ labs, userRole }: Props) {
 
   return (
     <>
-      <Navbar isLoggedIn={true} role={userRole || undefined} />
+      <Navbar user={user} />
       <main className="lab-page">
         <h1 className="title">Lab Openings</h1>
         <div className="lab-search">

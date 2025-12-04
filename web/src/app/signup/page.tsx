@@ -65,7 +65,7 @@ function SignupForm() {
 
   return (
     <>
-      <Navbar isLoggedIn={false} hideAuthButtons={true} />
+      <Navbar user={null} hideAuthButtons={true} />
       <div className="signup-page">
         <div className="signup-container">
           <h1 className="signup-title">Sign Up ({role})</h1>

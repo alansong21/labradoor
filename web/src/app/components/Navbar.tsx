@@ -10,13 +10,20 @@ import "./Navbar.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+interface User {
+  id: number;
+  email: string;
+  name?: string | null;
+  student?: any;
+  researcher?: any;
+}
+
 interface NavbarProps {
-  isLoggedIn?: boolean;
-  role?: string;
+  user?: User | null;
   hideAuthButtons?: boolean;
 }
 
-export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = false }: NavbarProps) {
+export default function Navbar({ user, hideAuthButtons = false }: NavbarProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -30,29 +37,35 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
     }
   };
 
+  const isLoggedIn = !!user;
+  const role = user?.student ? "STUDENT" : user?.researcher ? "RESEARCHER" : null;
+
   return (
     <nav className="navbar">
       <div className="navbar-left">
         <a href="/" className="navbar-brand">
           LABRADOOR
         </a>
-        <ul className="navbar-links">
-          {role === "STUDENT" && (
-            <li>
-              <a href="/my-applications">My Applications</a>
-            </li>
-          )}
-          {role === "RESEARCHER" && (
-            <li>
-              <a href="/researcher-myposts">My Posts</a>
-            </li>
-          )}
-        </ul>
+        {user && (
+          <p style={{ margin: "0.5rem 0 0 0", color: "#666" }}>
+            Logged in as: {user.email}
+          </p>
+        )}
       </div>
       <div className="navbar-right">
         {!hideAuthButtons && (
           <>
             <ul className="navbar-links">
+              {role === "STUDENT" && (
+                <li>
+                  <a href="/my-applications">My Applications</a>
+                </li>
+              )}
+              {role === "RESEARCHER" && (
+                <li>
+                  <a href="/researcher-myposts">My Posts</a>
+                </li>
+              )}
               {isLoggedIn && (
                 <>
                   <li>
