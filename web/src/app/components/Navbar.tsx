@@ -1,3 +1,8 @@
+/**
+ * Navbar Component
+ * Displays the main navigation bar.
+ * Adapts based on login status and user role (Student vs Researcher).
+ */
 "use client";
 
 import React from "react";

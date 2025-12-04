@@ -49,6 +49,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next()
     }
 
+    // Redirect to login if no session and trying to access a protected route
     if (!session && !isPublicPath) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
