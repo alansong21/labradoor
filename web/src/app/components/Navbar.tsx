@@ -16,20 +16,10 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:4000/api/auth/logout", {
-        method: "POST",
-      });
-      // We can also hit the Next.js API route if we had one proxying, but here we hit the backend directly.
-      // Actually, since we are in the browser, we should use the relative path if we have a proxy setup,
-      // OR use the full URL.
-      // Wait, the previous code used `/api/auth/signup` which implies there is a proxy or rewrite in next.config.ts.
-      // Let's check next.config.ts to be sure, or just assume /api works.
-      // The signup page used `/api/auth/signup`. So I should use `/api/auth/logout`.
-      
       await fetch("/api/auth/logout", { method: "POST" });
       
-      router.refresh(); // Refresh the current route to update server components
-      router.push("/"); // Redirect to landing page
+      router.refresh();
+      router.push("/");
     } catch (error) {
       console.error("Logout failed", error);
     }
