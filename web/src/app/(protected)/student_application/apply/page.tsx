@@ -35,7 +35,7 @@ function ApplyForm() {
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const [responses, setResponses] = useState<Record<number, string>>({});
+  const [responses, setResponses] = useState<Record<number, string | string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -58,19 +58,19 @@ function ApplyForm() {
 
   useEffect(() => {
     if (!post) return;
-    const defaults: Record<number, string> = {};
+    const defaults: Record<number, string | string[]> = {};
     post.questions.forEach((q) => {
       const rawType = typeof q.type === "string" ? q.type.toUpperCase().replace(/-/g, "_") : "";
       if (rawType === "CHECKBOX" && responses[q.id] === undefined) {
-        defaults[q.id] = "false";
+        defaults[q.id] = [];
       }
     });
     if (Object.keys(defaults).length > 0) {
       setResponses((prev) => ({ ...defaults, ...prev }));
     }
-  }, [post]); 
+  }, [post]);
 
-  const handleResponseChange = (questionId: number, value: string) => {
+  const handleResponseChange = (questionId: number, value: string | string[]) => {
     setResponses((prev) => ({ ...prev, [questionId]: value }));
   };
 
@@ -156,16 +156,27 @@ function ApplyForm() {
                 )}
 
                 {normalizedType === "CHECKBOX" && (
-                  <div className="checkbox-group">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={responses[q.id] === "true"}
-                        onChange={(e) => handleResponseChange(q.id, e.target.checked ? "true" : "false")}
-                      />
-                      Yes
-                    </label>
-                  </div>
+                  options.length > 0 ? (
+                    <div className="checkbox-group multi">
+                      {options.map((opt) => {
+                        const selected = Array.isArray(responses[q.id]) ? (responses[q.id] as string[]) : [];
+                        const checked = selected.includes(opt);
+                        const toggle = () => {
+                          const current = Array.isArray(responses[q.id]) ? (responses[q.id] as string[]) : [];
+                          const next = checked ? current.filter((o) => o !== opt) : [...current, opt];
+                          handleResponseChange(q.id, next);
+                        };
+                        return (
+                          <label key={opt}>
+                            <input type="checkbox" checked={checked} onChange={toggle} />
+                            {opt}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="field-helper">No options provided.</p>
+                  )
                 )}
 
                 {normalizedType === "MULTIPLE_CHOICE" && (
