@@ -59,11 +59,18 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
           <>
             <ul className="navbar-links">
               {isLoggedIn && (
-                <li>
-                  <button onClick={handleLogout} className="logout-button">
-                    Logout
-                  </button>
-                </li>
+                <>
+                  <li>
+                    <Link href="/profile" className="profile-button">
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <button onClick={handleLogout} className="logout-button">
+                      Logout
+                    </button>
+                  </li>
+                </>
               )}
             </ul>
           </>
