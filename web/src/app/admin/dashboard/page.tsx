@@ -153,7 +153,8 @@ function DeleteUserTab({
   const filteredUsers = users.filter(user => 
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.uclaId?.toLowerCase().includes(searchTerm.toLowerCase())
+    user.uclaId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.id.toString().includes(searchTerm)
   );
 
   console.log("DeleteUserTab - Total users:", users.length);
@@ -300,14 +301,14 @@ export default function AdminDashboard() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("/api/users", {
+      const res = await fetch("/api/admin/users", {
         credentials: "include",
       });
-      console.log("Fetch users response status:", res.status);
+      // console.log("Fetch users response status:", res.status);
       if (res.ok) {
         const data = await res.json();
-        console.log("Users data received:", data);
-        console.log("Number of users:", data.users?.length);
+        // console.log("Users data received:", data);
+        // console.log("Number of users:", data.users?.length);
         setUsers(data.users || []);
       } else {
         console.error("Failed to fetch users, status:", res.status);
@@ -354,7 +355,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      const res = await fetch(`/api/users/${selectedUser.id}`, {
+      const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
         method: "DELETE",
         credentials: "include",
       });
