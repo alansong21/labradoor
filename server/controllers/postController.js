@@ -139,9 +139,43 @@ async function getAllPosts(req, res) {
     }
 }
 
+async function deletePost(req, res) {
+    const parsed = idParam.safeParse(req.params);
+    if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+
+    try {
+        const post = await prisma.post.findUnique({
+            where: { id: parsed.data.id },
+        });
+
+        if (!post) return res.status(404).json({ error: "Post not found" });
+        if (post.researcherId !== req.user.id) {
+            return res.status(403).json({ error: "Unauthorized" });
+        }
+
+        await prisma.$transaction(async tx => {
+            await tx.answer.deleteMany({
+                where: { application: { postId: parsed.data.id } },
+            });
+            await tx.question.deleteMany({
+                where: { postId: parsed.data.id },
+            });
+            await tx.application.deleteMany({
+                where: { postId: parsed.data.id },
+            });
+            await tx.post.delete({ where: { id: parsed.data.id } });
+        });
+        res.status(204).send();
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: "Failed to delete post" });
+    }
+}
+
 module.exports = {
     createPost,
     getMyPosts,
     getPost,
     getAllPosts,
+    deletePost,
 };
