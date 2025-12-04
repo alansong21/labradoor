@@ -1,3 +1,9 @@
+/**
+ * Landing / Home Page
+ * 
+ * If logged in: Displays a list of available lab openings (Student view) or dashboard (Researcher view).
+ * If logged out: Displays the landing page with role selection (Student vs Researcher).
+ */
 import Link from "next/link";
 import { getLabs } from "@/lib/labs";
 import Navbar from "./components/Navbar";
