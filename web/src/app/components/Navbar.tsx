@@ -16,9 +16,9 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:4000/api/auth/logout", {
-        method: "POST",
-      });
+      // await fetch("http://localhost:4000/api/auth/logout", {
+      //   method: "POST",
+      // });
       // We can also hit the Next.js API route if we had one proxying, but here we hit the backend directly.
       // Actually, since we are in the browser, we should use the relative path if we have a proxy setup,
       // OR use the full URL.
@@ -59,18 +59,11 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
           <>
             <ul className="navbar-links">
               {isLoggedIn && (
-                <>
-                  <li>
-                    <Link href="/profile" className="profile-button">
-                      Profile
-                    </Link>
-                  </li>
-                  <li>
-                    <button onClick={handleLogout} className="logout-button">
-                      Logout
-                    </button>
-                  </li>
-                </>
+                <li>
+                  <button onClick={handleLogout} className="logout-button">
+                    Logout
+                  </button>
+                </li>
               )}
             </ul>
           </>

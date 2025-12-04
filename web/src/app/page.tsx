@@ -12,7 +12,30 @@ export default async function Page() {
 
   if (isLoggedIn) {
     const labs = await getLabs();
-    return <LabList labs={labs} />;
+    
+    // Fetch user data to determine role
+    let userRole = null;
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const response = await fetch(`${baseUrl}/api/auth/me`, {
+        headers: {
+          Cookie: `session=${session.value}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user?.researcher) {
+          userRole = "RESEARCHER";
+        } else if (data.user?.student) {
+          userRole = "STUDENT";
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+    
+    return <LabList labs={labs} userRole={userRole} />;
   }
 
   return (
