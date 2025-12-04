@@ -5,15 +5,38 @@
  * Sends verification email upon success.
  */
 "use client";
-import { useState, Suspense } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "../components/Navbar";
 import "./signup.css";
 
+type StatusState = { tone: "success" | "error"; message: string } | null;
+
+const ROLE_COPY: Record<
+  "student" | "researcher",
+  { title: string; blurb: string; helper: string }
+> = {
+  student: {
+    title: "Student signup",
+    blurb: "Create an account to discover labs, build your profile, and track applications.",
+    helper: "Use your UCLA email so labs know you’re part of the community.",
+  },
+  researcher: {
+    title: "Researcher signup",
+    blurb: "Publish openings, manage applicants, and keep your lab presence up to date.",
+    helper: "Use your UCLA email so applicants can trust your lab is verified.",
+  },
+};
+
+const ROLE_TOGGLE = [
+  { label: "Student", value: "student" },
+  { label: "Researcher", value: "researcher" },
+];
+
 function SignupForm() {
   const searchParams = useSearchParams();
-  const role = searchParams.get("role") || "STUDENT";
+  const roleParam = (searchParams.get("role") || "student").toLowerCase() as "student" | "researcher";
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -21,8 +44,9 @@ function SignupForm() {
     name: "",
     uclaId: "",
   });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [status, setStatus] = useState<StatusState>(null);
+
+  const roleCopy = useMemo(() => ROLE_COPY[roleParam], [roleParam]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,11 +54,10 @@ function SignupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess(false);
+    setStatus(null);
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setStatus({ tone: "error", message: "Passwords do not match." });
       return;
     }
 
@@ -47,98 +70,130 @@ function SignupForm() {
           password: formData.password,
           name: formData.name,
           uclaId: formData.uclaId || undefined,
-          role: role.toUpperCase(),
+          role: roleParam.toUpperCase(),
         }),
       });
 
       if (res.ok) {
-        setSuccess(true);
-        setError("Account created! Please check your inbox for the verification email.");
+        setStatus({
+          tone: "success",
+          message: "Account created! Check your UCLA inbox for the verification email.",
+        });
       } else {
         const body = await res.json().catch(() => null);
-        setError(body?.error ? JSON.stringify(body.error) : "Signup failed.");
+        setStatus({
+          tone: "error",
+          message: body?.error ? JSON.stringify(body.error) : "Signup failed.",
+        });
       }
     } catch (err) {
-      setError("An unexpected error occurred.");
+      setStatus({ tone: "error", message: "An unexpected error occurred." });
     }
   };
 
   return (
     <>
       <Navbar isLoggedIn={false} hideAuthButtons={true} />
-      <div className="signup-page">
-        <div className="signup-container">
-          <h1 className="signup-title">Sign Up ({role})</h1>
+      <div className="auth-page">
+        <div className="auth-card">
+          <div className={`role-pill role-pill--${roleParam}`}>{roleCopy.title}</div>
+          <div className="auth-card__intro">
+            <h1>Join Labradoor.</h1>
+            <p>{roleCopy.blurb}</p>
+          </div>
+          <p className="auth-helper">{roleCopy.helper}</p>
 
-          <form onSubmit={handleSubmit} className="signup-form">
-            <div className="input-wrapper">
+          <div className="role-toggle" aria-label="Select role">
+            {ROLE_TOGGLE.map(({ label, value }) => (
+              <Link
+                key={value}
+                href={`/signup?role=${value}`}
+                className={`role-toggle__option ${value === roleParam ? "active" : ""}`}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <label className="auth-field">
+              <span className="auth-label">Full name</span>
               <input
                 type="text"
                 name="name"
-                placeholder="Full Name"
-                className="signup-input"
+                placeholder="First Last"
+                className="auth-input"
                 onChange={handleChange}
+                required
               />
-            </div>
+            </label>
 
-            <div className="input-wrapper">
+            <label className="auth-field">
+              <span className="auth-label">UCLA email</span>
               <input
                 type="email"
                 name="email"
-                placeholder="UCLA Email"
-                className="signup-input"
+                placeholder="you@ucla.edu"
+                className="auth-input"
                 required
                 onChange={handleChange}
               />
-            </div>
+            </label>
 
-            {role === "STUDENT" && (
-              <div className="input-wrapper">
+            {roleParam === "student" && (
+              <label className="auth-field">
+                <span className="auth-label">UCLA ID (UID)</span>
                 <input
                   type="text"
                   name="uclaId"
-                  placeholder="UCLA ID (UID)"
-                  className="signup-input"
+                  placeholder="000000000"
+                  className="auth-input"
                   onChange={handleChange}
                 />
-              </div>
+              </label>
             )}
 
-            <div className="input-wrapper">
+            <label className="auth-field">
+              <span className="auth-label">Password</span>
               <input
                 type="password"
                 name="password"
-                placeholder="Password"
-                className="signup-input"
+                placeholder="Create at least 8 characters"
+                className="auth-input"
                 minLength={8}
                 required
                 onChange={handleChange}
               />
-            </div>
+            </label>
 
-            <div className="input-wrapper">
+            <label className="auth-field">
+              <span className="auth-label">Confirm password</span>
               <input
                 type="password"
                 name="confirmPassword"
-                placeholder="Confirm Password"
-                className="signup-input"
+                placeholder="Re-enter password"
+                className="auth-input"
                 minLength={8}
                 required
                 onChange={handleChange}
               />
-            </div>
+            </label>
 
-            <button type="submit" className="signup-submit-button">
-              Sign Up
+            <button type="submit" className="auth-button primary">
+              Create account
             </button>
           </form>
 
-          {error && <p className={`status-message ${success ? "success" : "error"}`}>{error}</p>}
+          {status && (
+            <p className={`status-message status-${status.tone}`} role="status">
+              {status.message}
+            </p>
+          )}
 
-          <p className="login-prompt">
+          <p className="auth-footer">
             Already have an account?{" "}
-            <Link href="/login" className="login-link">
-              Log In
+            <Link href={`/login?role=${roleParam}`} className="auth-link">
+              Log in
             </Link>
           </p>
         </div>
