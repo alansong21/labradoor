@@ -3,6 +3,14 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../../../components/Navbar";
 import "./page.css";
 
+interface User {
+  id: number;
+  email: string;
+  name?: string | null;
+  student?: any;
+  researcher?: any;
+}
+
 interface Response {
   id: number;
   answer: string;
@@ -30,8 +38,20 @@ export default function PostApplicationsPage({
 }) {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
     fetch(`/api/applications/post/${params.id}`)
       .then((res) => res.json())
       .then((data) => {
@@ -48,7 +68,7 @@ export default function PostApplicationsPage({
 
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <div className="applications-page">
         <div className="container">
           <h1 className="page-title">Applications</h1>

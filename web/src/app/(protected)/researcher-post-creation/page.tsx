@@ -10,9 +10,17 @@
  * The state is managed locally and submitted to the /api/posts endpoint.
  */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./page.css";
 import Navbar from "../../components/Navbar";
+
+interface User {
+  id: number;
+  email: string;
+  name?: string | null;
+  student?: any;
+  researcher?: any;
+}
 
 interface FormEntry {
   id: string;
@@ -23,9 +31,23 @@ interface FormEntry {
 }
 
 const PostCreationPage: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [showEntryMenu, setShowEntryMenu] = useState(false);
   const [entries, setEntries] = useState<FormEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
   const addEntry = (type: "text" | "checkbox" | "multiple-choice") => {
     const needsOptions = type === "multiple-choice" || type === "checkbox";
@@ -172,7 +194,7 @@ const PostCreationPage: React.FC = () => {
 
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <div className="post-creation-page">
         <div className="post-creation-container">
           <h1 className="post-creation-title">Post Creation</h1>

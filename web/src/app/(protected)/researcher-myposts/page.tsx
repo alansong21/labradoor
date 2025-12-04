@@ -20,11 +20,31 @@ interface Post {
   };
 }
 
+interface User {
+  id: number;
+  email: string;
+  name?: string | null;
+  student?: any;
+  researcher?: any;
+}
+
 export default function MyPostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
     fetch("/api/posts/my-posts")
       .then((res) => res.json())
       .then((data) => {
@@ -41,7 +61,7 @@ export default function MyPostsPage() {
 
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <div className="my-posts-page">
         <div className="container">
           <div className="header">

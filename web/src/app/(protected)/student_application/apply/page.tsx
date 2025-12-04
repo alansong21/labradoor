@@ -10,6 +10,14 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import "./page.css";
 
+interface User {
+  id: number;
+  email: string;
+  name?: string | null;
+  student?: any;
+  researcher?: any;
+}
+
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "CHECKBOX" | "MULTIPLE_CHOICE";
 
 interface QuestionBody {
@@ -214,9 +222,24 @@ function ApplyForm() {
 }
 
 export default function ApplyPage() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
+
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <Suspense fallback={<div>Loading...</div>}>
         <ApplyForm />
       </Suspense>
