@@ -1,3 +1,8 @@
+/**
+ * Authentication routes.
+ * Handles user signup, login, logout, and session verification.
+ * Also handles admin authentication.
+ */
 const router = require('express').Router();
 const {
     requestSignup,

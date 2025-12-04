@@ -1,3 +1,7 @@
+/**
+ * Session Service
+ * Handles creation and deletion of user sessions in the database.
+ */
 const crypto = require("crypto");
 const prisma = require("../db/prisma");
 
@@ -20,7 +24,7 @@ async function createSession(userId) {
 }
 
 async function deleteSession(id) {
-  await prisma.session.delete({ where: { id } }).catch(() => {});
+  await prisma.session.delete({ where: { id } }).catch(() => { });
 }
 
 module.exports = { createSession, deleteSession };

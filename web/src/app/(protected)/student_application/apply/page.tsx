@@ -1,3 +1,9 @@
+/**
+ * Student Application Page
+ * Displays the application form for a specific lab post.
+ * Dynamically renders questions based on the post's configuration.
+ * Handles form submission to the backend.
+ */
 "use client";
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
