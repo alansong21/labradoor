@@ -1,3 +1,14 @@
+/**
+ * PostCreationPage Component
+ * 
+ * This component handles the creation of new research posts by researchers.
+ * It includes a dynamic form builder that allows researchers to:
+ * - Set post title and description
+ * - Add/remove tags
+ * - Add/remove/edit custom questions (Text, Checkbox, Multiple Choice)
+ * 
+ * The state is managed locally and submitted to the /api/posts endpoint.
+ */
 "use client";
 import React, { useState } from "react";
 import "./page.css";

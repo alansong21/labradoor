@@ -1,3 +1,8 @@
+/**
+ * Researcher Applications View
+ * Displays all applications received for a specific post.
+ * Shows applicant details and their responses to custom questions.
+ */
 "use client";
 import React, { useEffect, useState, use } from "react";
 import Navbar from "../../../../components/Navbar";
