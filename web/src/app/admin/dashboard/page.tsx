@@ -1,3 +1,8 @@
+/**
+ * Admin Dashboard
+ * Main interface for administrators.
+ * Allows viewing and managing researcher verification statuses.
+ */
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
