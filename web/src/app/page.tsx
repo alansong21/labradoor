@@ -20,7 +20,7 @@ export default async function Page() {
     const labs = await getLabs();
     
     // Fetch user data to determine role
-    let userRole = null;
+    let user = null;
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const response = await fetch(`${baseUrl}/api/auth/me`, {
@@ -31,22 +31,18 @@ export default async function Page() {
       
       if (response.ok) {
         const data = await response.json();
-        if (data.user?.researcher) {
-          userRole = "RESEARCHER";
-        } else if (data.user?.student) {
-          userRole = "STUDENT";
-        }
+        user = data.user;
       }
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
     
-    return <LabList labs={labs} userRole={userRole} />;
+    return <LabList labs={labs} user={user} />;
   }
 
   return (
     <>
-      <Navbar isLoggedIn={false} />
+      <Navbar user={null} />
       <main className="landing-page">
         <div className="hero-section">
           <h1 className="hero-title">Welcome to Labradoor</h1>

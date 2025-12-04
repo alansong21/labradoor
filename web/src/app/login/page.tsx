@@ -50,7 +50,7 @@ function LoginForm() {
 
   return (
     <>
-      <Navbar isLoggedIn={false} hideAuthButtons={true} />
+      <Navbar user={null} hideAuthButtons={true} />
       <div className="login-page">
         <div className="login-container">
           <h1 className="login-title">{getTitle()}</h1>

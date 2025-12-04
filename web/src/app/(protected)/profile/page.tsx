@@ -178,7 +178,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <>
-        <Navbar isLoggedIn={true} />
+        <Navbar user={null} />
         <div className="profile-page">
           <div className="profile-container">
             <div className="loading">Loading profile...</div>
@@ -191,7 +191,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <>
-        <Navbar isLoggedIn={true} />
+        <Navbar user={null} />
         <div className="profile-page">
           <div className="profile-container">
             <div className="error">Failed to load profile</div>
@@ -205,7 +205,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Navbar isLoggedIn={true} role={userRole.toUpperCase()} />
+      <Navbar user={user} />
       <div className="profile-page">
         <div className="profile-container">
           <div className="profile-header">
