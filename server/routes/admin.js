@@ -1,3 +1,8 @@
+/**
+ * Admin routes.
+ * Handles admin-specific actions like verifying researchers.
+ * Includes inline admin authentication middleware.
+ */
 const router = require('express').Router();
 const {
     getAllResearchers,
