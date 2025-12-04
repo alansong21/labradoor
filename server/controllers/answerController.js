@@ -1,7 +1,14 @@
+/**
+ * Answer Controller
+ * Handles CRUD operations for answers submitted to application questions.
+ * Ensures authorization checks so only applicants and researchers can access answers.
+ */
 const prisma = require("../db/prisma");
 const { z } = require("zod");
 
-const idParam = z.object({ id: z.coerce.number().int().positive() });
+const idParam = z.object({ id: z.coerce.number().int().positive() }); // id param validator
+
+// createAnswerSchema - validates create answer request, can have short_text, long_text, multiple_choice, checkbox
 
 const createAnswerSchema = z.object({
 	questionId: z.number().int().positive(),
@@ -9,6 +16,8 @@ const createAnswerSchema = z.object({
 	body: z.any(),
 	type: z.enum(["SHORT_TEXT", "LONG_TEXT", "MULTIPLE_CHOICE", "CHECKBOX"]).optional(),
 });
+
+// createAnswer - creates an answer by parsing the request body, checking if the user is authorized, and creating the answer in the database
 
 async function createAnswer(req, res) {
 	const parsed = createAnswerSchema.safeParse(req.body);
@@ -40,6 +49,8 @@ async function createAnswer(req, res) {
 	}
 }
 
+// getAnswer - gets an answer by parsing the request params, checking if the user is authorized, and getting the answer from the database
+
 async function getAnswer(req, res) {
 	const parsed = idParam.safeParse(req.params);
 	if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
@@ -59,6 +70,8 @@ async function getAnswer(req, res) {
 		res.status(500).json({ error: "Failed to fetch answer" });
 	}
 }
+
+// getApplicationAnswers - gets all answers for a specific application by parsing the request params, checking if the user is authorized, and getting the answers from the database
 
 async function getApplicationAnswers(req, res) {
 	const parsed = idParam.safeParse(req.params);
@@ -81,6 +94,8 @@ async function getApplicationAnswers(req, res) {
 	}
 }
 
+// updateAnswer - updates an answer by parsing the request params, checking if the user is authorized, and updating the answer in the database
+
 async function updateAnswer(req, res) {
 	const parsedParams = idParam.safeParse(req.params);
 	if (!parsedParams.success) return res.status(400).json({ error: "Invalid id" });
@@ -102,6 +117,8 @@ async function updateAnswer(req, res) {
 		res.status(500).json({ error: "Failed to update answer" });
 	}
 }
+
+// deleteAnswer - deletes an answer by parsing the request params, checking if the user is authorized, and deleting the answer from the database
 
 async function deleteAnswer(req, res) {
 	const parsed = idParam.safeParse(req.params);

@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+/**
+ * Delete User Script
+ * Utility to permanently delete a user and all related data (posts, sessions, tokens).
+ * Intended for development/maintenance use only.
+ * Usage: node scripts/deleteUser.js --email=<email> OR --id=<id>
+ */
 const readline = require("readline");
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
@@ -25,7 +31,7 @@ async function findUser({ email, id }) {
 }
 
 async function deleteUserAndRelated(userId) {
-    return prisma.$transaction([
+  return prisma.$transaction([
     prisma.post.deleteMany({ where: { researcherId: userId } }),
     prisma.session.deleteMany({ where: { userId } }),
     prisma.verificationToken.deleteMany({ where: { userId } }),
@@ -79,7 +85,7 @@ async function deleteUserAndRelated(userId) {
     process.exit(0);
   } catch (err) {
     console.error("Error:", err);
-    try { await prisma.$disconnect(); } catch (_) {}
+    try { await prisma.$disconnect(); } catch (_) { }
     process.exit(1);
   }
 })();

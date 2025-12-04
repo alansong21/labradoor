@@ -1,3 +1,8 @@
+/**
+ * Admin Login Page
+ * Separate login flow for system administrators.
+ * Uses a distinct admin session cookie.
+ */
 "use client";
 import { useState } from "react";
 import Link from "next/link";

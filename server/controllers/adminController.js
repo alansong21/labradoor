@@ -1,8 +1,15 @@
+/**
+ * Admin Controller
+ * Handles administrative actions such as fetching all researchers and updating their verification status.
+ */
 const { z } = require("zod");
 const prisma = require("../db/prisma");
 const { publicUser } = require("../utils/user");
 
 const idParamSchema = z.object({ id: z.coerce.number().int().positive() });
+
+//getAllResearchers - fetches researchers from the database
+
 
 async function getAllResearchers(req, res) {
   try {
@@ -39,6 +46,9 @@ async function getAllResearchers(req, res) {
 const updateVerificationSchema = z.object({
   verifyStatus: z.enum(["VERIFIED", "PENDING", "UNVERIFIED"]),
 });
+
+// updateResearcherVerification - update researcher verification status
+
 
 async function updateResearcherVerification(req, res) {
   const userId = parseInt(req.params.userId);

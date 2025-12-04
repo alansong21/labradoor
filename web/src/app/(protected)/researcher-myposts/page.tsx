@@ -1,3 +1,8 @@
+/**
+ * Researcher My Posts Page
+ * Displays a dashboard of posts created by the logged-in researcher.
+ * Shows application counts and links to view detailed applications.
+ */
 "use client";
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";

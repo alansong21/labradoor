@@ -1,3 +1,8 @@
+/**
+ * Token Service
+ * Handles generation, storage, and verification of tokens (e.g., for signup verification).
+ * Supports encoding metadata within the token string.
+ */
 const crypto = require("crypto");
 const prisma = require("../db/prisma");
 

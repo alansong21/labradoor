@@ -1,3 +1,9 @@
+/**
+ * Signup Page
+ * Handles new user registration.
+ * Supports both Student and Researcher roles based on query param.
+ * Sends verification email upon success.
+ */
 "use client";
 import { useState, Suspense } from "react";
 import Link from "next/link";
