@@ -13,6 +13,7 @@
 import React, { useState } from "react";
 import "./page.css";
 import Navbar from "../../components/Navbar";
+import { useUser } from "@/hooks/useUser";
 
 interface FormEntry {
   id: string;
@@ -23,6 +24,7 @@ interface FormEntry {
 }
 
 const PostCreationPage: React.FC = () => {
+  const { user } = useUser();
   const [showEntryMenu, setShowEntryMenu] = useState(false);
   const [entries, setEntries] = useState<FormEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
@@ -172,7 +174,7 @@ const PostCreationPage: React.FC = () => {
 
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <div className="post-creation-page">
         <div className="post-creation-container">
           <h1 className="post-creation-title">Post Creation</h1>

@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Link from "next/link";
+import { useUser } from "@/hooks/useUser";
 import "./page.css";
 
 interface Post {
@@ -21,6 +22,7 @@ interface Post {
 }
 
 export default function MyPostsPage() {
+  const { user } = useUser();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<number | null>(null);
@@ -42,7 +44,7 @@ export default function MyPostsPage() {
 
   return (
     <>
-      <Navbar isLoggedIn={true} />
+      <Navbar user={user} />
       <div className="my-posts-page">
         <div className="container">
           <div className="header">
