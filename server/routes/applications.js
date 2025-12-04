@@ -1,3 +1,7 @@
+/**
+ * Application routes.
+ * Handles submitting and retrieving applications for posts.
+ */
 const express = require("express");
 const router = express.Router();
 const { submitApplication, getPostApplications, getMyApplications } = require("../controllers/applicationController");

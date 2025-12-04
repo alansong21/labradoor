@@ -1,3 +1,8 @@
+/**
+ * User management routes.
+ * Handles listing, retrieving, updating, and deleting users.
+ * Protected by authentication middleware.
+ */
 const router = require("express").Router();
 const { authMiddleware } = require("../middleware/auth");
 const {

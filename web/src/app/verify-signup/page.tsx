@@ -1,3 +1,8 @@
+/**
+ * Verify Signup Page
+ * Handles the email verification step.
+ * Validates the token from the URL and activates the user account.
+ */
 "use client";
 import "./page.css";
 

@@ -1,3 +1,7 @@
+/**
+ * Password Service
+ * Handles secure password hashing and verification using scrypt.
+ */
 const crypto = require("crypto");
 
 const SALT_LENGTH_BYTES = 16;

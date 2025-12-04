@@ -1,3 +1,8 @@
+/**
+ * Login Page
+ * Handles user authentication (Student & Researcher).
+ * Redirects to appropriate dashboard upon success.
+ */
 "use client";
 import { useState, Suspense } from "react";
 import Link from "next/link";

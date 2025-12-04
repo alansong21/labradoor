@@ -1,3 +1,7 @@
+/**
+ * Prisma Client Instance
+ * Instantiates and exports a singleton PrismaClient to prevent multiple connections in development.
+ */
 const { PrismaClient } = require("../generated/prisma");
 
 let prisma;

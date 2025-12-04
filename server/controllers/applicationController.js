@@ -1,19 +1,26 @@
 const prisma = require("../db/prisma");
 const { z } = require("zod");
 
+// validationError - creates a validation error
+
 const validationError = message => {
     const err = new Error(message);
     err.isValidationError = true;
     return err;
 };
 
+// idParam - validates a route param containing { id }
+// postIdParam - validates a route param containing { postId }
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 const postIdParam = z.object({ postId: z.coerce.number().int().positive() });
 
+// answerSchema - validates an individual answer (questionId + answer value)
 const answerSchema = z.object({
     questionId: z.number().int().positive(),
     answer: z.any(),
 });
+
+// submitApplicationSchema - validates the request body for submitting an application
 
 const submitApplicationSchema = z.object({
     postId: z.number().int().positive(),
@@ -21,6 +28,7 @@ const submitApplicationSchema = z.object({
     responses: z.array(answerSchema).optional(),
 });
 
+// submitApplication - creates a new application for a post (postId) with validated responses
 async function submitApplication(req, res) {
     const parsed = submitApplicationSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -35,7 +43,7 @@ async function submitApplication(req, res) {
         if (!studentProfile) {
             return res.status(400).json({ error: "Complete your student profile before applying." });
         }
-        
+
         const existing = await prisma.application.findFirst({
             where: {
                 postId,
@@ -152,6 +160,7 @@ async function submitApplication(req, res) {
     }
 }
 
+// getPostApplications - gets all applications for a specific post by id
 async function getPostApplications(req, res) {
     const parsed = postIdParam.safeParse(req.params);
     if (!parsed.success) return res.status(400).json({ error: "Invalid post id" });
@@ -187,6 +196,7 @@ async function getPostApplications(req, res) {
     }
 }
 
+// getMyApplications - gets all applications for a specific student by id
 async function getMyApplications(req, res) {
     try {
         const applications = await prisma.application.findMany({
@@ -205,6 +215,7 @@ async function getMyApplications(req, res) {
     }
 }
 
+// getApplication - gets a specific application by id
 async function getApplication(req, res) {
     const parsed = idParam.safeParse(req.params);
     if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
@@ -235,6 +246,7 @@ async function getApplication(req, res) {
     }
 }
 
+// updateApplication - updates a specific application by id
 async function updateApplication(req, res) {
     const parsedParams = idParam.safeParse(req.params);
     if (!parsedParams.success) return res.status(400).json({ error: "Invalid id" });
@@ -268,6 +280,7 @@ async function updateApplication(req, res) {
     }
 }
 
+// deleteApplication - deletes a specific application by id
 async function deleteApplication(req, res) {
     const parsed = idParam.safeParse(req.params);
     if (!parsed.success) return res.status(400).json({ error: "Invalid id" });

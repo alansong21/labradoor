@@ -1,3 +1,7 @@
+/**
+ * Root Layout
+ * Defines the global HTML structure and font settings for the application.
+ */
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./page.css";

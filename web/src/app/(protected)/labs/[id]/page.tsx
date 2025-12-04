@@ -1,3 +1,8 @@
+/**
+ * Lab Detail Page
+ * Displays public information about a specific lab/post.
+ * Includes a link to the application form.
+ */
 import { getLab } from "@/lib/labs";
 import "./page.css";
 
