@@ -23,8 +23,9 @@ export async function getLabs() {
     return posts.map((p: any) => ({
       id: p.id.toString(),
       name: p.title,
-      desc: p.content,
-      details: [`Posted by ${p.author?.name || "Unknown"}`], // We can add more details if we want
+      desc: p.body,
+      details: [`Posted by ${p.researcher?.user?.name || "Unknown"}`], // We can add more details if we want
+      tags: p.tags || [],
     }));
   } catch (error) {
     console.error("Failed to fetch labs:", error);
@@ -41,9 +42,10 @@ export async function getLab(id: string) {
     return {
       id: p.id.toString(),
       name: p.title,
-      desc: p.content,
-      details: [`Posted by ${p.author?.name || "Unknown"}`],
-      questions: p.questions
+      desc: p.body,
+      details: [`Posted by ${p.researcher?.user?.name || "Unknown"}`],
+      questions: p.questions,
+      tags: p.tags || [],
     };
   } catch (error) {
     console.error("Failed to fetch lab:", error);

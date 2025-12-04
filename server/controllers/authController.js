@@ -14,6 +14,7 @@ const signupSchema = z.object({
   password: z.string().min(8),
   name: z.string().min(1).optional(),
   uclaId: z.string().min(7).optional(),
+  role: z.enum(["STUDENT", "RESEARCHER"]),
 });
 
 const tokenSchema = z.object({
@@ -29,7 +30,7 @@ async function requestSignup(req, res) {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const { email, name, uclaId, password } = parsed.data;
+  const { email, name, uclaId, password, role } = parsed.data;
   const passwordHash = await hashPassword(password);
   const baseData = {
     name: name ?? null,
@@ -61,7 +62,11 @@ async function requestSignup(req, res) {
     });
   }
 
-  const rawToken = await createVerificationToken({ userId: user.id, type: "SIGNUP" });
+  const rawToken = await createVerificationToken({
+    userId: user.id,
+    type: "SIGNUP",
+    metadata: { role },
+  });
   const url = `${process.env.APP_BASE_URL ?? "http://localhost:3000"}/verify-signup?token=${rawToken}`;
   sendVerificationLink({ email, url, type: "SIGNUP" });
 
@@ -72,16 +77,45 @@ async function verifySignup(req, res) {
   const parsed = tokenSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Token required" });
 
-  let token;
+  let tokenPayload;
   try {
-    token = await consumeVerificationToken(parsed.data.token, "SIGNUP");
+    tokenPayload = await consumeVerificationToken(parsed.data.token, "SIGNUP");
   } catch (err) {
     return res.status(400).json({ error: err.message });
   }
 
-  await prisma.user.update({
-    where: { id: token.userId },
-    data: { emailVerifiedAt: new Date() },
+  const { token, metadata } = tokenPayload;
+  const intendedRole = metadata?.role === "RESEARCHER" ? "RESEARCHER" : "STUDENT";
+
+  await prisma.$transaction(async tx => {
+    await tx.user.update({
+      where: { id: token.userId },
+      data: { emailVerifiedAt: new Date() },
+    });
+
+    if (intendedRole === "RESEARCHER") {
+      await tx.researcher.upsert({
+        where: { userId: token.userId },
+        update: {},
+        create: {
+          userId: token.userId,
+          verifyStatus: "PENDING",
+          department: "Unspecified",
+        },
+      });
+      return;
+    }
+
+    await tx.student.upsert({
+      where: { userId: token.userId },
+      update: {},
+      create: {
+        userId: token.userId,
+        year: "Unspecified",
+        major: "Undeclared",
+        description: null,
+      },
+    });
   });
 
   return res.json({ message: "Email verified. You can now log in." });
@@ -124,10 +158,68 @@ async function logout(req, res) {
   res.clearCookie(SESSION_COOKIE).json({ ok: true });
 }
 
+const adminLoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+async function adminLogin(req, res) {
+  const parsed = adminLoginSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const admin = await prisma.admin.findUnique({ where: { email: parsed.data.email } });
+  if (!admin) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+
+  const passwordValid = await verifyPassword(parsed.data.password, admin.passwordHash);
+  if (!passwordValid) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+
+  const adminToken = Buffer.from(JSON.stringify({ email: admin.email, timestamp: Date.now() })).toString('base64');
+
+  res
+    .cookie('admin_session', adminToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000, 
+    })
+    .json({ admin: { email: admin.email } });
+}
+
+async function adminVerify(req, res) {
+  const adminToken = req.cookies?.admin_session;
+  if (!adminToken) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  try {
+    const decoded = JSON.parse(Buffer.from(adminToken, 'base64').toString());
+    const admin = await prisma.admin.findUnique({ where: { email: decoded.email } });
+    
+    if (!admin) {
+      return res.status(401).json({ error: "Invalid session" });
+    }
+
+    res.json({ admin: { email: admin.email } });
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid session" });
+  }
+}
+
+async function adminLogout(req, res) {
+  res.clearCookie('admin_session').json({ ok: true });
+}
+
 module.exports = {
   requestSignup,
   verifySignup,
   login,
   getMe,
   logout,
+  adminLogin,
+  adminVerify,
+  adminLogout,
 };

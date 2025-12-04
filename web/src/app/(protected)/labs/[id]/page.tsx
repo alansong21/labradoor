@@ -2,12 +2,12 @@ import { getLab } from "@/lib/labs";
 import "./page.css";
 
 type LabDetailProps = {
-  params: { id: string }; // Next.js will always provide this
+  params: Promise<{ id: string }>;
 };
 
 export default async function LabDetail({ params }: LabDetailProps) {
-  // Use params.id directly
-  const lab = await getLab(params.id);
+  const { id } = await params;
+  const lab = await getLab(id);
 
   if (!lab) return <div>Lab not found.</div>;
 

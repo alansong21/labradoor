@@ -9,7 +9,6 @@ interface Post {
   title: string;
   content: string;
   createdAt: string;
-  tags?: string[];
   _count: {
     applications: number;
   };
@@ -64,15 +63,6 @@ export default function MyPostsPage() {
                     <p className="post-date">
                       Posted on {new Date(post.createdAt).toLocaleDateString()}
                     </p>
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="post-tags">
-                        {post.tags.map((tag) => (
-                          <span key={tag} className="post-tag">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                     <p className="post-desc">{post.content}</p>
                   </div>
                   <div className="post-footer">

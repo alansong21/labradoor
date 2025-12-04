@@ -10,31 +10,39 @@ async function main() {
     data: {
       email: `test+${Date.now()}@example.com`,
       name: 'Test User',
-      role: 'USER'
-    }
+      passwordHash: 'insecure-test-hash',
+    },
   });
   console.log('Created user:', { id: user.id, email: user.email });
 
-  // create a post for that user (updatedAt is required by schema)
+  // create a researcher record for that user (required by Post.researcherId relation)
+  const researcher = await prisma.researcher.create({
+    data: {
+      userId: user.id,
+      verifyStatus: 'VERIFIED',
+      department: 'Test Dept',
+    },
+  });
+  console.log('Created researcher:', { userId: researcher.userId });
+
+  // create a post for that researcher
   const post = await prisma.post.create({
     data: {
       title: 'Hello Prisma',
-      published: true,
-      updatedAt: new Date(),
-      authorId: user.id
-    }
+      body: 'This is a test post body',
+      researcherId: researcher.userId,
+      tags: [],
+    },
   });
-  console.log('Created post:', { id: post.id, title: post.title, authorId: post.authorId });
+  console.log('Created post:', { id: post.id, title: post.title, researcherId: post.researcherId });
 
-  // query
-  const usersWithPosts = await prisma.user.findMany({
-    include: { Post: true }
-  });
-  console.log('Users with posts:', JSON.stringify(usersWithPosts, null, 2));
+  // query: fetch posts with researcher
+  const posts = await prisma.post.findMany({ include: { researcher: { include: { user: true } } } });
+  console.log('Posts with researcher:', JSON.stringify(posts, null, 2));
 }
 
 main()
-  .catch(e => {
+  .catch((e) => {
     console.error('Error:', e);
     process.exitCode = 1;
   })

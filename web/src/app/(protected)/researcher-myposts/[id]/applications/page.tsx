@@ -1,38 +1,47 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import Navbar from "../../../../components/Navbar";
 import "./page.css";
 
-interface Response {
+type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "MULTIPLE_CHOICE" | "CHECKBOX";
+
+interface AnswerPayload {
   id: number;
-  answer: string;
+  type: QuestionType | string;
+  body: {
+    value: any;
+  };
   question: {
-    question: string;
-    type: string;
+    body?: {
+      prompt?: string;
+    } | null;
   };
 }
 
 interface Application {
   id: number;
   createdAt: string;
-  applicant: {
-    name: string;
-    email: string;
-    uclaId: string;
+  student?: {
+    user?: {
+      name?: string | null;
+      email: string;
+      uclaId?: string | null;
+    };
   };
-  responses: Response[];
+  answers: AnswerPayload[];
 }
 
 export default function PostApplicationsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = use(params);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/applications/post/${params.id}`)
+    fetch(`/api/applications/post/${id}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -44,7 +53,7 @@ export default function PostApplicationsPage({
         console.error(err);
         setLoading(false);
       });
-  }, [params.id]);
+  }, [id]);
 
   return (
     <>
@@ -61,32 +70,45 @@ export default function PostApplicationsPage({
             </div>
           ) : (
             <div className="applications-list">
-              {applications.map((app) => (
-                <div key={app.id} className="application-card">
-                  <div className="applicant-info">
-                    <h2>{app.applicant.name || "Unknown Name"}</h2>
-                    <p className="applicant-email">{app.applicant.email}</p>
-                    {app.applicant.uclaId && (
-                      <p className="applicant-id">UID: {app.applicant.uclaId}</p>
-                    )}
-                    <p className="applied-date">
-                      Applied on {new Date(app.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
+              {applications.map((app) => {
+                const applicant = app.student?.user;
 
-                  <div className="responses-section">
-                    <h3>Responses</h3>
-                    {app.responses.map((response) => (
-                      <div key={response.id} className="response-item">
-                        <p className="question-text">
-                          {response.question.question}
-                        </p>
-                        <p className="answer-text">{response.answer}</p>
-                      </div>
-                    ))}
+                return (
+                  <div key={app.id} className="application-card">
+                    <div className="applicant-info">
+                      <h2>{applicant?.name || "Unknown Name"}</h2>
+                      <p className="applicant-email">{applicant?.email ?? "No email"}</p>
+                      {applicant?.uclaId && (
+                        <p className="applicant-id">UID: {applicant.uclaId}</p>
+                      )}
+                      <p className="applied-date">
+                        Applied on {new Date(app.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+
+                    <div className="responses-section">
+                      <h3>Responses</h3>
+                      {app.answers.length === 0 && (
+                        <p className="empty-responses">No responses submitted.</p>
+                      )}
+                      {app.answers.map((answer) => (
+                        <div key={answer.id} className="response-item">
+                          <p className="question-text">
+                            {answer.question?.body && typeof answer.question.body === "object"
+                              ? answer.question.body.prompt ?? "Question"
+                              : "Question"}
+                          </p>
+                          <p className="answer-text">
+                            {typeof answer.body?.value === "boolean"
+                              ? answer.body.value ? "Yes" : "No"
+                              : String(answer.body?.value ?? "")}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

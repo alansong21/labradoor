@@ -1,3 +1,7 @@
+* {
+  color: black
+}
+
 .apply-page {
   width: 100%;
   min-height: 100vh;
@@ -78,15 +82,43 @@
   margin: 0 0 34px 0;
 }
 
+.submit-button {
+  width: 260px;
+  height: 70px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.submit-button:hover {
+  background: #333;
+}
+
+.submit-button:active {
+  transform: scale(0.97);
+}
+
+.submit-button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
 .upload-button {
-  width: 258px;
-  height: 83px;
+  width: 200px;
+  height: 70px;
   background: #D9D9D9;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s;
+  color: black;
 }
 
 .upload-button:hover {
