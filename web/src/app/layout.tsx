@@ -32,6 +32,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
+        <div className="floating-blob blob-left" aria-hidden="true" />
+        <div className="floating-blob blob-right" aria-hidden="true" />
         {children}
         <Footer />
       </body>

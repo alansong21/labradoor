@@ -104,6 +104,10 @@ function SignupForm() {
           <p className="auth-helper">{roleCopy.helper}</p>
 
           <div className="role-toggle" aria-label="Select role">
+            <span
+              className={`role-toggle__indicator role-toggle__indicator--${roleParam}`}
+              aria-hidden="true"
+            />
             {ROLE_TOGGLE.map(({ label, value }) => (
               <Link
                 key={value}
