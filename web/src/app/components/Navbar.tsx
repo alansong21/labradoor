@@ -46,11 +46,6 @@ export default function Navbar({ user, hideAuthButtons = false }: NavbarProps) {
         <a href="/" className="navbar-brand">
           LABRADOOR
         </a>
-        {user && (
-          <p style={{ margin: "0.5rem 0 0 0", color: "#666" }}>
-            Logged in as: {user.email}
-          </p>
-        )}
       </div>
       <div className="navbar-right">
         {!hideAuthButtons && (
@@ -65,7 +60,7 @@ export default function Navbar({ user, hideAuthButtons = false }: NavbarProps) {
                 <>
                   <li>
                     <a href="/profile" className="profile-button">
-                      Profile
+                      {user.name || "Profile"}
                     </a>
                   </li>
                   <li>
