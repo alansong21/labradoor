@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { authMiddleware } = require("../middleware/auth");
+const { authMiddleware, requireRole } = require("../middleware/auth");
 const {
   createQuestion,
   getQuestion,
@@ -15,8 +15,8 @@ router.get("/:id", getQuestion);
 router.get("/post/:postId", getPostQuestions);
 
 // Protected: create/update/delete
-router.post("/", authMiddleware, createQuestion);
-router.patch("/:id", authMiddleware, updateQuestion);
-router.delete("/:id", authMiddleware, deleteQuestion);
+router.post("/", authMiddleware, requireRole("RESEARCHER"), createQuestion);
+router.patch("/:id", authMiddleware, requireRole("RESEARCHER"), updateQuestion);
+router.delete("/:id", authMiddleware, requireRole("RESEARCHER"), deleteQuestion);
 
 module.exports = router;
