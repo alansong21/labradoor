@@ -35,7 +35,7 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <a href="/" className="navbar-brand">
+        <Link href="/" className="navbar-brand" prefetch={true}>
           {logoFailed ? (
             <span style={{ fontWeight: "bold", fontSize: "1.5rem", color: "black" }}>
               LABRADOOR
@@ -47,6 +47,7 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
               width={120}
               height={40}
               priority
+              loading="eager"
               style={{ height: "auto", width: "auto", objectFit: "contain" }}
               onError={(e: SyntheticEvent<HTMLImageElement, Event>) => {
                 // Hide broken image and switch to text fallback
@@ -55,16 +56,16 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
               }}
             />
           )}
-        </a>
+        </Link>
         <ul className="navbar-links">
           {role === "STUDENT" && (
             <li>
-              <a href="/my-applications">My Applications</a>
+              <Link href="/my-applications" prefetch={true}>My Applications</Link>
             </li>
           )}
           {role === "RESEARCHER" && (
             <li>
-              <a href="/researcher-myposts">My Posts</a>
+              <Link href="/researcher-myposts" prefetch={true}>My Posts</Link>
             </li>
           )}
         </ul>
@@ -76,9 +77,9 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
               {isLoggedIn && (
                 <>
                   <li>
-                    <a href="/profile" className="profile-button">
+                    <Link href="/profile" prefetch={true} className="profile-button">
                       Profile
-                    </a>
+                    </Link>
                   </li>
                   <li>
                     <button onClick={handleLogout} className="logout-button">

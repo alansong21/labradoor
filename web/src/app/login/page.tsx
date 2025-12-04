@@ -8,6 +8,7 @@ import { Suspense, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "../components/Navbar";
+import Loading from "../components/Loading";
 import "./login.css";
 
 type ToastState = { id: number; tone: "success" | "error" | "loading"; message: string } | null;
@@ -118,6 +119,7 @@ function LoginForm() {
               <Link
                 key={value}
                 href={`/login?role=${value}`}
+                prefetch={true}
                 className={`role-toggle__option ${value === roleParam ? "active" : ""}`}
               >
                 {label}
@@ -178,9 +180,9 @@ function LoginForm() {
             </button>
           </form>
 
-          <p className="auth-footer">
+                  <p className="auth-footer">
             Don&apos;t have an account yet?{" "}
-            <Link href={`/signup?role=${roleParam}`} className="auth-link">
+            <Link href={`/signup?role=${roleParam}`} prefetch={true} className="auth-link">
               Create an account
             </Link>
           </p>

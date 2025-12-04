@@ -122,19 +122,22 @@ describe('Performance Benchmarking', () => {
       // Log request info
       cy.log(`Login API request intercepted: ${interception.request.url}`)
       
-      // Check if response exists and has status
-      if (interception.response && typeof interception.response.status === 'number') {
-        const status = interception.response.status
-        const responseTime = interception.response.headers?.['x-response-time'] 
-          ? parseInt(interception.response.headers['x-response-time'] as string)
+      // Check if response exists - Cypress uses statusCode property
+      const response = interception.response as any
+      if (response && (response.statusCode !== undefined || response.status !== undefined)) {
+        const status = response.statusCode || response.status
+        const responseTime = response.headers?.['x-response-time'] 
+          ? parseInt(response.headers['x-response-time'] as string)
           : 0
         
         cy.log(`[OPTIMIZED] Login API response time: ${responseTime}ms`)
         cy.log(`[OPTIMIZED] Login API status: ${status}`)
         cy.task('log', `OPTIMIZED - Login API: ${responseTime}ms (status: ${status})`)
         
-        // Verify login was successful
-        expect(status).to.equal(200)
+        // Verify login was successful if we have a valid status
+        if (typeof status === 'number') {
+          expect(status).to.equal(200)
+        }
       } else {
         // Response not available yet, but request was intercepted
         cy.log('Login API request intercepted (response not yet available)')

@@ -23,6 +23,7 @@ export default function Footer() {
                 href={`https://github.com/${dev.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                prefetch={false}
                 className="text-slate-500 transition-colors duration-200 hover:text-slate-800"
               >
                 {dev.name}

@@ -14,11 +14,12 @@ const getApiUrl = () => {
 export async function getLabs() {
   try {
     const apiUrl = getApiUrl();
-    // Use revalidate for better caching in production
-    const res = await fetch(`${apiUrl}/api/posts`, {
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
-      cache: "no-store", // Keep no-store for development
-    });
+    // Optimize caching: use revalidate in production, no-store in development
+    const cacheOption = process.env.NODE_ENV === 'production' 
+      ? { next: { revalidate: 60 } } // Revalidate every 60 seconds in production
+      : { cache: "no-store" as RequestCache }; // Always fresh in development
+    
+    const res = await fetch(`${apiUrl}/api/posts`, cacheOption);
     if (!res.ok) return [];
 
     const posts = await res.json();
@@ -39,7 +40,12 @@ export async function getLabs() {
 export async function getLab(id: string) {
   try {
     const apiUrl = getApiUrl();
-    const res = await fetch(`${apiUrl}/api/posts/${id}`, { cache: "no-store" });
+    // Optimize caching: use revalidate in production, no-store in development
+    const cacheOption = process.env.NODE_ENV === 'production'
+      ? { next: { revalidate: 300 } } // Revalidate every 5 minutes in production
+      : { cache: "no-store" as RequestCache }; // Always fresh in development
+    
+    const res = await fetch(`${apiUrl}/api/posts/${id}`, cacheOption);
     if (!res.ok) return null;
 
     const p = await res.json();

@@ -137,7 +137,11 @@ export default function LabList({ labs, userRole }: Props) {
                   <li key={line}>{line}</li>
                 ))}
               </ul>
-              <Link href={`/labs/${lab.id}`} className="learn-more">
+              <Link 
+                href={`/labs/${lab.id}`} 
+                className="learn-more"
+                prefetch={true}
+              >
                 Learn More
               </Link>
             </div>

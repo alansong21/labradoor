@@ -1,10 +1,20 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import Navbar from "./components/Navbar";
+import dynamic from "next/dynamic";
 import Loading from "./components/Loading";
 import { cookies } from "next/headers";
 import { getLabs } from "@/lib/labs";
-import LabList from "./components/LabList";
+
+// Lazy load components - reduce initial bundle size
+const Navbar = dynamic(() => import("./components/Navbar"), {
+  ssr: true, // Navbar is above the fold, keep SSR
+});
+
+// Lazy load LabList component - only loads when user is logged in
+const LabList = dynamic(() => import("./components/LabList"), {
+  loading: () => <Loading fullPage message="Loading labs..." />,
+  ssr: true, // Enable SSR for better initial load
+});
 
 export default async function Page() {
   const cookieStore = await cookies();
@@ -18,13 +28,18 @@ export default async function Page() {
       process.env.API_URL ||
       "http://localhost:4000";
 
+    // Parallel fetch with optimized caching
+    const cacheOption = process.env.NODE_ENV === 'production' 
+      ? { next: { revalidate: 300 } } // Revalidate every 5 minutes in production
+      : { cache: "no-store" as RequestCache }; // Always fresh in development
+    
     const [labs, userData] = await Promise.allSettled([
       getLabs(),
       fetch(`${baseUrl}/api/auth/me`, {
         headers: {
           Cookie: `session=${session.value}`,
         },
-        cache: "no-store",
+        ...cacheOption,
       }).then((res) => (res.ok ? res.json() : null)).catch(() => null),
     ]);
 
@@ -79,12 +94,14 @@ export default async function Page() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/signup?role=student"
+                  prefetch={true}
                   className="inline-flex items-center justify-center rounded-full bg-[#2563eb] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1e40af] btn-blue-glow"
                 >
                   Join as Student
                 </Link>
                 <Link
                   href="/login?role=student"
+                  prefetch={true}
                   className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
                   Login
@@ -104,12 +121,14 @@ export default async function Page() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/signup?role=researcher"
+                  prefetch={true}
                   className="inline-flex items-center justify-center rounded-full bg-[#2563eb] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1e40af] btn-blue-glow"
                 >
                   Join as Researcher
                 </Link>
                 <Link
                   href="/login?role=researcher"
+                  prefetch={true}
                   className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
                   Login

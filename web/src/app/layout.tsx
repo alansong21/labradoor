@@ -4,8 +4,14 @@
  */
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import "./globals.css";
-import Footer from "./components/Footer";
+
+// Lazy load Footer - not critical for initial render
+const Footer = dynamic(() => import("./components/Footer"), {
+  ssr: true,
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +30,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Labradoor",
   description: "A platform to connect UCLA students with research labs",
+  // Performance optimizations
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+  },
+  // Resource hints for better performance
+  other: {
+    "dns-prefetch": "//fonts.googleapis.com",
+  },
 };
 
 export default function RootLayout({
@@ -39,7 +55,9 @@ export default function RootLayout({
         <div className="floating-blob blob-left" aria-hidden="true" />
         <div className="floating-blob blob-right" aria-hidden="true" />
         {children}
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </body>
     </html>
   );
