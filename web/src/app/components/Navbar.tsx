@@ -21,14 +21,10 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:4000/api/auth/logout", {
-        method: "POST",
-      });
-         
       await fetch("/api/auth/logout", { method: "POST" });
       
-      router.refresh(); // Refresh the current route to update server components
-      router.push("/"); // Redirect to landing page
+      router.refresh();
+      router.push("/");
     } catch (error) {
       console.error("Logout failed", error);
     }
