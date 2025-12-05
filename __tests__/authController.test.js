@@ -59,11 +59,20 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 describe("Auth Controller Tests", () => {
+    // Suppress console.error during tests
+    let consoleErrorSpy;
+
     beforeEach(() => {
         jest.clearAllMocks();
         process.env.APP_BASE_URL = "http://localhost:3000";
+        // Mock console.error to suppress error outputs
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
+    afterEach(() => {
+        // Restore console.error after each test
+        consoleErrorSpy.mockRestore();
+    });
     describe("POST /api/auth/signup - requestSignup", () => {
         it("should successfully create a new user and send verification email", async () => {
             const signupData = {
