@@ -1,92 +1,112 @@
-/**
- * Landing / Home Page
- * 
- * If logged in: Displays a list of available lab openings (Student view) or dashboard (Researcher view).
- * If logged out: Displays the landing page with role selection (Student vs Researcher).
- */
-import Link from "next/link";
-import Navbar from "./components/Navbar";
-import "./landing.css";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
+import Loading from "./components/Loading";
 import { cookies } from "next/headers";
 import { getLabs } from "@/lib/labs";
-import LabList from "./components/LabList";
+import HomePageButtons from "./components/HomePageButtons";
+
+// Lazy load components - reduce initial bundle size
+const Navbar = dynamic(() => import("./components/Navbar"), {
+  ssr: true, // Navbar is above the fold, keep SSR
+});
+
+// Lazy load LabList component - only loads when user is logged in
+const LabList = dynamic(() => import("./components/LabList"), {
+  loading: () => <Loading fullPage />,
+  ssr: true, // Enable SSR for better initial load
+});
 
 export default async function Page() {
   const cookieStore = await cookies();
   const session = cookieStore.get("session");
   const isLoggedIn = !!session;
 
-  if (isLoggedIn) {
-    const labs = await getLabs();
+  if (isLoggedIn && session?.value) {
+    // Parallel fetch for better performance
+    const baseUrl =
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.API_URL ||
+      "http://localhost:4000";
+
+    // Parallel fetch with optimized caching
+    const cacheOption = process.env.NODE_ENV === 'production' 
+      ? { next: { revalidate: 300 } } // Revalidate every 5 minutes in production
+      : { cache: "no-store" as RequestCache }; // Always fresh in development
     
-    // Fetch user data to determine role
-    let user = null;
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const response = await fetch(`${baseUrl}/api/auth/me`, {
+    const [labs, userData] = await Promise.allSettled([
+      getLabs(),
+      fetch(`${baseUrl}/api/auth/me`, {
         headers: {
           Cookie: `session=${session.value}`,
         },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        user = data.user;
+        ...cacheOption,
+      }).then((res) => (res.ok ? res.json() : null)).catch(() => null),
+    ]);
+
+    let userRole: "RESEARCHER" | "STUDENT" | null = null;
+    const labsData = labs.status === "fulfilled" ? labs.value : [];
+
+    if (userData.status === "fulfilled" && userData.value) {
+      const data = userData.value;
+      if (data.user?.researcher) {
+        userRole = "RESEARCHER";
+      } else if (data.user?.student) {
+        userRole = "STUDENT";
       }
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
     }
-    
-    return <LabList labs={labs} user={user} />;
+
+    return (
+      <Suspense fallback={<Loading fullPage />}>
+        <LabList labs={labsData} userRole={userRole} />
+      </Suspense>
+    );
   }
 
   return (
     <>
-      <Navbar user={null} />
-      <main className="landing-page">
-        <div className="hero-section">
-          <h1 className="hero-title">Welcome to Labradoor</h1>
-          <p className="hero-subtitle">Connect with research opportunities at UCLA</p>
+      <Navbar isLoggedIn={false} />
 
-          <div className="role-selection-container">
-            <div className="role-card student-card">
-              <h2>I am a Student</h2>
-              <p>
-                Find research labs, apply for positions, and track your
-                applications.
+      <main className="min-h-screen">
+        <section className="relative mx-auto flex max-w-5xl flex-col items-center px-4 pb-16 pt-12 sm:pt-16">
+          <div className="hero-glow" />
+          <div className="text-center relative z-10">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              Match UCLA students with{" "}
+              <span className="gradient-text">research labs</span>
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
+              A centralized platform where labs post standardized openings and
+              students discover, filter, and apply in one place.
+            </p>
+          </div>
+
+            {/* Role cards */}
+          <div className="relative z-10 mt-10 grid w-full gap-6 sm:grid-cols-2">
+            {/* Student card */}
+            <div className="flex flex-col rounded-2xl border border-white/50 bg-white/65 backdrop-blur-xl shadow-lg shadow-slate-200/20 p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-200/30 hover:bg-white/75 hover:border-white/60">
+              <h2 className="text-lg font-semibold text-slate-900">
+                I am a Student
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Browse open lab positions across UCLA, start applications, and
+                track your status from one dashboard.
               </p>
-              <div className="role-actions">
-                <Link href="/signup?role=student" className="role-button primary">
-                  Join as Student
-                </Link>
-                <Link href="/login?role=student" className="role-button secondary">
-                  Login
-                </Link>
-              </div>
+              <HomePageButtons role="student" />
             </div>
 
-            <div className="role-card researcher-card">
-              <h2>I am a Researcher</h2>
-              <p>
-                Post open positions, review applicants, and manage your lab page.
+            {/* Researcher card */}
+            <div className="flex flex-col rounded-2xl border border-white/50 bg-white/65 backdrop-blur-xl shadow-lg shadow-slate-200/20 p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-200/30 hover:bg-white/75 hover:border-white/60">
+              <h2 className="text-lg font-semibold text-slate-900">
+                I am a Researcher
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Post openings, review applicants, and manage your lab&apos;s
+                presence on campus in a single workspace.
               </p>
-              <div className="role-actions">
-                <Link
-                  href="/signup?role=researcher"
-                  className="role-button primary"
-                >
-                  Join as Researcher
-                </Link>
-                <Link
-                  href="/login?role=researcher"
-                  className="role-button secondary"
-                >
-                  Login
-                </Link>
-              </div>
+              <HomePageButtons role="researcher" />
             </div>
           </div>
-        </div>
+        </section>
       </main>
     </>
   );
