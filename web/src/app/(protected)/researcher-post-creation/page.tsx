@@ -189,7 +189,7 @@ const PostCreationPage: React.FC = () => {
         setToast({ id: Date.now(), tone: "success", message: "Post saved successfully!" });
         // Navigate after a brief delay to show success message
         setTimeout(() => {
-          window.location.href = "/researcher-myposts";
+        window.location.href = "/my-posts";
         }, 1000);
       } else {
         const body = await res.json();
@@ -209,7 +209,7 @@ const PostCreationPage: React.FC = () => {
       <div className="post-creation-page">
         <div className="post-creation-container">
           <Link 
-            href="/researcher-myposts" 
+            href="/my-posts" 
             className="back-button"
             onClick={() => {
               setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
