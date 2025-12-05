@@ -19,6 +19,20 @@ const updateSchema = z.object({
     uclaId: z.string().length(9).or(z.literal("")).optional(),
 });
 
+// updateProfileSchema – validates all fields for unified profile update
+const updateProfileSchema = z.object({
+    // Base user fields
+    name: z.string().min(1).optional(),
+    email: z.string().email().regex(UCLA_EMAIL_REGEX).optional(),
+    uclaId: z.string().length(9).or(z.literal("")).optional(),
+    // Student fields
+    year: z.string().min(1).optional(),
+    major: z.string().min(1).optional(),
+    description: z.string().optional(),
+    // Researcher fields
+    department: z.string().min(1).optional(),
+});
+
 
 
 
@@ -54,13 +68,11 @@ async function getUserByEmail(req, res) {
     const emailSchema = z.object({ email: z.string().email().regex(UCLA_EMAIL_REGEX) });
     const parsed = emailSchema.safeParse(req.query);
     if (!parsed.success) return res.status(400).json({ error: "Invalid email" });
-    
     const user = await prisma.user.findUnique({
         where: { email: parsed.data.email },
         include: { student: true, researcher: true },
     });
     if (!user) return res.status(404).json({ error: "User not found" });
-    
     res.json({ user: publicUser(user) });
 }
 
@@ -197,9 +209,92 @@ async function deleteUser(req, res) {
     }
 }
 
+// updateUserProfile – unified endpoint to update user + role-specific fields in one transaction
+async function updateUserProfile(req, res) {
+    const parsedParams = idParamSchema.safeParse(req.params);
+    if (!parsedParams.success) return res.status(400).json({ error: "Invalid user id" });
+
+    const parsedBody = updateProfileSchema.safeParse(req.body);
+    if (!parsedBody.success) return res.status(400).json({ error: parsedBody.error.flatten() });
+
+    const userId = parsedParams.data.id;
+
+    try {
+        // Fetch user to determine role
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { student: true, researcher: true },
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Auth: users can only update their own profile
+        if (req.user?.id !== userId) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+
+        const { name, email, uclaId, year, major, description, department } = parsedBody.data;
+
+        // Update in transaction for atomicity
+        const result = await prisma.$transaction(async (tx) => {
+            // Update base user fields if provided
+            const userUpdateData = {};
+            if (name !== undefined) userUpdateData.name = name;
+            if (email !== undefined) userUpdateData.email = email;
+            if (uclaId !== undefined) userUpdateData.uclaId = uclaId;
+
+            let updatedUser = user;
+            if (Object.keys(userUpdateData).length > 0) {
+                updatedUser = await tx.user.update({
+                    where: { id: userId },
+                    data: userUpdateData,
+                });
+            }
+
+            // Update student-specific fields if student
+            if (user.student && (year !== undefined || major !== undefined || description !== undefined)) {
+                const studentUpdateData = {};
+                if (year !== undefined) studentUpdateData.year = year;
+                if (major !== undefined) studentUpdateData.major = major;
+                if (description !== undefined) studentUpdateData.description = description;
+
+                await tx.student.update({
+                    where: { userId },
+                    data: studentUpdateData,
+                });
+            }
+
+            // Update researcher-specific fields if researcher
+            if (user.researcher && department !== undefined) {
+                await tx.researcher.update({
+                    where: { userId },
+                    data: { department },
+                });
+            }
+
+            // Fetch updated user with relations
+            return tx.user.findUnique({
+                where: { id: userId },
+                include: { student: true, researcher: true },
+            });
+        });
+
+        res.json({ user: publicUser(result) });
+    } catch (err) {
+        if (err?.code === "P2025") return res.status(404).json({ error: "User not found" });
+        if (err?.code === "P2002") return res.status(409).json({ error: "Email or UID already in use" });
+        console.error("Error updating user profile:", err);
+        res.status(500).json({ error: "Failed to update profile" });
+    }
+}
+
 module.exports = {
     listUsers,
     getUserById,
+    getUserByEmail,
     updateUser,
+    updateUserProfile,
     deleteUser,
 };
