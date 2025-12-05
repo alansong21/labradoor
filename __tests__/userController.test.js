@@ -163,7 +163,7 @@ describe("User Controller Tests", () => {
                 id: 1,
                 email: "user@ucla.edu",
                 name: "Test User",
-                uclaId: "1234567",
+                uclaId: "123456789",
                 student: { id: 1 },
                 researcher: null,
             };
@@ -218,7 +218,7 @@ describe("User Controller Tests", () => {
                 id: 1,
                 email: "user@ucla.edu",
                 name: "Updated Name",
-                uclaId: "1234567",
+                uclaId: "123456789",
             };
 
             prisma.user.update.mockResolvedValue(mockUser);
@@ -257,17 +257,17 @@ describe("User Controller Tests", () => {
                 id: 1,
                 email: "user@ucla.edu",
                 name: "Test User",
-                uclaId: "7654321",
+                uclaId: "987654321",
             };
 
             prisma.user.update.mockResolvedValue(mockUser);
 
             const res = await request(app)
                 .put("/api/users/1")
-                .send({ uclaId: "7654321" });
+                .send({ uclaId: "987654321" });
 
             expect(res.status).toBe(200);
-            expect(res.body.user.uclaId).toBe("7654321");
+            expect(res.body.user.uclaId).toBe("987654321");
         });
 
         it("should update multiple fields at once", async () => {
@@ -275,7 +275,7 @@ describe("User Controller Tests", () => {
                 id: 1,
                 email: "updated@g.ucla.edu",
                 name: "Updated Name",
-                uclaId: "9999999",
+                uclaId: "999999999",
             };
 
             prisma.user.update.mockResolvedValue(mockUser);
@@ -285,7 +285,7 @@ describe("User Controller Tests", () => {
                 .send({
                     name: "Updated Name",
                     email: "updated@g.ucla.edu",
-                    uclaId: "9999999",
+                    uclaId: "999999999",
                 });
 
             expect(res.status).toBe(200);
@@ -320,7 +320,7 @@ describe("User Controller Tests", () => {
 
             const res = await request(app)
                 .put("/api/users/1")
-                .send({ uclaId: "1234567" });
+                .send({ uclaId: "123456789" });
 
             expect(res.status).toBe(409);
             expect(res.body.error).toBe("Email or UID already in use");
@@ -378,7 +378,7 @@ describe("User Controller Tests", () => {
             expect(res.body).toHaveProperty("error");
         });
 
-        it("should return 400 for uclaId shorter than 7 characters", async () => {
+        it("should return 400 for uclaId shorter than 9 characters", async () => {
             const res = await request(app)
                 .put("/api/users/1")
                 .send({ uclaId: "123456" });
@@ -387,18 +387,18 @@ describe("User Controller Tests", () => {
             expect(res.body).toHaveProperty("error");
         });
 
-        it("should accept uclaId with exactly 7 characters", async () => {
+        it("should accept uclaId with exactly 9 characters", async () => {
             const mockUser = {
                 id: 1,
                 email: "user@ucla.edu",
-                uclaId: "1234567",
+                uclaId: "123456789",
             };
 
             prisma.user.update.mockResolvedValue(mockUser);
 
             const res = await request(app)
                 .put("/api/users/1")
-                .send({ uclaId: "1234567" });
+                .send({ uclaId: "123456789" });
 
             expect(res.status).toBe(200);
         });
@@ -438,16 +438,51 @@ describe("User Controller Tests", () => {
 
     describe("DELETE /api/users/:id - deleteUser", () => {
         it("should delete a user successfully", async () => {
-            prisma.user.delete.mockResolvedValue({ id: 1 });
+            const mockUser = {
+                id: 1,
+                student: { id: 1 },
+                researcher: null,
+            };
+
+            prisma.$transaction.mockImplementation(async (callback) => {
+                const tx = {
+                    user: {
+                        findUnique: jest.fn().mockResolvedValue(mockUser),
+                        delete: jest.fn().mockResolvedValue({ id: 1 }),
+                    },
+                    student: {
+                        delete: jest.fn().mockResolvedValue({ id: 1 }),
+                    },
+                    answer: {
+                        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+                    },
+                    application: {
+                        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+                    },
+                    verificationToken: {
+                        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+                    },
+                    session: {
+                        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+                    },
+                };
+                return callback(tx);
+            });
 
             const res = await request(app).delete("/api/users/1");
 
             expect(res.status).toBe(204);
-            expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 1 } });
         });
 
         it("should return 404 for non-existent user", async () => {
-            prisma.user.delete.mockRejectedValue({ code: "P2025" });
+            prisma.$transaction.mockImplementation(async (callback) => {
+                const tx = {
+                    user: {
+                        findUnique: jest.fn().mockResolvedValue(null),
+                    },
+                };
+                return callback(tx);
+            });
 
             const res = await request(app).delete("/api/users/999");
 
@@ -499,7 +534,7 @@ describe("User Controller Tests", () => {
         });
 
         it("should handle unexpected database error during delete", async () => {
-            prisma.user.delete.mockRejectedValue(new Error("Unexpected error"));
+            prisma.$transaction.mockRejectedValue(new Error("Unexpected error"));
 
             const res = await request(app).delete("/api/users/1");
 
@@ -608,7 +643,7 @@ describe("User Controller Tests", () => {
                     id: 1,
                     email: "student@ucla.edu",
                     name: "Old Name",
-                    uclaId: "1234567",
+                    uclaId: "123456789",
                     student: { id: 1, userId: 1, year: "Junior", major: "CS" },
                     researcher: null,
                 };
@@ -677,7 +712,7 @@ describe("User Controller Tests", () => {
 
         describe("Researcher Profile Updates", () => {
             it("should update researcher profile fields successfully", async () => {
-                const mockUser = {
+                const mockUserData = {
                     id: 2,
                     email: "researcher@ucla.edu",
                     name: "Dr. Smith",
@@ -686,13 +721,13 @@ describe("User Controller Tests", () => {
                 };
 
                 const updatedUser = {
-                    ...mockUser,
-                    researcher: { ...mockUser.researcher, department: "Computer Science" },
+                    ...mockUserData,
+                    researcher: { ...mockUserData.researcher, department: "Computer Science" },
                 };
 
                 mockUser = { id: 2, email: "researcher@ucla.edu" };
 
-                prisma.user.findUnique.mockResolvedValue(mockUser);
+                prisma.user.findUnique.mockResolvedValue(mockUserData);
                 prisma.$transaction.mockImplementation(async (callback) => {
                     const tx = {
                         user: {
@@ -715,7 +750,7 @@ describe("User Controller Tests", () => {
             });
 
             it("should update researcher + base user fields in one request", async () => {
-                const mockUser = {
+                const mockUserData = {
                     id: 2,
                     email: "researcher@ucla.edu",
                     name: "Old Name",
@@ -724,19 +759,19 @@ describe("User Controller Tests", () => {
                 };
 
                 const updatedUser = {
-                    ...mockUser,
+                    ...mockUserData,
                     name: "New Name",
-                    researcher: { ...mockUser.researcher, department: "CS" },
+                    researcher: { ...mockUserData.researcher, department: "CS" },
                 };
 
                 // Set mock user to researcher (id: 2)
                 mockUser = { id: 2, email: "researcher@ucla.edu" };
 
-                prisma.user.findUnique.mockResolvedValue(mockUser);
+                prisma.user.findUnique.mockResolvedValue(mockUserData);
                 prisma.$transaction.mockImplementation(async (callback) => {
                     const tx = {
                         user: {
-                            update: jest.fn().mockResolvedValue({ ...mockUser, name: "New Name" }),
+                            update: jest.fn().mockResolvedValue({ ...mockUserData, name: "New Name" }),
                             findUnique: jest.fn().mockResolvedValue(updatedUser),
                         },
                         researcher: {
