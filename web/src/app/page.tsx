@@ -1,9 +1,9 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import Loading from "./components/Loading";
 import { cookies } from "next/headers";
 import { getLabs } from "@/lib/labs";
+import HomePageButtons from "./components/HomePageButtons";
 
 // Lazy load components - reduce initial bundle size
 const Navbar = dynamic(() => import("./components/Navbar"), {
@@ -91,23 +91,7 @@ export default async function Page() {
                 Browse open lab positions across UCLA, start applications, and
                 track your status from one dashboard.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/signup?role=student"
-                  prefetch={true}
-                  className="inline-flex items-center justify-center rounded-full bg-[#2563eb] px-4 py-2 text-sm font-medium transition hover:bg-[#1e40af] btn-blue-glow"
-                  style={{ color: 'white' }}
-                >
-                  Join as Student
-                </Link>
-                <Link
-                  href="/login?role=student"
-                  prefetch={true}
-                  className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-                >
-                  Login
-                </Link>
-              </div>
+              <HomePageButtons role="student" />
             </div>
 
             {/* Researcher card */}
@@ -119,23 +103,7 @@ export default async function Page() {
                 Post openings, review applicants, and manage your lab&apos;s
                 presence on campus in a single workspace.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/signup?role=researcher"
-                  prefetch={true}
-                  className="inline-flex items-center justify-center rounded-full bg-[#2563eb] px-4 py-2 text-sm font-medium transition hover:bg-[#1e40af] btn-blue-glow"
-                  style={{ color: 'white' }}
-                >
-                  Join as Researcher
-                </Link>
-                <Link
-                  href="/login?role=researcher"
-                  prefetch={true}
-                  className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-                >
-                  Login
-                </Link>
-              </div>
+              <HomePageButtons role="researcher" />
             </div>
           </div>
         </section>

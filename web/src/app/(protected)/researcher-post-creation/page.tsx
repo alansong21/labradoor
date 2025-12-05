@@ -208,7 +208,14 @@ const PostCreationPage: React.FC = () => {
       <Navbar isLoggedIn={true} />
       <div className="post-creation-page">
         <div className="post-creation-container">
-          <Link href="/researcher-myposts" className="back-button">
+          <Link 
+            href="/researcher-myposts" 
+            className="back-button"
+            onClick={() => {
+              setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
+              setIsDismissing(false);
+            }}
+          >
             ← Back to My Posts
           </Link>
           <h1 className="post-creation-title">Post Creation</h1>

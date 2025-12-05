@@ -181,7 +181,15 @@ function LoginForm() {
 
                   <p className="auth-footer">
             Don&apos;t have an account yet?{" "}
-            <Link href={`/signup?role=${roleParam}`} prefetch={true} className="auth-link">
+            <Link 
+              href={`/signup?role=${roleParam}`} 
+              prefetch={true} 
+              className="auth-link"
+              onClick={() => {
+                setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
+                setIsDismissing(false);
+              }}
+            >
               Create an account
             </Link>
           </p>

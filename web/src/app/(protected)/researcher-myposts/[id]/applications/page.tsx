@@ -8,6 +8,7 @@ import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
 import Navbar from "../../../../components/Navbar";
 import Loading from "../../../../components/Loading";
+import Toast, { type ToastState } from "../../../../components/Toast";
 import "./page.css";
 
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "MULTIPLE_CHOICE" | "CHECKBOX";
@@ -46,6 +47,42 @@ export default function PostApplicationsPage({
   const { id } = use(params);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
+
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const handleAccept = (email: string) => {
+    navigator.clipboard.writeText(email).then(() => {
+      setToast({ id: Date.now(), tone: "success", message: "Email successfully copied" });
+      setIsDismissing(false);
+    }).catch(() => {
+      setToast({ id: Date.now(), tone: "error", message: "Failed to copy email" });
+      setIsDismissing(false);
+    });
+  };
+
+  const handleReject = () => {
+    setToast({ id: Date.now(), tone: "loading", message: "WIP" });
+    setIsDismissing(false);
+    setTimeout(() => {
+      setIsDismissing(true);
+    }, 2000);
+  };
+
+  const handlePending = () => {
+    setToast({ id: Date.now(), tone: "loading", message: "WIP" });
+    setIsDismissing(false);
+    setTimeout(() => {
+      setIsDismissing(true);
+    }, 2000);
+  };
 
   useEffect(() => {
     fetch(`/api/applications/post/${id}`)
@@ -67,7 +104,14 @@ export default function PostApplicationsPage({
       <Navbar isLoggedIn={true} />
       <div className="applications-page">
         <div className="container">
-          <Link href="/researcher-myposts" className="back-button">
+          <Link 
+            href="/researcher-myposts" 
+            className="back-button"
+            onClick={() => {
+              setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
+              setIsDismissing(false);
+            }}
+          >
             ← Back to My Posts
           </Link>
           <h1 className="page-title">Applications</h1>
@@ -126,6 +170,26 @@ export default function PostApplicationsPage({
                           </div>
                         );
                       })}
+                      <div className="application-actions">
+                        <button
+                          className="action-button accept-button"
+                          onClick={() => handleAccept(applicant?.email || "")}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className="action-button reject-button"
+                          onClick={handleReject}
+                        >
+                          Reject
+                        </button>
+                        <button
+                          className="action-button pending-button"
+                          onClick={handlePending}
+                        >
+                          Pending
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -134,6 +198,17 @@ export default function PostApplicationsPage({
           )}
         </div>
       </div>
+      <Toast
+        toast={toast}
+        isDismissing={isDismissing}
+        onDismiss={() => setIsDismissing(true)}
+        onAnimationEnd={() => {
+          if (isDismissing) {
+            setToast(null);
+            setIsDismissing(false);
+          }
+        }}
+      />
     </>
   );
 }

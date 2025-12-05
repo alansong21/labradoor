@@ -229,6 +229,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  min-width: 120px;
+  text-align: center;
 }
 
 .cancel-button {
