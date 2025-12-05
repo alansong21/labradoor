@@ -179,7 +179,6 @@ export default function MyApplicationsPage() {
       />
       <div className="applications-page">
         <h1 className="page-title">My Applications</h1>
-        <div className="container">
           {loading ? (
             <div className="loading">Loading applications...</div>
           ) : applications.length === 0 ? (
@@ -252,7 +251,6 @@ export default function MyApplicationsPage() {
             </div>
           )}
         </div>
-      </div>
       <Toast
         toast={toast}
         isDismissing={isDismissing}
