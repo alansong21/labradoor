@@ -30,8 +30,7 @@
     background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(24px);
     border-radius: 16px;
-    border: none;
-    overflow: hidden;
+    border: 1px solid transparent;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     position: relative;
     transition: all 0.3s;
@@ -41,16 +40,22 @@
 .application-card::before {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: -1px;
     border-radius: 16px;
-    padding: 1px;
-    background: linear-gradient(120deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.6));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
+    background: linear-gradient(120deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.6), rgba(59, 130, 246, 0.7), rgba(37, 99, 235, 0.8));
+    background-size: 400% 400%;
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
     mask-composite: exclude;
     pointer-events: none;
-    z-index: 0;
-    transition: transform 0.6s ease;
+    z-index: -1;
+    background-position: 0% 50%;
+    padding: 1px;
 }
 
 .application-card:hover {
@@ -59,21 +64,15 @@
 }
 
 .application-card:hover::before {
-    animation: gradient-rotate 3s linear infinite;
+    animation: gradient-flow 3s linear infinite;
 }
 
-@keyframes gradient-rotate {
+@keyframes gradient-flow {
     0% {
-        background: linear-gradient(120deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.6));
-    }
-    33% {
-        background: linear-gradient(240deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.6));
-    }
-    66% {
-        background: linear-gradient(360deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.6));
+        background-position: 0% 50%;
     }
     100% {
-        background: linear-gradient(120deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.6));
+        background-position: 400% 50%;
     }
 }
 
