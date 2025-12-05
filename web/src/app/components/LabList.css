@@ -1,0 +1,338 @@
+.lab-page {
+    min-height: 100vh;
+    background: transparent;
+    padding: 2rem;
+    padding-top: 100px; /* Account for fixed navbar */
+    color: black;
+    position: relative;
+    z-index: 1;
+}
+
+.lab-page .container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.lab-page .title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1a1a1a;
+}
+
+.search-container {
+    max-width: 900px;
+    margin: 0 auto 1.5rem auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.lab-search {
+    width: 100%;
+}
+
+.lab-search input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    font-size: 0.875rem;
+    background: white;
+    color: #1a1a1a;
+    transition: all 0.2s;
+}
+
+.lab-search input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.tag-filter-search {
+    width: 100%;
+    position: relative;
+}
+
+.tag-filter-search input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    font-size: 0.875rem;
+    background: white;
+    color: #1a1a1a;
+    transition: all 0.2s;
+}
+
+.tag-filter-search input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.selected-tags,
+.tag-entry {
+    max-width: 900px;
+    margin: 0 auto 1rem auto;
+    width: 100%;
+}
+
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: linear-gradient(120deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.85));
+    color: white;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.selected-tag button {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+    margin-left: 0.25rem;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.selected-tag button:hover {
+    opacity: 1;
+}
+
+.tag-entry {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 16px;
+    padding: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.tag-picker-panel {
+    padding: 0.5rem;
+}
+
+.tag-suggestions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag-chip {
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    background: rgba(37, 99, 235, 0.05);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    color: #2563eb;
+}
+
+.tag-chip:hover {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.5);
+}
+
+.tag-chip.active {
+    background: linear-gradient(120deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.85));
+    color: white;
+    border-color: rgba(37, 99, 235, 0.95);
+}
+
+.empty-tags {
+    color: #666;
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    text-align: center;
+    width: 100%;
+}
+
+.card-container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.lab-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid transparent; /* Reserve space for the border */
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    position: relative;
+    transition: all 0.3s;
+}
+
+.lab-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px; /* Extend slightly outside */
+    border-radius: 16px;
+    background: linear-gradient(
+        90deg,
+        rgba(37, 99, 235, 0.8) 0%,
+        rgba(59, 130, 246, 0.7) 25%,
+        rgba(96, 165, 250, 0.6) 50%,
+        rgba(59, 130, 246, 0.7) 75%,
+        rgba(37, 99, 235, 0.8) 100%
+    );
+    background-size: 400% 400%;
+    z-index: -1; /* Keep behind content */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    padding: 1px;
+    background-position: 0% 0%;
+}
+
+.lab-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: white;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.lab-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.lab-card:hover::before {
+    opacity: 1;
+    animation: gradient-rotate 3s linear infinite;
+}
+
+@keyframes gradient-rotate {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 400% 0%;
+    }
+}
+
+.lab-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    color: #1a1a1a;
+    position: relative;
+    z-index: 1;
+}
+
+.lab-desc {
+    color: #4b5563;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0 0 1rem 0;
+    position: relative;
+    z-index: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.lab-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.lab-tag {
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(120deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.08));
+    color: #2563eb;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.lab-details {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+    position: relative;
+    z-index: 1;
+}
+
+.lab-details li {
+    color: #666;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.lab-details li:last-child {
+    margin-bottom: 0;
+}
+
+.learn-more {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 1;
+}
+
+.learn-more:hover {
+    background: rgba(37, 99, 235, 0.05);
+    border-color: #1e40af;
+    color: #1e40af;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px dashed rgba(226, 232, 240, 0.8);
+    color: #666;
+}
+
+.empty-state p {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
