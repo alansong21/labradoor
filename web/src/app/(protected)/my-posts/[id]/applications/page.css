@@ -89,6 +89,13 @@
 }
 
 .empty-state,
+.loading-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+}
+
 .loading {
     text-align: center;
     padding: 4rem;

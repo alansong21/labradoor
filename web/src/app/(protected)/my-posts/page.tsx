@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Link from "next/link";
+import Loading from "../../components/Loading";
 import "./page.css";
 
 interface Post {
@@ -53,7 +54,9 @@ export default function MyPostsPage() {
           </div>
 
           {loading ? (
-            <div className="loading">Loading...</div>
+            <div className="loading-wrapper">
+              <Loading />
+            </div>
           ) : posts.length === 0 ? (
             <div className="empty-state">
               <p>You haven't created any posts yet.</p>

@@ -6,6 +6,7 @@
 "use client";
 import React, { useEffect, useState, use } from "react";
 import Navbar from "../../../../components/Navbar";
+import Loading from "../../../../components/Loading";
 import "./page.css";
 
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "MULTIPLE_CHOICE" | "CHECKBOX";
@@ -68,7 +69,9 @@ export default function PostApplicationsPage({
           <h1 className="page-title">Applications</h1>
 
           {loading ? (
-            <div className="loading">Loading applications...</div>
+            <div className="loading-wrapper">
+              <Loading />
+            </div>
           ) : applications.length === 0 ? (
             <div className="empty-state">
               <p>No applications received yet.</p>

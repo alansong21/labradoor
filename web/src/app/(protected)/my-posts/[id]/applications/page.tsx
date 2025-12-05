@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Navbar from "../../../../components/Navbar";
+import Loading from "../../../../components/Loading";
 import "./page.css";
 
 interface Response {
@@ -54,7 +55,9 @@ export default function PostApplicationsPage({
           <h1 className="page-title">Applications</h1>
 
           {loading ? (
-            <div className="loading">Loading applications...</div>
+            <div className="loading-wrapper">
+              <Loading />
+            </div>
           ) : applications.length === 0 ? (
             <div className="empty-state">
               <p>No applications received yet.</p>

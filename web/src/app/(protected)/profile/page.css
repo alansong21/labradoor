@@ -13,6 +13,13 @@
   padding: 2rem;
 }
 
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+}
+
 .profile-header {
   display: flex;
   justify-content: space-between;

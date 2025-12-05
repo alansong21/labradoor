@@ -8,6 +8,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "../../../components/Navbar";
+import Loading from "../../../components/Loading";
 import "./page.css";
 
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "CHECKBOX" | "MULTIPLE_CHOICE";
@@ -217,7 +218,7 @@ export default function ApplyPage() {
   return (
     <>
       <Navbar isLoggedIn={true} />
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Loading fullPage />}>
         <ApplyForm />
       </Suspense>
     </>

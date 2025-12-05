@@ -8,13 +8,13 @@ interface LoadingProps {
   message?: string;
 }
 
-export default function Loading({ fullPage = false, message = "Loading..." }: LoadingProps) {
+export default function Loading({ fullPage = false, message }: LoadingProps) {
   if (fullPage) {
     return (
       <div className="loading-overlay">
         <div className="loading-container">
           <div className="loading-spinner" />
-          <p className="loading-message">{message}</p>
+          {message && <p className="loading-message">{message}</p>}
         </div>
       </div>
     );
@@ -23,7 +23,7 @@ export default function Loading({ fullPage = false, message = "Loading..." }: Lo
   return (
     <div className="loading-inline">
       <div className="loading-spinner-small" />
-      <span className="loading-text">{message}</span>
+      {message && <span className="loading-text">{message}</span>}
     </div>
   );
 }
