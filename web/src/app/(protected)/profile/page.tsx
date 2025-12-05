@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
+import Loading from "../../components/Loading";
 import "./page.css";
 
 interface User {
@@ -127,10 +128,12 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <>
-        <Navbar user={null} />
+        <Navbar isLoggedIn={true} />
         <div className="profile-page">
           <div className="profile-container">
-            <div className="loading">Loading profile...</div>
+            <div className="loading-wrapper">
+              <Loading />
+            </div>
           </div>
         </div>
       </>
@@ -140,7 +143,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <>
-        <Navbar user={null} />
+        <Navbar isLoggedIn={true} />
         <div className="profile-page">
           <div className="profile-container">
             <div className="error">Failed to load profile</div>
@@ -154,7 +157,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Navbar user={user} />
+      <Navbar isLoggedIn={true} role={userRole.toUpperCase()} />
       <div className="profile-page">
         <div className="profile-container">
           <div className="profile-header">

@@ -12,20 +12,12 @@ export interface Lab {
   tags?: string[];
 }
 
-interface User {
-  id: number;
-  email: string;
-  name?: string | null;
-  student?: any;
-  researcher?: any;
-}
-
 interface Props {
   labs: Lab[];
-  user?: User | null;
+  userRole?: string | null;
 }
 
-export default function LabList({ labs, user }: Props) {
+export default function LabList({ labs, userRole }: Props) {
   const [query, setQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagInputOpen, setTagInputOpen] = useState(false);
@@ -65,7 +57,7 @@ export default function LabList({ labs, user }: Props) {
 
   return (
     <>
-      <Navbar user={user} />
+      <Navbar isLoggedIn={true} role={userRole || undefined} />
       <main className="lab-page">
         <h1 className="title">Lab Openings</h1>
         <div className="lab-search">
@@ -145,7 +137,11 @@ export default function LabList({ labs, user }: Props) {
                   <li key={line}>{line}</li>
                 ))}
               </ul>
-              <Link href={`/labs/${lab.id}`} className="learn-more">
+              <Link 
+                href={`/labs/${lab.id}`} 
+                className="learn-more"
+                prefetch={true}
+              >
                 Learn More
               </Link>
             </div>

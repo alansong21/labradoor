@@ -202,12 +202,23 @@ async function getMyApplications(req, res) {
         const applications = await prisma.application.findMany({
             where: { studentId: req.user.id },
             include: {
-                post: true,
-                answers: true,
+                post: {
+                    include: {
+                        questions: true,
+                    },
+                },
+                answers: {
+                    include: {
+                        question: true,
+                    },
+                },
             },
             orderBy: { createdAt: "desc" },
         });
 
+        if (applications.length === 0) {
+            return res.status(204).send();
+        }
         res.json(applications);
     } catch (e) {
         console.error(e);

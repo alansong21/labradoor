@@ -10,10 +10,11 @@
  * The state is managed locally and submitted to the /api/posts endpoint.
  */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import "./page.css";
 import Navbar from "../../components/Navbar";
-import { useUser } from "@/hooks/useUser";
+import Toast, { type ToastState } from "../../components/Toast";
 
 interface FormEntry {
   id: string;
@@ -24,7 +25,6 @@ interface FormEntry {
 }
 
 const PostCreationPage: React.FC = () => {
-  const { user } = useUser();
   const [showEntryMenu, setShowEntryMenu] = useState(false);
   const [entries, setEntries] = useState<FormEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
@@ -56,10 +56,14 @@ const PostCreationPage: React.FC = () => {
   };
 
   const deleteEntry = (id: string) => {
-    setEntries(entries.filter((entry) => entry.id !== id));
-    if (editingEntry === id) {
-      setEditingEntry(null);
-    }
+    setRemovingEntry(id);
+    setTimeout(() => {
+      setEntries(entries.filter((entry) => entry.id !== id));
+      if (editingEntry === id) {
+        setEditingEntry(null);
+      }
+      setRemovingEntry(null);
+    }, 300);
   };
 
   const addOption = (entryId: string) => {
@@ -103,6 +107,10 @@ const PostCreationPage: React.FC = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
+  const [removingTag, setRemovingTag] = useState<string | null>(null);
+  const [removingEntry, setRemovingEntry] = useState<string | null>(null);
 
   const addTag = () => {
     const trimmedTag = tagInput.trim();
@@ -127,8 +135,21 @@ const PostCreationPage: React.FC = () => {
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+    setRemovingTag(tagToRemove);
+    // Wait for animation to complete before removing from state
+    setTimeout(() => {
+      setTags(tags.filter((tag) => tag !== tagToRemove));
+      setRemovingTag(null);
+    }, 300);
   };
+
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -138,8 +159,14 @@ const PostCreationPage: React.FC = () => {
   };
 
   async function handleSavePost() {
-    if (!postTitle) return alert("Please enter a post title");
+    if (!postTitle) {
+      setToast({ id: Date.now(), tone: "error", message: "Please enter a post title" });
+      setIsDismissing(false);
+      return;
+    }
     setIsSubmitting(true);
+    setToast({ id: Date.now(), tone: "loading", message: "Saving post..." });
+    setIsDismissing(false);
 
     try {
       const res = await fetch("/api/posts", {
@@ -159,35 +186,51 @@ const PostCreationPage: React.FC = () => {
       });
 
       if (res.ok) {
-        window.location.href = "/researcher-myposts";
+        setToast({ id: Date.now(), tone: "success", message: "Post saved successfully!" });
+        // Navigate after a brief delay to show success message
+        setTimeout(() => {
+          window.location.href = "/researcher-myposts";
+        }, 1000);
       } else {
         const body = await res.json();
-        alert(body.error || "Failed to save post");
+        setToast({ id: Date.now(), tone: "error", message: body.error || "Failed to save post" });
+        setIsSubmitting(false);
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred");
-    } finally {
+      setToast({ id: Date.now(), tone: "error", message: "An error occurred while saving" });
       setIsSubmitting(false);
     }
   }
 
   return (
     <>
-      <Navbar user={user} />
+      <Navbar isLoggedIn={true} />
       <div className="post-creation-page">
         <div className="post-creation-container">
+          <Link 
+            href="/researcher-myposts" 
+            className="back-button"
+            onClick={() => {
+              setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
+              setIsDismissing(false);
+            }}
+          >
+            ← Back to My Posts
+          </Link>
           <h1 className="post-creation-title">Post Creation</h1>
 
           <div className="post-meta-section">
-            <input
-              type="text"
-              className="post-title-input"
-              placeholder="Post Title (e.g., Research Assistant needed for AI Lab)"
-              value={postTitle}
-              onChange={(e) => setPostTitle(e.target.value)}
-              maxLength={50}
-            />
+            <div className="post-title-container">
+              <input
+                type="text"
+                className="post-title-input"
+                placeholder="Post Title (e.g., Research Assistant needed for AI Lab)"
+                value={postTitle}
+                onChange={(e) => setPostTitle(e.target.value)}
+                maxLength={50}
+              />
+            </div>
             <textarea
               className="post-description-input"
               placeholder="Post Description (Describe the role, requirements, etc.)"
@@ -218,7 +261,10 @@ const PostCreationPage: React.FC = () => {
               {tags.length > 0 && (
                 <div className="tags-display">
                   {tags.map((tag) => (
-                    <span key={tag} className="tag-chip">
+                    <span 
+                      key={tag} 
+                      className={`tag-chip ${removingTag === tag ? 'tag-removing' : ''}`}
+                    >
                       {tag}
                       <button
                         className="tag-remove-btn"
@@ -243,7 +289,7 @@ const PostCreationPage: React.FC = () => {
 
           <div className="entries-list">
             {entries.map((entry, index) => (
-              <div key={entry.id} className="entry-card">
+              <div key={entry.id} className={`entry-card ${removingEntry === entry.id ? 'entry-removing' : ''}`}>
                 <div className="entry-header">
                   <span className="entry-number">Question {index + 1}</span>
                   <span className="entry-type-badge">{entry.type}</span>
@@ -389,6 +435,17 @@ const PostCreationPage: React.FC = () => {
           </>
         )}
       </div>
+      <Toast
+        toast={toast}
+        isDismissing={isDismissing}
+        onDismiss={() => setIsDismissing(true)}
+        onAnimationEnd={() => {
+          if (isDismissing) {
+            setToast(null);
+            setIsDismissing(false);
+          }
+        }}
+      />
     </>
   );
 };

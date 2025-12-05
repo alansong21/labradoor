@@ -5,8 +5,10 @@
  */
 "use client";
 import React, { useEffect, useState, use } from "react";
+import Link from "next/link";
 import Navbar from "../../../../components/Navbar";
-import { useUser } from "@/hooks/useUser";
+import Loading from "../../../../components/Loading";
+import Toast, { type ToastState } from "../../../../components/Toast";
 import "./page.css";
 
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "MULTIPLE_CHOICE" | "CHECKBOX";
@@ -27,6 +29,7 @@ interface AnswerPayload {
 interface Application {
   id: number;
   createdAt: string;
+  status: string;
   student?: {
     user?: {
       name?: string | null;
@@ -43,11 +46,46 @@ export default function PostApplicationsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { user } = useUser();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
 
+  // Auto-dismiss success toast
   useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const handleAccept = (email: string) => {
+    navigator.clipboard.writeText(email).then(() => {
+      setToast({ id: Date.now(), tone: "success", message: "Email successfully copied" });
+      setIsDismissing(false);
+    }).catch(() => {
+      setToast({ id: Date.now(), tone: "error", message: "Failed to copy email" });
+      setIsDismissing(false);
+    });
+  };
+
+  const handleReject = () => {
+    setToast({ id: Date.now(), tone: "loading", message: "WIP" });
+    setIsDismissing(false);
+    setTimeout(() => {
+      setIsDismissing(true);
+    }, 2000);
+  };
+
+  const handlePending = () => {
+    setToast({ id: Date.now(), tone: "loading", message: "WIP" });
+    setIsDismissing(false);
+    setTimeout(() => {
+      setIsDismissing(true);
+    }, 2000);
+  };
+
+  const fetchApplications = () => {
     fetch(`/api/applications/post/${id}`)
       .then((res) => res.json())
       .then((data) => {
@@ -60,17 +98,62 @@ export default function PostApplicationsPage({
         console.error(err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchApplications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const handleStatusUpdate = async (applicationId: number, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/applications/${applicationId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        // Update the local state
+        setApplications((prev) =>
+          prev.map((app) =>
+            app.id === applicationId ? { ...app, status: newStatus } : app
+          )
+        );
+      } else {
+        const error = await res.json().catch(() => ({ error: "Failed to update status" }));
+        alert(error.error || "Failed to update application status");
+      }
+    } catch (err) {
+      console.error("Error updating status:", err);
+      alert("Failed to update application status");
+    }
+  };
 
   return (
     <>
-      <Navbar user={user} />
+      <Navbar isLoggedIn={true} />
       <div className="applications-page">
         <div className="container">
+          <Link 
+            href="/researcher-myposts" 
+            className="back-button"
+            onClick={() => {
+              setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
+              setIsDismissing(false);
+            }}
+          >
+            ← Back to My Posts
+          </Link>
           <h1 className="page-title">Applications</h1>
 
           {loading ? (
-            <div className="loading">Loading applications...</div>
+            <div className="loading-wrapper">
+              <Loading />
+            </div>
           ) : applications.length === 0 ? (
             <div className="empty-state">
               <p>No applications received yet.</p>
@@ -83,14 +166,21 @@ export default function PostApplicationsPage({
                 return (
                   <div key={app.id} className="application-card">
                     <div className="applicant-info">
-                      <h2>{applicant?.name || "Unknown Name"}</h2>
-                      <p className="applicant-email">{applicant?.email ?? "No email"}</p>
-                      {applicant?.uclaId && (
-                        <p className="applicant-id">UID: {applicant.uclaId}</p>
-                      )}
-                      <p className="applied-date">
-                        Applied on {new Date(app.createdAt).toLocaleDateString()}
-                      </p>
+                      <div className="applicant-header">
+                        <div>
+                          <h2>{applicant?.name || "Unknown Name"}</h2>
+                          <p className="applicant-email">{applicant?.email ?? "No email"}</p>
+                          {applicant?.uclaId && (
+                            <p className="applicant-id">UID: {applicant.uclaId}</p>
+                          )}
+                          <p className="applied-date">
+                            Applied on {new Date(app.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className={`status-badge status-${app.status.toLowerCase().replace("_", "-")}`}>
+                          {app.status.replace("_", " ")}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="responses-section">
@@ -121,6 +211,53 @@ export default function PostApplicationsPage({
                           </div>
                         );
                       })}
+                      <div className="application-actions">
+                        <button
+                          className="action-button accept-button"
+                          onClick={() => handleAccept(applicant?.email || "")}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className="action-button reject-button"
+                          onClick={handleReject}
+                        >
+                          Reject
+                        </button>
+                        <button
+                          className="action-button pending-button"
+                          onClick={handlePending}
+                        >
+                          Pending
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="actions-section">
+                      <h3>Actions</h3>
+                      <div className="action-buttons">
+                        <button
+                          onClick={() => handleStatusUpdate(app.id, "UNDER_REVIEW")}
+                          className={`action-btn ${app.status === "UNDER_REVIEW" ? "active" : ""}`}
+                          disabled={app.status === "UNDER_REVIEW"}
+                        >
+                          Under Review
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(app.id, "ACCEPTED")}
+                          className={`action-btn accept-btn ${app.status === "ACCEPTED" ? "active" : ""}`}
+                          disabled={app.status === "ACCEPTED"}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(app.id, "REJECTED")}
+                          className={`action-btn reject-btn ${app.status === "REJECTED" ? "active" : ""}`}
+                          disabled={app.status === "REJECTED"}
+                        >
+                          Reject
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -129,6 +266,17 @@ export default function PostApplicationsPage({
           )}
         </div>
       </div>
+      <Toast
+        toast={toast}
+        isDismissing={isDismissing}
+        onDismiss={() => setIsDismissing(true)}
+        onAnimationEnd={() => {
+          if (isDismissing) {
+            setToast(null);
+            setIsDismissing(false);
+          }
+        }}
+      />
     </>
   );
 }
