@@ -120,7 +120,7 @@ export default function PostApplicationsPage({
       <div className="applications-page">
         <div className="container">
           <Link 
-            href="/myposts" 
+            href="/my-posts" 
             className="back-button"
             onClick={() => {
               setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
