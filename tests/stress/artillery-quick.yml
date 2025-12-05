@@ -1,0 +1,70 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 10
+      name: Quick comprehensive test
+  plugins:
+    metrics-by-endpoint: {}
+    apdex: {}
+  apdex:
+    threshold: 100
+
+scenarios:
+  # Public endpoint tests
+  - name: "Public Pages"
+    weight: 30
+    flow:
+      - get:
+          url: "/"
+      - think: 1
+      - get:
+          url: "/login"
+      - think: 1
+      - get:
+          url: "/signup"
+
+  # API endpoint tests
+  - name: "API Health Checks"
+    weight: 20
+    flow:
+      - get:
+          url: "/api/auth/me"
+      - get:
+          url: "/api/posts"
+
+  # Post retrieval
+  - name: "Post Browsing"
+    weight: 25
+    flow:
+      - get:
+          url: "/api/posts"
+      - think: 2
+      - get:
+          url: "/api/posts/1"
+
+  # Admin routes (unauthenticated - should fail gracefully)
+  - name: "Admin Endpoint Check"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/auth/admin/verify"
+
+  # Mixed navigation pattern
+  - name: "Visitor Journey"
+    weight: 15
+    flow:
+      - get:
+          url: "/"
+      - think: 1
+      - get:
+          url: "/api/posts"
+      - think: 2
+      - get:
+          url: "/login"
+      - think: 1
+      - get:
+          url: "/signup"
+      - think: 2
+      - get:
+          url: "/api/posts/1"
