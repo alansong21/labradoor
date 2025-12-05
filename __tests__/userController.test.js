@@ -3,10 +3,10 @@ const express = require("express");
 const userRoutes = require("../server/routes/users");
 const prisma = require("../server/db/prisma");
 
-// Mock the auth middleware
+let mockUser = { id: 1, email: "test@ucla.edu" };
 jest.mock("../server/middleware/auth", () => ({
     authMiddleware: (req, res, next) => {
-        req.user = { id: 1, email: "test@ucla.edu" };
+        req.user = mockUser;
         next();
     },
 }));
@@ -616,7 +616,7 @@ describe("User Controller Tests", () => {
                 const updatedUser = {
                     ...mockUser,
                     name: "New Name",
-                    uclaId: "7654321",
+                    uclaId: "987654321",
                     student: { ...mockUser.student, year: "Senior" },
                 };
 
@@ -624,7 +624,7 @@ describe("User Controller Tests", () => {
                 prisma.$transaction.mockImplementation(async (callback) => {
                     const tx = {
                         user: {
-                            update: jest.fn().mockResolvedValue({ ...mockUser, name: "New Name", uclaId: "7654321" }),
+                            update: jest.fn().mockResolvedValue({ ...mockUser, name: "New Name", uclaId: "987654321" }),
                             findUnique: jest.fn().mockResolvedValue(updatedUser),
                         },
                         student: {
@@ -638,7 +638,7 @@ describe("User Controller Tests", () => {
                     .put("/api/users/1/profile")
                     .send({
                         name: "New Name",
-                        uclaId: "7654321",
+                        uclaId: "987654321",
                         year: "Senior",
                     });
 
@@ -690,12 +690,7 @@ describe("User Controller Tests", () => {
                     researcher: { ...mockUser.researcher, department: "Computer Science" },
                 };
 
-                // Mock auth middleware to return user id 2
-                jest.spyOn(require("../server/middleware/auth"), "authMiddleware")
-                    .mockImplementation((req, res, next) => {
-                        req.user = { id: 2, email: "researcher@ucla.edu" };
-                        next();
-                    });
+                mockUser = { id: 2, email: "researcher@ucla.edu" };
 
                 prisma.user.findUnique.mockResolvedValue(mockUser);
                 prisma.$transaction.mockImplementation(async (callback) => {
@@ -715,6 +710,8 @@ describe("User Controller Tests", () => {
                     .send({ department: "Computer Science" });
 
                 expect(res.status).toBe(200);
+
+                mockUser = { id: 1, email: "test@ucla.edu" };
             });
 
             it("should update researcher + base user fields in one request", async () => {
@@ -732,11 +729,8 @@ describe("User Controller Tests", () => {
                     researcher: { ...mockUser.researcher, department: "CS" },
                 };
 
-                jest.spyOn(require("../server/middleware/auth"), "authMiddleware")
-                    .mockImplementation((req, res, next) => {
-                        req.user = { id: 2, email: "researcher@ucla.edu" };
-                        next();
-                    });
+                // Set mock user to researcher (id: 2)
+                mockUser = { id: 2, email: "researcher@ucla.edu" };
 
                 prisma.user.findUnique.mockResolvedValue(mockUser);
                 prisma.$transaction.mockImplementation(async (callback) => {
@@ -760,6 +754,8 @@ describe("User Controller Tests", () => {
                     });
 
                 expect(res.status).toBe(200);
+
+                mockUser = { id: 1, email: "test@ucla.edu" };
             });
         });
 
