@@ -7,8 +7,25 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
-import { useUser } from "@/hooks/useUser";
+import Loading from "../../components/Loading";
 import "./page.css";
+
+interface User {
+  id: number;
+  email: string;
+  name: string | null;
+  uclaId: string | null;
+  createdAt: string;
+  student?: {
+    year: string;
+    major: string;
+    description: string | null;
+  };
+  researcher?: {
+    department: string;
+    verifyStatus: string;
+  };
+}
 
 interface Question {
   id: number;
@@ -42,11 +59,27 @@ interface Application {
 }
 
 export default function MyApplicationsPage() {
-  const { user, loading: userLoading } = useUser();
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedApplications, setExpandedApplications] = useState<Set<number>>(new Set());
+
+  // Fetch user data
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user) {
+          setUser(data.user);
+        }
+        setUserLoading(false);
+      })
+      .catch(() => {
+        setUserLoading(false);
+      });
+  }, []);
 
   // Redirect researchers to my-posts
   useEffect(() => {
@@ -86,9 +119,9 @@ export default function MyApplicationsPage() {
       });
   }, [user, userLoading]);
 
-  // Don't render if user is a researcher (will be redirected)
+  // Don't render if user is a researcher (will be redirected) or still loading
   if (userLoading || user?.researcher) {
-    return null;
+    return <Loading fullPage />;
   }
 
   const toggleApplication = (appId: number) => {
@@ -125,7 +158,11 @@ export default function MyApplicationsPage() {
 
   return (
     <>
-      <Navbar user={user} />
+      <Navbar 
+        isLoggedIn={true} 
+        role={user?.student ? "STUDENT" : undefined}
+        userName={user?.name || undefined}
+      />
       <div className="applications-page">
         <div className="container">
           <h1 className="page-title">My Applications</h1>

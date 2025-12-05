@@ -373,7 +373,7 @@ const PostCreationPage: React.FC = () => {
             onClick={handleSavePost}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Saving..." : "Save Post"}
+            {isSubmitting ? "Saving..." : "Create Post"}
           </button>
         </div>
 
