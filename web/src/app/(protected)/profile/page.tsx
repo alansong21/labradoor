@@ -80,19 +80,14 @@ export default function ProfilePage() {
     setSuccess("");
 
     try {
-      // Update basic user info
-      const userUpdateBody: any = {
-        name: formData.name,
-        uclaId: formData.uclaId,
-      };
-
-      const res = await fetch(`/api/users/${user?.id}`, {
+      // Use unified profile update endpoint - updates all fields in one transaction
+      const res = await fetch(`/api/users/${user?.id}/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(userUpdateBody),
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) {
@@ -104,57 +99,11 @@ export default function ProfilePage() {
         return;
       }
 
-      // If student, update student-specific fields
-      if (user?.student) {
-        const studentRes = await fetch(`/api/students/${user.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            year: formData.year,
-            major: formData.major,
-            description: formData.description,
-          }),
-        });
-
-        if (!studentRes.ok) {
-          const data = await studentRes.json();
-          const errorMsg = typeof data.error === 'string' 
-            ? data.error 
-            : JSON.stringify(data.error) || "Failed to update student information";
-          setError(errorMsg);
-          return;
-        }
-      }
-
-      if (user?.researcher) {
-        const researcherRes = await fetch(`/api/researchers/${user.id}`, {
-          method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                department: formData.department,
-            }),
-        });
-
-        if (!researcherRes.ok) {
-            const data = await researcherRes.json();
-            const errorMsg = typeof data.error === 'string' 
-              ? data.error 
-              : JSON.stringify(data.error) || "Failed to update researcher information";
-            setError(errorMsg);
-            return;
-        }
-    }
-
-    setSuccess("Profile updated successfully!");
-    setEditing(false);
-    fetchUserProfile();
+      setSuccess("Profile updated successfully!");
+      setEditing(false);
+      fetchUserProfile();
     } catch (error) {
+      console.error("Error updating profile:", error);
       setError("An error occurred while updating profile");
     }
   };
