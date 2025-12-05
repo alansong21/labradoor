@@ -11,6 +11,7 @@
  */
 "use client";
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import "./page.css";
 import Navbar from "../../components/Navbar";
 import Toast, { type ToastState } from "../../components/Toast";
@@ -55,10 +56,14 @@ const PostCreationPage: React.FC = () => {
   };
 
   const deleteEntry = (id: string) => {
-    setEntries(entries.filter((entry) => entry.id !== id));
-    if (editingEntry === id) {
-      setEditingEntry(null);
-    }
+    setRemovingEntry(id);
+    setTimeout(() => {
+      setEntries(entries.filter((entry) => entry.id !== id));
+      if (editingEntry === id) {
+        setEditingEntry(null);
+      }
+      setRemovingEntry(null);
+    }, 300);
   };
 
   const addOption = (entryId: string) => {
@@ -105,6 +110,7 @@ const PostCreationPage: React.FC = () => {
   const [toast, setToast] = useState<ToastState | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
   const [removingTag, setRemovingTag] = useState<string | null>(null);
+  const [removingEntry, setRemovingEntry] = useState<string | null>(null);
 
   const addTag = () => {
     const trimmedTag = tagInput.trim();
@@ -202,6 +208,9 @@ const PostCreationPage: React.FC = () => {
       <Navbar isLoggedIn={true} />
       <div className="post-creation-page">
         <div className="post-creation-container">
+          <Link href="/researcher-myposts" className="back-button">
+            ← Back to My Posts
+          </Link>
           <h1 className="post-creation-title">Post Creation</h1>
 
           <div className="post-meta-section">
@@ -273,7 +282,7 @@ const PostCreationPage: React.FC = () => {
 
           <div className="entries-list">
             {entries.map((entry, index) => (
-              <div key={entry.id} className="entry-card">
+              <div key={entry.id} className={`entry-card ${removingEntry === entry.id ? 'entry-removing' : ''}`}>
                 <div className="entry-header">
                   <span className="entry-number">Question {index + 1}</span>
                   <span className="entry-type-badge">{entry.type}</span>

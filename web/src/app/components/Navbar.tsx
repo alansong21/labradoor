@@ -5,11 +5,12 @@
  */
 "use client";
 
-import { useState, type SyntheticEvent } from "react";
+import { useState, useEffect, type SyntheticEvent } from "react";
 import "./Navbar.css";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Toast, { type ToastState } from "./Toast";
 
 interface NavbarProps {
   isLoggedIn?: boolean;
@@ -20,16 +21,37 @@ interface NavbarProps {
 export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = false }: NavbarProps) {
   const router = useRouter();
   const [logoFailed, setLogoFailed] = useState(false);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
+
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleLogout = async () => {
+    setToast({ id: Date.now(), tone: "loading", message: "Logging out..." });
+    setIsDismissing(false);
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      
-      router.refresh();
-      router.push("/");
+      setToast({ id: Date.now(), tone: "success", message: "Logged out successfully" });
+      setTimeout(() => {
+        router.refresh();
+        router.push("/");
+      }, 500);
     } catch (error) {
       console.error("Logout failed", error);
+      setToast({ id: Date.now(), tone: "error", message: "Logout failed" });
+      setIsDismissing(false);
     }
+  };
+
+  const handleLinkClick = () => {
+    setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
+    setIsDismissing(false);
   };
 
   return (
@@ -60,7 +82,7 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
         <ul className="navbar-links">
           {role === "STUDENT" && (
             <li>
-              <Link href="/my-applications" prefetch={true}>My Applications</Link>
+              <Link href="/my-applications" prefetch={true} onClick={handleLinkClick}>My Applications</Link>
             </li>
           )}
         </ul>
@@ -72,7 +94,7 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
               {isLoggedIn && (
                 <>
                   <li>
-                    <Link href="/profile" prefetch={true} className="profile-button">
+                    <Link href="/profile" prefetch={true} className="profile-button" onClick={handleLinkClick}>
                       Profile
                     </Link>
                   </li>
@@ -87,6 +109,17 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
           </>
         )}
       </div>
+      <Toast
+        toast={toast}
+        isDismissing={isDismissing}
+        onDismiss={() => setIsDismissing(true)}
+        onAnimationEnd={() => {
+          if (isDismissing) {
+            setToast(null);
+            setIsDismissing(false);
+          }
+        }}
+      />
     </nav>
   );
 }

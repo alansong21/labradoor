@@ -10,9 +10,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "../components/Navbar";
 import Loading from "../components/Loading";
+import Toast, { type ToastState } from "../components/Toast";
 import "./signup.css";
-
-type ToastState = { id: number; tone: "success" | "error" | "loading"; message: string } | null;
 
 const ROLE_COPY: Record<
   "student" | "researcher",
@@ -45,7 +44,7 @@ function SignupForm() {
     name: "",
     uclaId: "",
   });
-  const [toast, setToast] = useState<ToastState>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -318,31 +317,17 @@ function SignupForm() {
           </p>
         </div>
 
-        {toast && (
-          <div
-            className={`toast toast--${toast.tone} ${isDismissing ? "toast--dismissing" : ""}`}
-            role="alert"
-            onAnimationEnd={() => {
-              if (isDismissing) {
-                setToast(null);
-                setIsDismissing(false);
-              }
-            }}
-          >
-            {toast.tone === "loading" && <span className="toast-spinner" />}
-            {toast.tone === "error" && <span className="toast-icon">⚠</span>}
-            <span>{toast.message}</span>
-            {toast.tone !== "loading" && (
-              <button
-                className="toast-close"
-                onClick={() => setIsDismissing(true)}
-                aria-label="Dismiss"
-              >
-                ×
-              </button>
-            )}
-          </div>
-        )}
+        <Toast
+          toast={toast}
+          isDismissing={isDismissing}
+          onDismiss={() => setIsDismissing(true)}
+          onAnimationEnd={() => {
+            if (isDismissing) {
+              setToast(null);
+              setIsDismissing(false);
+            }
+          }}
+        />
       </div>
     </>
   );
