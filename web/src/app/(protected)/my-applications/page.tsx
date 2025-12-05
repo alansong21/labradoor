@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/useUsers";
 import "./page.css";
 
 interface Question {
@@ -125,7 +125,7 @@ export default function MyApplicationsPage() {
 
   return (
     <>
-      <Navbar user={user} />
+      <Navbar isLoggedIn={!userLoading && !!user} role={user?.researcher ? "RESEARCHER" : "STUDENT"} />
       <div className="applications-page">
         <div className="container">
           <h1 className="page-title">My Applications</h1>

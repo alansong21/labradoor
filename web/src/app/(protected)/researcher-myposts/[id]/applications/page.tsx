@@ -59,32 +59,6 @@ export default function PostApplicationsPage({
     }
   }, [toast]);
 
-  const handleAccept = (email: string) => {
-    navigator.clipboard.writeText(email).then(() => {
-      setToast({ id: Date.now(), tone: "success", message: "Email successfully copied" });
-      setIsDismissing(false);
-    }).catch(() => {
-      setToast({ id: Date.now(), tone: "error", message: "Failed to copy email" });
-      setIsDismissing(false);
-    });
-  };
-
-  const handleReject = () => {
-    setToast({ id: Date.now(), tone: "loading", message: "WIP" });
-    setIsDismissing(false);
-    setTimeout(() => {
-      setIsDismissing(true);
-    }, 2000);
-  };
-
-  const handlePending = () => {
-    setToast({ id: Date.now(), tone: "loading", message: "WIP" });
-    setIsDismissing(false);
-    setTimeout(() => {
-      setIsDismissing(true);
-    }, 2000);
-  };
-
   const fetchApplications = () => {
     fetch(`/api/applications/post/${id}`)
       .then((res) => res.json())
@@ -107,6 +81,9 @@ export default function PostApplicationsPage({
 
   const handleStatusUpdate = async (applicationId: number, newStatus: string) => {
     try {
+      setToast({ id: Date.now(), tone: "loading", message: "Updating status..." });
+      setIsDismissing(false);
+
       const res = await fetch(`/api/applications/${applicationId}`, {
         method: "PATCH",
         headers: {
@@ -123,13 +100,17 @@ export default function PostApplicationsPage({
             app.id === applicationId ? { ...app, status: newStatus } : app
           )
         );
+        setToast({ id: Date.now(), tone: "success", message: "Status updated successfully" });
+        setIsDismissing(false);
       } else {
         const error = await res.json().catch(() => ({ error: "Failed to update status" }));
-        alert(error.error || "Failed to update application status");
+        setToast({ id: Date.now(), tone: "error", message: error.error || "Failed to update application status" });
+        setIsDismissing(false);
       }
     } catch (err) {
       console.error("Error updating status:", err);
-      alert("Failed to update application status");
+      setToast({ id: Date.now(), tone: "error", message: "Failed to update application status" });
+      setIsDismissing(false);
     }
   };
 
@@ -213,49 +194,25 @@ export default function PostApplicationsPage({
                       })}
                       <div className="application-actions">
                         <button
-                          className="action-button accept-button"
-                          onClick={() => handleAccept(applicant?.email || "")}
-                        >
-                          Accept
-                        </button>
-                        <button
-                          className="action-button reject-button"
-                          onClick={handleReject}
-                        >
-                          Reject
-                        </button>
-                        <button
-                          className="action-button pending-button"
-                          onClick={handlePending}
-                        >
-                          Pending
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="actions-section">
-                      <h3>Actions</h3>
-                      <div className="action-buttons">
-                        <button
-                          onClick={() => handleStatusUpdate(app.id, "UNDER_REVIEW")}
-                          className={`action-btn ${app.status === "UNDER_REVIEW" ? "active" : ""}`}
-                          disabled={app.status === "UNDER_REVIEW"}
-                        >
-                          Under Review
-                        </button>
-                        <button
+                          className={`action-button accept-button ${app.status === "ACCEPTED" ? "active" : ""}`}
                           onClick={() => handleStatusUpdate(app.id, "ACCEPTED")}
-                          className={`action-btn accept-btn ${app.status === "ACCEPTED" ? "active" : ""}`}
                           disabled={app.status === "ACCEPTED"}
                         >
                           Accept
                         </button>
                         <button
+                          className={`action-button reject-button ${app.status === "REJECTED" ? "active" : ""}`}
                           onClick={() => handleStatusUpdate(app.id, "REJECTED")}
-                          className={`action-btn reject-btn ${app.status === "REJECTED" ? "active" : ""}`}
                           disabled={app.status === "REJECTED"}
                         >
                           Reject
+                        </button>
+                        <button
+                          className={`action-button pending-button ${app.status === "UNDER_REVIEW" ? "active" : ""}`}
+                          onClick={() => handleStatusUpdate(app.id, "UNDER_REVIEW")}
+                          disabled={app.status === "UNDER_REVIEW"}
+                        >
+                          Under Review
                         </button>
                       </div>
                     </div>
