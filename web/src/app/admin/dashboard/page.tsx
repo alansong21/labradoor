@@ -6,6 +6,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Loading from "../../components/Loading";
 import "../admin.css";
 
 interface User {
@@ -393,7 +394,11 @@ export default function AdminDashboard() {
   };
 
   if (loading) {
-    return <div className="admin-container">Loading...</div>;
+    return (
+      <div className="admin-container">
+        <Loading fullPage />
+      </div>
+    );
   }
 
   return (
