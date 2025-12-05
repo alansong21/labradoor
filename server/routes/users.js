@@ -9,11 +9,13 @@ const {
     listUsers,
     getUserById,
     updateUser,
+    updateUserProfile,
     deleteUser,
 } = require("../controllers/userController");
 
 router.use(authMiddleware);
 router.get("/", listUsers);
+router.put("/:id/profile", updateUserProfile);
 router.get("/:id", getUserById);
 router.put("/:id", updateUser);
 router.delete("/:id", deleteUser);
