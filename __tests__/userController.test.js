@@ -55,8 +55,18 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 
 describe("User Controller Tests", () => {
+    // Suppress console.error during tests
+    let consoleErrorSpy;
+
     beforeEach(() => {
         jest.clearAllMocks();
+        // Mock console.error to suppress error outputs
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        // Restore console.error after each test
+        consoleErrorSpy.mockRestore();
     });
 
     describe("GET /api/users - listUsers", () => {

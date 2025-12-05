@@ -31,9 +31,20 @@ app.use(express.json());
 app.use("/api/questions", questionRoutes);
 
 describe("Question Controller Tests", () => {
+    // Suppress console.error during tests
+    let consoleErrorSpy;
+
     beforeEach(() => {
         jest.clearAllMocks();
+        // Mock console.error to suppress error outputs
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     });
+
+    afterEach(() => {
+        // Restore console.error after each test
+        consoleErrorSpy.mockRestore();
+    });
+
 
     describe("Public Routes", () => {
         it("GET /:id should be accessible without authentication", async () => {

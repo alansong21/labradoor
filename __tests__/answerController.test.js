@@ -46,8 +46,18 @@ const createAppWithoutAuth = () => {
 };
 
 describe("Answer Controller - Basic Tests", () => {
+    // Suppress console.error during tests
+    let consoleErrorSpy;
+
     beforeEach(() => {
         jest.clearAllMocks();
+        // Mock console.error to suppress error outputs
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        // Restore console.error after each test
+        consoleErrorSpy.mockRestore();
     });
 
     describe("POST /api/answers - createAnswer", () => {
