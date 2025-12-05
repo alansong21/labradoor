@@ -178,9 +178,8 @@ export default function MyApplicationsPage() {
         userName={user?.name || undefined}
       />
       <div className="applications-page">
+        <h1 className="page-title">My Applications</h1>
         <div className="container">
-          <h1 className="page-title">My Applications</h1>
-
           {loading ? (
             <div className="loading">Loading applications...</div>
           ) : applications.length === 0 ? (
