@@ -109,3 +109,11 @@
   opacity: 1;
 }
 
+@media (max-width: 640px) {
+  .toast {
+    right: 16px !important;
+    bottom: 16px !important;
+    max-width: calc(100% - 32px);
+  }
+}
+
