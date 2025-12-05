@@ -20,17 +20,26 @@ const updateSchema = z.object({
 });
 
 // updateProfileSchema – validates all fields for unified profile update
+const optionalProfileString = z.preprocess(
+    value => {
+        if (typeof value !== "string") return value;
+        const trimmed = value.trim();
+        return trimmed === "" ? undefined : trimmed;
+    },
+    z.string().optional()
+);
+
 const updateProfileSchema = z.object({
     // Base user fields
     name: z.string().min(1).optional(),
     email: z.string().email().regex(UCLA_EMAIL_REGEX).optional(),
     uclaId: z.string().length(9).or(z.literal("")).optional(),
     // Student fields
-    year: z.string().min(1).optional(),
-    major: z.string().min(1).optional(),
+    year: optionalProfileString,
+    major: optionalProfileString,
     description: z.string().optional(),
     // Researcher fields
-    department: z.string().min(1).optional(),
+    department: optionalProfileString,
 });
 
 
@@ -235,7 +244,30 @@ async function updateUserProfile(req, res) {
             return res.status(403).json({ error: "Forbidden" });
         }
 
+        const body = typeof req.body === "object" && req.body !== null ? req.body : {};
+        const yearProvided = Object.prototype.hasOwnProperty.call(body, "year");
+        const majorProvided = Object.prototype.hasOwnProperty.call(body, "major");
+        const departmentProvided = Object.prototype.hasOwnProperty.call(body, "department");
+
         const { name, email, uclaId, year, major, description, department } = parsedBody.data;
+
+        if (user.student) {
+            const effectiveYear = yearProvided ? year : user.student?.year;
+            if (!effectiveYear || !effectiveYear.toString().trim()) {
+                return res.status(400).json({ error: "Year is required for student profiles" });
+            }
+            const effectiveMajor = majorProvided ? major : user.student?.major;
+            if (!effectiveMajor || !effectiveMajor.toString().trim()) {
+                return res.status(400).json({ error: "Major is required for student profiles" });
+            }
+        }
+
+        if (user.researcher) {
+            const effectiveDepartment = departmentProvided ? department : user.researcher?.department;
+            if (!effectiveDepartment || !effectiveDepartment.toString().trim()) {
+                return res.status(400).json({ error: "Department is required for researcher profiles" });
+            }
+        }
 
         // Update in transaction for atomicity
         const result = await prisma.$transaction(async (tx) => {
