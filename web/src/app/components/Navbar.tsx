@@ -63,11 +63,6 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
               <Link href="/my-applications" prefetch={true}>My Applications</Link>
             </li>
           )}
-          {role === "RESEARCHER" && (
-            <li>
-              <Link href="/researcher-myposts" prefetch={true}>My Posts</Link>
-            </li>
-          )}
         </ul>
       </div>
       <div className="navbar-right">

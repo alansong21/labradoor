@@ -5,6 +5,7 @@
  */
 "use client";
 import React, { useEffect, useState, use } from "react";
+import Link from "next/link";
 import Navbar from "../../../../components/Navbar";
 import Loading from "../../../../components/Loading";
 import "./page.css";
@@ -66,6 +67,9 @@ export default function PostApplicationsPage({
       <Navbar isLoggedIn={true} />
       <div className="applications-page">
         <div className="container">
+          <Link href="/researcher-myposts" className="back-button">
+            ← Back to My Posts
+          </Link>
           <h1 className="page-title">Applications</h1>
 
           {loading ? (

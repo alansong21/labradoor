@@ -1,16 +1,22 @@
 .profile-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background: transparent;
   padding: 2rem;
+  padding-top: 100px; /* Account for fixed navbar */
+  color: black;
+  position: relative;
+  z-index: 1;
 }
 
 .profile-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
   padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .loading-wrapper {
@@ -26,28 +32,33 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.6);
 }
 
 .profile-header h1 {
   margin: 0;
-  color: #333;
+  color: #1a1a1a;
   font-size: 2rem;
+  font-weight: 700;
 }
 
 .edit-button {
-  background-color: #007bff;
+  background: #2563eb;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2), 0 0 12px rgba(59, 130, 246, 0.12);
 }
 
 .edit-button:hover {
-  background-color: #0056b3;
+  background: #1e40af;
+  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.24), 0 0 14px rgba(59, 130, 246, 0.15);
+  transform: none;
 }
 
 .loading,
@@ -59,25 +70,25 @@
 }
 
 .error {
-  color: #dc3545;
+  color: #dc2626;
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #721c24;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
   padding: 1rem;
-  border-radius: 4px;
+  border-radius: 12px;
   margin-bottom: 1rem;
-  border: 1px solid #f5c6cb;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .success-message {
-  background-color: #d4edda;
-  color: #155724;
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
   padding: 1rem;
-  border-radius: 4px;
+  border-radius: 12px;
   margin-bottom: 1rem;
-  border: 1px solid #c3e6cb;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 /* Profile View Styles */
@@ -89,20 +100,23 @@
 
 .profile-section {
   padding: 1.5rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .profile-section h2 {
   margin: 0 0 1rem 0;
-  color: #495057;
+  color: #1a1a1a;
   font-size: 1.3rem;
+  font-weight: 600;
 }
 
 .info-row {
   display: flex;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .info-row:last-child {
@@ -111,12 +125,12 @@
 
 .info-row .label {
   font-weight: 600;
-  color: #495057;
+  color: #475569;
   min-width: 180px;
 }
 
 .info-row .value {
-  color: #333;
+  color: #1a1a1a;
   flex: 1;
 }
 
@@ -129,14 +143,17 @@
 
 .form-section {
   padding: 1.5rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .form-section h2 {
   margin: 0 0 1.5rem 0;
-  color: #495057;
+  color: #1a1a1a;
   font-size: 1.3rem;
+  font-weight: 600;
 }
 
 .form-group {
@@ -151,26 +168,30 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #495057;
+  color: #475569;
+  font-size: 0.875rem;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 8px;
   font-size: 1rem;
   font-family: inherit;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
   box-sizing: border-box;
   color: #000;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: #2563eb;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .form-group textarea {
@@ -181,14 +202,14 @@
 .form-group small {
   display: block;
   margin-top: 0.25rem;
-  color: #6c757d;
+  color: #64748b;
   font-size: 0.875rem;
 }
 
 .disabled-input {
-  background-color: #e9ecef;
+  background: rgba(241, 245, 249, 0.6);
   cursor: not-allowed;
-  color: #6c757d;
+  color: #64748b;
 }
 
 .form-actions {
@@ -196,66 +217,81 @@
   gap: 1rem;
   justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid rgba(226, 232, 240, 0.5);
 }
 
 .cancel-button,
 .save-button {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .cancel-button {
-  background-color: #6c757d;
-  color: white;
+  background: transparent;
+  color: #475569;
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .cancel-button:hover {
-  background-color: #5a6268;
+  background: rgba(248, 250, 252, 0.8);
+  border-color: #cbd5e1;
+  color: #1a1a1a;
 }
 
 .save-button {
-  background-color: #28a745;
+  background: #2563eb;
   color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2), 0 0 12px rgba(59, 130, 246, 0.12);
 }
 
 .save-button:hover {
-  background-color: #218838;
+  background: #1e40af;
+  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.24), 0 0 14px rgba(59, 130, 246, 0.15);
+  transform: none;
 }
 
 /* Status Badge */
 .status-badge {
   display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 6px 14px;
+  border-radius: 999px;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .status-badge.verified {
-  background-color: #d4edda;
-  color: #155724;
+  background: linear-gradient(120deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.85));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .status-badge.pending {
-  background-color: #fff3cd;
-  color: #856404;
+  background: linear-gradient(120deg, rgba(251, 191, 36, 0.95), rgba(217, 119, 6, 0.85));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .status-badge.unverified {
-  background-color: #f8d7da;
-  color: #721c24;
+  background: linear-gradient(120deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.85));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .profile-page {
     padding: 1rem;
+    padding-top: 100px;
   }
 
   .profile-container {
