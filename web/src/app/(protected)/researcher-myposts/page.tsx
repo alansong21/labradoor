@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Link from "next/link";
 import Loading from "../../components/Loading";
+import Toast, { type ToastState } from "../../components/Toast";
 import "./page.css";
 
 interface Post {
@@ -24,6 +25,8 @@ interface Post {
 export default function MyPostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
 
   useEffect(() => {
     fetch("/api/posts/my-posts")
@@ -40,6 +43,14 @@ export default function MyPostsPage() {
       });
   }, []);
 
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   return (
     <>
       <Navbar isLoggedIn={true} />
@@ -47,7 +58,14 @@ export default function MyPostsPage() {
         <div className="container">
           <div className="header">
             <h1>My Posts</h1>
-            <Link href="/researcher-post-creation" className="create-button">
+            <Link 
+              href="/researcher-post-creation" 
+              className="create-button"
+              onClick={() => {
+                setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
+                setIsDismissing(false);
+              }}
+            >
               Create New Post
             </Link>
           </div>
@@ -90,6 +108,10 @@ export default function MyPostsPage() {
                     <Link
                       href={`/researcher-myposts/${post.id}/applications`}
                       className="view-apps-button"
+                      onClick={() => {
+                        setToast({ id: Date.now(), tone: "loading", message: "Loading applications..." });
+                        setIsDismissing(false);
+                      }}
                     >
                       View Applications
                     </Link>
@@ -100,6 +122,17 @@ export default function MyPostsPage() {
           )}
         </div>
       </div>
+      <Toast
+        toast={toast}
+        isDismissing={isDismissing}
+        onDismiss={() => setIsDismissing(true)}
+        onAnimationEnd={() => {
+          if (isDismissing) {
+            setToast(null);
+            setIsDismissing(false);
+          }
+        }}
+      />
     </>
   );
 }
