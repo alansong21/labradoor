@@ -10,6 +10,16 @@ import Navbar from "../../components/Navbar";
 import { useUser } from "@/hooks/useUser";
 import "./page.css";
 
+interface Question {
+  id: number;
+  type: string;
+  body: {
+    prompt?: string;
+    description?: string;
+    options?: string[];
+  };
+}
+
 interface Application {
   id: number;
   createdAt: string;
@@ -18,6 +28,7 @@ interface Application {
     id: number;
     title: string;
     summary?: string | null;
+    questions?: Question[];
   };
   answers: Array<{
     id: number;
@@ -25,6 +36,8 @@ interface Application {
     body: {
       value: any;
     };
+    question?: Question;
+    questionId: number;
   }>;
 }
 
@@ -33,6 +46,7 @@ export default function MyApplicationsPage() {
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedApplications, setExpandedApplications] = useState<Set<number>>(new Set());
 
   // Redirect researchers to my-posts
   useEffect(() => {
@@ -77,6 +91,38 @@ export default function MyApplicationsPage() {
     return null;
   }
 
+  const toggleApplication = (appId: number) => {
+    setExpandedApplications((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(appId)) {
+        newSet.delete(appId);
+      } else {
+        newSet.add(appId);
+      }
+      return newSet;
+    });
+  };
+
+  const formatAnswerValue = (answer: Application["answers"][0]): string => {
+    const value = answer.body?.value;
+    if (Array.isArray(value)) {
+      return value.length ? value.join(", ") : "No selections";
+    } else if (typeof value === "boolean") {
+      return value ? "Yes" : "No";
+    } else if (value === null || value === undefined || value === "") {
+      return "No response";
+    } else {
+      return String(value);
+    }
+  };
+
+  const getQuestionPrompt = (answer: Application["answers"][0]): string => {
+    if (answer.question?.body && typeof answer.question.body === "object") {
+      return answer.question.body.prompt ?? "Question";
+    }
+    return "Question";
+  };
+
   return (
     <>
       <Navbar user={user} />
@@ -92,27 +138,60 @@ export default function MyApplicationsPage() {
             </div>
           ) : (
             <div className="applications-list">
-              {applications.map((app) => (
-                <div key={app.id} className="application-card">
-                  <div className="application-header">
-                    <h2>{app.post.title}</h2>
-                    <span className={`status-badge status-${app.status.toLowerCase().replace("_", "-")}`}>
-                      {app.status.replace("_", " ")}
-                    </span>
+              {applications.map((app) => {
+                const isExpanded = expandedApplications.has(app.id);
+                const hasAnswers = app.answers && app.answers.length > 0;
+                
+                return (
+                  <div key={app.id} className="application-card">
+                    <div className="application-header">
+                      <h2>{app.post.title}</h2>
+                      <span className={`status-badge status-${app.status.toLowerCase().replace("_", "-")}`}>
+                        {app.status.replace("_", " ")}
+                      </span>
+                    </div>
+                    {app.post.summary && (
+                      <p className="post-summary">{app.post.summary}</p>
+                    )}
+                    <div className="application-meta">
+                      <p className="applied-date">
+                        Applied on {new Date(app.createdAt).toLocaleDateString()}
+                      </p>
+                      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                        {hasAnswers && (
+                          <button
+                            onClick={() => toggleApplication(app.id)}
+                            className="view-questions-btn"
+                            aria-expanded={isExpanded}
+                          >
+                            {isExpanded ? "Hide" : "View"} My Responses
+                            <span className={`dropdown-arrow ${isExpanded ? "expanded" : ""}`}>
+                              ▼
+                            </span>
+                          </button>
+                        )}
+                        <a href={`/labs/${app.post.id}`} className="view-post-link">
+                          View Post →
+                        </a>
+                      </div>
+                    </div>
+                    {isExpanded && hasAnswers && (
+                      <div className="responses-section">
+                        {app.answers.map((answer) => {
+                          const prompt = getQuestionPrompt(answer);
+                          const displayValue = formatAnswerValue(answer);
+                          return (
+                            <div key={answer.id} className="qa-item">
+                              <p className="question-text">{prompt}</p>
+                              <p className="answer-text">{displayValue}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                  {app.post.summary && (
-                    <p className="post-summary">{app.post.summary}</p>
-                  )}
-                  <div className="application-meta">
-                    <p className="applied-date">
-                      Applied on {new Date(app.createdAt).toLocaleDateString()}
-                    </p>
-                    <a href={`/labs/${app.post.id}`} className="view-post-link">
-                      View Post →
-                    </a>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
