@@ -9,6 +9,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "../../../components/Navbar";
 import Loading from "../../../components/Loading";
+import Toast, { type ToastState } from "../../../components/Toast";
 import "./page.css";
 
 type QuestionType = "LONG_TEXT" | "SHORT_TEXT" | "CHECKBOX" | "MULTIPLE_CHOICE";
@@ -44,14 +45,31 @@ function ApplyForm() {
   const [loading, setLoading] = useState(true);
   const [responses, setResponses] = useState<Record<number, string | string[]>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [userRole, setUserRole] = useState<"RESEARCHER" | "STUDENT" | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
 
   useEffect(() => {
+    // Fetch user role
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user?.researcher) {
+          setUserRole("RESEARCHER");
+        } else if (data?.user?.student) {
+          setUserRole("STUDENT");
+        }
+      })
+      .catch(() => {});
+
     if (!postId) return;
     fetch(`/api/posts/${postId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
           console.error(data.error);
+          setToast({ id: Date.now(), tone: "error", message: data.error || "Failed to load application form" });
+          setIsDismissing(false);
         } else {
           setPost(data);
         }
@@ -59,9 +77,19 @@ function ApplyForm() {
       })
       .catch((err) => {
         console.error(err);
+        setToast({ id: Date.now(), tone: "error", message: "Failed to load application form" });
+        setIsDismissing(false);
         setLoading(false);
       });
   }, [postId]);
+
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   useEffect(() => {
     if (!post) return;
@@ -102,26 +130,61 @@ function ApplyForm() {
       });
 
       if (res.ok) {
-        alert("Application submitted successfully!");
-        router.push("/");
+        setToast({ id: Date.now(), tone: "success", message: "Application submitted successfully!" });
+        setTimeout(() => {
+          router.push("/my-applications");
+        }, 1500);
       } else {
         const body = await res.json();
-        alert(body.error || "Failed to submit application");
+        setToast({ id: Date.now(), tone: "error", message: body.error || "Failed to submit application" });
+        setIsDismissing(false);
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred");
+      setToast({ id: Date.now(), tone: "error", message: "An error occurred" });
+      setIsDismissing(false);
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (!postId) return <div className="error-message">Invalid URL: Missing lab ID.</div>;
-  if (loading) return <div className="loading-message">Loading application form...</div>;
-  if (!post) return <div className="error-message">Post not found.</div>;
+  if (!postId) {
+    return (
+      <>
+        <Navbar isLoggedIn={true} role={userRole || undefined} />
+        <div className="apply-page">
+          <div className="apply-container">
+            <div className="error-message">Invalid URL: Missing lab ID.</div>
+          </div>
+        </div>
+      </>
+    );
+  }
+  if (loading) {
+    return (
+      <>
+        <Navbar isLoggedIn={true} role={userRole || undefined} />
+        <Loading fullPage />
+      </>
+    );
+  }
+  if (!post) {
+    return (
+      <>
+        <Navbar isLoggedIn={true} role={userRole || undefined} />
+        <div className="apply-page">
+          <div className="apply-container">
+            <div className="error-message">Post not found.</div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
-    <div className="apply-page">
+    <>
+      <Navbar isLoggedIn={true} role={userRole || undefined} />
+      <div className="apply-page">
       <div className="apply-container">
         <h1 className="page-title">Apply to {post.title}</h1>
         <p className="post-desc">{post.body}</p>
@@ -210,17 +273,26 @@ function ApplyForm() {
           </button>
         </form>
       </div>
-    </div>
+      </div>
+      <Toast
+        toast={toast}
+        isDismissing={isDismissing}
+        onDismiss={() => setIsDismissing(true)}
+        onAnimationEnd={() => {
+          if (isDismissing) {
+            setToast(null);
+            setIsDismissing(false);
+          }
+        }}
+      />
+    </>
   );
 }
 
 export default function ApplyPage() {
   return (
-    <>
-      <Navbar isLoggedIn={true} />
-      <Suspense fallback={<Loading fullPage />}>
-        <ApplyForm />
-      </Suspense>
-    </>
+    <Suspense fallback={<Loading fullPage />}>
+      <ApplyForm />
+    </Suspense>
   );
 }

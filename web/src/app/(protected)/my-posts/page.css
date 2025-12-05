@@ -49,8 +49,7 @@
 }
 
 .post-card {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(24px);
+    background: white;
     border-radius: 16px;
     border: 1px solid transparent;
     padding: 1rem;
@@ -68,37 +67,52 @@
     position: absolute;
     inset: -1px;
     border-radius: 16px;
-    padding: 1px;
-    background: linear-gradient(120deg, rgba(37, 99, 235, 0.8), rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.6), rgba(59, 130, 246, 0.7), rgba(37, 99, 235, 0.8));
+    background: linear-gradient(
+        90deg,
+        rgba(37, 99, 235, 0.8) 0%,
+        rgba(59, 130, 246, 0.7) 25%,
+        rgba(96, 165, 250, 0.6) 50%,
+        rgba(59, 130, 246, 0.7) 75%,
+        rgba(37, 99, 235, 0.8) 100%
+    );
     background-size: 400% 400%;
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: destination-out;
-    mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
     z-index: -1;
-    background-position: 0% 50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    padding: 1px;
+    background-position: 0% 0%;
+}
+
+.post-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: white;
+    z-index: -1;
+    pointer-events: none;
 }
 
 .post-card:hover {
-    background: rgba(255, 255, 255, 0.75);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .post-card:hover::before {
-    animation: gradient-flow 3s linear infinite;
+    opacity: 1;
+    animation: gradient-rotate 3s linear infinite;
 }
 
-@keyframes gradient-flow {
+@keyframes gradient-rotate {
     0% {
-        background-position: 0% 50%;
+        background-position: 0% 0%;
     }
     100% {
-        background-position: 400% 50%;
+        background-position: 400% 0%;
     }
 }
 

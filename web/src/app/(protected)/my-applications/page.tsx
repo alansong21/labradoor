@@ -6,9 +6,28 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "../../components/Navbar";
-import { useUser } from "@/hooks/useUsers";
+import Loading from "../../components/Loading";
+import Toast, { type ToastState } from "../../components/Toast";
 import "./page.css";
+
+interface User {
+  id: number;
+  email: string;
+  name: string | null;
+  uclaId: string | null;
+  createdAt: string;
+  student?: {
+    year: string;
+    major: string;
+    description: string | null;
+  };
+  researcher?: {
+    department: string;
+    verifyStatus: string;
+  };
+}
 
 interface Question {
   id: number;
@@ -42,11 +61,29 @@ interface Application {
 }
 
 export default function MyApplicationsPage() {
-  const { user, loading: userLoading } = useUser();
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedApplications, setExpandedApplications] = useState<Set<number>>(new Set());
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
+
+  // Fetch user data
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user) {
+          setUser(data.user);
+        }
+        setUserLoading(false);
+      })
+      .catch(() => {
+        setUserLoading(false);
+      });
+  }, []);
 
   // Redirect researchers to my-posts
   useEffect(() => {
@@ -82,13 +119,23 @@ export default function MyApplicationsPage() {
       })
       .catch((err) => {
         console.error(err);
+        setToast({ id: Date.now(), tone: "error", message: "Failed to load applications" });
+        setIsDismissing(false);
         setLoading(false);
       });
   }, [user, userLoading]);
 
-  // Don't render if user is a researcher (will be redirected)
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  // Don't render if user is a researcher (will be redirected) or still loading
   if (userLoading || user?.researcher) {
-    return null;
+    return <Loading fullPage />;
   }
 
   const toggleApplication = (appId: number) => {
@@ -125,7 +172,11 @@ export default function MyApplicationsPage() {
 
   return (
     <>
-      <Navbar isLoggedIn={!userLoading && !!user} role={user?.researcher ? "RESEARCHER" : "STUDENT"} />
+      <Navbar 
+        isLoggedIn={true} 
+        role={user?.student ? "STUDENT" : undefined}
+        userName={user?.name || undefined}
+      />
       <div className="applications-page">
         <div className="container">
           <h1 className="page-title">My Applications</h1>
@@ -157,7 +208,7 @@ export default function MyApplicationsPage() {
                       <p className="applied-date">
                         Applied on {new Date(app.createdAt).toLocaleDateString()}
                       </p>
-                      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                      <div className="application-actions">
                         {hasAnswers && (
                           <button
                             onClick={() => toggleApplication(app.id)}
@@ -170,9 +221,16 @@ export default function MyApplicationsPage() {
                             </span>
                           </button>
                         )}
-                        <a href={`/labs/${app.post.id}`} className="view-post-link">
+                        <Link 
+                          href={`/labs/${app.post.id}`} 
+                          className="view-post-link"
+                          onClick={() => {
+                            setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
+                            setIsDismissing(false);
+                          }}
+                        >
                           View Post →
-                        </a>
+                        </Link>
                       </div>
                     </div>
                     {isExpanded && hasAnswers && (
@@ -196,6 +254,17 @@ export default function MyApplicationsPage() {
           )}
         </div>
       </div>
+      <Toast
+        toast={toast}
+        isDismissing={isDismissing}
+        onDismiss={() => setIsDismissing(true)}
+        onAnimationEnd={() => {
+          if (isDismissing) {
+            setToast(null);
+            setIsDismissing(false);
+          }
+        }}
+      />
     </>
   );
 }

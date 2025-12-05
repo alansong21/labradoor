@@ -6,7 +6,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Navbar from "../../components/Navbar";
 import Loading from "../../components/Loading";
+import Toast, { type ToastState } from "../../components/Toast";
 import "../admin.css";
 
 interface User {
@@ -256,6 +258,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>("verification");
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
   
   // Researcher verification state
   const [researchers, setResearchers] = useState<Researcher[]>([]);
@@ -266,6 +270,14 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+
+  // Auto-dismiss success toast
+  useEffect(() => {
+    if (toast?.tone === "success") {
+      const timer = setTimeout(() => setIsDismissing(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -329,6 +341,8 @@ export default function AdminDashboard() {
     status: "VERIFIED" | "PENDING" | "UNVERIFIED"
   ) => {
     setUpdating(userId);
+    setToast({ id: Date.now(), tone: "loading", message: "Updating status..." });
+    setIsDismissing(false);
     try {
       const res = await fetch(`/api/admin/researchers/${userId}/verify`, {
         method: "PATCH",
@@ -343,12 +357,15 @@ export default function AdminDashboard() {
             r.userId === userId ? { ...r, verifyStatus: status } : r
           )
         );
+        setToast({ id: Date.now(), tone: "success", message: "Status updated successfully" });
       } else {
-        alert("Failed to update verification status");
+        setToast({ id: Date.now(), tone: "error", message: "Failed to update verification status" });
+        setIsDismissing(false);
       }
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Error updating verification status");
+      setToast({ id: Date.now(), tone: "error", message: "Error updating verification status" });
+      setIsDismissing(false);
     } finally {
       setUpdating(null);
     }
@@ -356,10 +373,13 @@ export default function AdminDashboard() {
 
   const handleDeleteUser = async () => {
     if (!selectedUser || deleteConfirm !== "DELETE") {
-      alert("Please type DELETE to confirm");
+      setToast({ id: Date.now(), tone: "error", message: "Please type DELETE to confirm" });
+      setIsDismissing(false);
       return;
     }
 
+    setToast({ id: Date.now(), tone: "loading", message: "Deleting user..." });
+    setIsDismissing(false);
     try {
       const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
         method: "DELETE",
@@ -367,16 +387,18 @@ export default function AdminDashboard() {
       });
 
       if (res.ok) {
-        alert(`User ${selectedUser.email} has been deleted`);
+        setToast({ id: Date.now(), tone: "success", message: `User ${selectedUser.email} has been deleted` });
         setUsers(users.filter(u => u.id !== selectedUser.id));
         setSelectedUser(null);
         setDeleteConfirm("");
       } else {
-        alert("Failed to delete user");
+        setToast({ id: Date.now(), tone: "error", message: "Failed to delete user" });
+        setIsDismissing(false);
       }
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert("Error deleting user");
+      setToast({ id: Date.now(), tone: "error", message: "Error deleting user" });
+      setIsDismissing(false);
     }
   };
 
@@ -386,11 +408,21 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = async () => {
-    await fetch("/api/auth/admin/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    router.push("/admin/login");
+    setToast({ id: Date.now(), tone: "loading", message: "Logging out..." });
+    setIsDismissing(false);
+    try {
+      await fetch("/api/auth/admin/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setToast({ id: Date.now(), tone: "success", message: "Logged out successfully" });
+      setTimeout(() => {
+        router.push("/admin/login");
+      }, 500);
+    } catch (error) {
+      setToast({ id: Date.now(), tone: "error", message: "Logout failed" });
+      setIsDismissing(false);
+    }
   };
 
   if (loading) {
@@ -402,59 +434,73 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="admin-container">
-      <div className="admin-header">
-        <div>
-          <h1>Admin Dashboard</h1>
-          {adminEmail && (
-            <p style={{ margin: "0.5rem 0 0 0", color: "#666" }}>
-              Logged in as: {adminEmail}
-            </p>
-          )}
+    <>
+      <Navbar isLoggedIn={false} hideAuthButtons={true} />
+      <div className="admin-container">
+        <div className="admin-header">
+          <div>
+            <h1>Admin Dashboard</h1>
+            {adminEmail && (
+              <p style={{ margin: "0.5rem 0 0 0", color: "#666" }}>
+                Logged in as: {adminEmail}
+              </p>
+            )}
+          </div>
+          <button onClick={handleLogout} className="admin-logout-btn">
+            Logout
+          </button>
         </div>
-        <button onClick={handleLogout} className="admin-logout-btn">
-          Logout
-        </button>
+
+        {/* Tab Navigation */}
+        <div className="tab-navigation">
+          <button
+            className={`tab-button ${activeTab === "verification" ? "active" : ""}`}
+            onClick={() => setActiveTab("verification")}
+          >
+            Researcher Verification
+          </button>
+          <button
+            className={`tab-button ${activeTab === "deleteUser" ? "active" : ""}`}
+            onClick={() => setActiveTab("deleteUser")}
+          >
+            Delete User
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "verification" && (
+          <ResearcherVerification
+            researchers={researchers}
+            updating={updating}
+            onUpdateStatus={updateVerificationStatus}
+          />
+        )}
+
+        {activeTab === "deleteUser" && (
+          <DeleteUserTab
+            users={users}
+            searchTerm={searchTerm}
+            selectedUser={selectedUser}
+            deleteConfirm={deleteConfirm}
+            onSearchChange={setSearchTerm}
+            onSelectUser={setSelectedUser}
+            onDeleteUser={handleDeleteUser}
+            onCancelDelete={handleCancelDelete}
+            onConfirmChange={setDeleteConfirm}
+          />
+        )}
       </div>
-
-      {/* Tab Navigation */}
-      <div className="tab-navigation">
-        <button
-          className={`tab-button ${activeTab === "verification" ? "active" : ""}`}
-          onClick={() => setActiveTab("verification")}
-        >
-          Researcher Verification
-        </button>
-        <button
-          className={`tab-button ${activeTab === "deleteUser" ? "active" : ""}`}
-          onClick={() => setActiveTab("deleteUser")}
-        >
-          Delete User
-        </button>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === "verification" && (
-        <ResearcherVerification
-          researchers={researchers}
-          updating={updating}
-          onUpdateStatus={updateVerificationStatus}
-        />
-      )}
-
-      {activeTab === "deleteUser" && (
-        <DeleteUserTab
-          users={users}
-          searchTerm={searchTerm}
-          selectedUser={selectedUser}
-          deleteConfirm={deleteConfirm}
-          onSearchChange={setSearchTerm}
-          onSelectUser={setSelectedUser}
-          onDeleteUser={handleDeleteUser}
-          onCancelDelete={handleCancelDelete}
-          onConfirmChange={setDeleteConfirm}
-        />
-      )}
-    </div>
+      <Toast
+        toast={toast}
+        isDismissing={isDismissing}
+        onDismiss={() => setIsDismissing(true)}
+        onAnimationEnd={() => {
+          if (isDismissing) {
+            setToast(null);
+            setIsDismissing(false);
+          }
+        }}
+      />
+    </>
   );
 }
