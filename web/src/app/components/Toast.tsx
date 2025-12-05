@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import "./Toast.css";
 
 export type ToastTone = "success" | "error" | "loading";
@@ -19,9 +20,15 @@ interface ToastProps {
 }
 
 export default function Toast({ toast, isDismissing, onDismiss, onAnimationEnd }: ToastProps) {
-  if (!toast) return null;
+  const [mounted, setMounted] = React.useState(false);
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!toast || !mounted) return null;
+
+  const toastContent = (
     <div
       className={`toast toast--${toast.tone} ${isDismissing ? "toast--dismissing" : ""}`}
       role="alert"
@@ -41,5 +48,7 @@ export default function Toast({ toast, isDismissing, onDismiss, onAnimationEnd }
       )}
     </div>
   );
+
+  return createPortal(toastContent, document.body);
 }
 

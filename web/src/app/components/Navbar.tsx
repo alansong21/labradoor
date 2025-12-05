@@ -5,10 +5,9 @@
  */
 "use client";
 
-import { useState, useEffect, type SyntheticEvent } from "react";
+import { useState, useEffect } from "react";
 import "./Navbar.css";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Toast, { type ToastState } from "./Toast";
 
@@ -58,24 +57,21 @@ export default function Navbar({ isLoggedIn = false, role, hideAuthButtons = fal
     <>
       <nav className="navbar">
         <div className="navbar-left">
-          <Link href="/" className="navbar-brand" prefetch={true}>
+          <Link href="/" className="navbar-brand" prefetch={true} onClick={handleLinkClick}>
             {logoFailed ? (
               <span style={{ fontWeight: "bold", fontSize: "1.5rem", color: "black" }}>
                 LABRADOOR
               </span>
             ) : (
-              <Image
+              <img
                 src="/logo.png"
                 alt="Labradoor"
-                width={120}
-                height={40}
-                priority
-                loading="eager"
-                style={{ height: "auto", width: "auto", objectFit: "contain" }}
-                onError={(e: SyntheticEvent<HTMLImageElement, Event>) => {
-                  // Hide broken image and switch to text fallback
-                  e.currentTarget.style.display = "none";
+                style={{ height: "40px", width: "auto", objectFit: "contain", display: "block" }}
+                onError={() => {
                   setLogoFailed(true);
+                }}
+                onLoad={() => {
+                  setLogoFailed(false);
                 }}
               />
             )}

@@ -62,10 +62,19 @@
   height: 40px;
 }
 
-.navbar-brand img {
+.navbar-brand img,
+.navbar-brand span img,
+.navbar-brand > span {
   height: 100%;
   width: auto;
   object-fit: contain;
+  display: block;
+}
+
+.navbar-brand > span {
+  display: flex;
+  align-items: center;
+  height: 40px;
 }
 
 .navbar-links {
