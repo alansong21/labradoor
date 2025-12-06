@@ -1,0 +1,34 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      rampTo: 10
+      name: Warm up
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 20
+      name: Ramp up load
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 20
+      name: Sustained load
+  plugins:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+
+scenarios:
+  - name: "Visitor flow"
+    flow:
+      - get: { url: "/" }
+      - think: 1
+      - get: { url: "/login" }
+      - think: 2
+      - get: { url: "/signup" }
+
+  - name: "API Check"
+    flow:
+      - get: { url: "/api/auth/session" }
