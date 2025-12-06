@@ -46,7 +46,7 @@ describe('Authentication and RBAC Tests', () => {
     })
 
     it('should redirect to login when accessing researcher route without authentication', () => {
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       
       // Should redirect to login
       cy.url().should('include', '/login')
@@ -121,11 +121,11 @@ describe('Authentication and RBAC Tests', () => {
     it('should NOT allow student to access researcher my-posts page', () => {
       cy.intercept('GET', '/api/auth/me', { fixture: 'student-user.json' }).as('getUser')
       cy.intercept('GET', '/api/posts/my-posts', { statusCode: 403 }).as('getMyPosts')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       
       // Should redirect or show error
       cy.url().should('satisfy', (url) => {
-        return !url.includes('/researcher-myposts') || url.includes('/login')
+        return !url.includes('/my-posts') || url.includes('/login')
       })
     })
 
@@ -146,9 +146,9 @@ describe('Authentication and RBAC Tests', () => {
 
     it('should allow researcher to access researcher homepage', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       
-      cy.url().should('include', '/researcher-myposts')
+      cy.url().should('include', '/my-posts')
       cy.contains('My Posts').should('be.visible')
     })
 
@@ -162,7 +162,7 @@ describe('Authentication and RBAC Tests', () => {
     it('should allow researcher to access applications page for their posts', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
       cy.intercept('GET', '/api/applications/post/1', { fixture: 'applications.json' }).as('getApplications')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('View Applications').first().click()
       
       cy.url().should('include', '/applications')
@@ -191,7 +191,7 @@ describe('Authentication and RBAC Tests', () => {
       
       // Should redirect to my-posts (researcher equivalent)
       cy.url().should('satisfy', (url) => {
-        return url.includes('/my-posts') || url.includes('/researcher-myposts')
+        return url.includes('/my-posts') || url.includes('/my-posts')
       })
     })
 
@@ -280,7 +280,7 @@ describe('Authentication and RBAC Tests', () => {
     })
 
     it('should redirect unauthenticated user from protected researcher routes', () => {
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.url().should('include', '/login')
     })
 
@@ -336,7 +336,7 @@ describe('Authentication and RBAC Tests', () => {
       cy.loginAsStudent()
       
       // Try to access researcher applications page
-      cy.visit('/researcher-myposts/1/applications')
+      cy.visit('/my-posts/1/applications')
       
       // Should redirect or show error
       cy.url().should('satisfy', (url) => {
@@ -354,7 +354,7 @@ describe('Authentication and RBAC Tests', () => {
       
       // Should redirect to researcher equivalent
       cy.url().should('satisfy', (url) => {
-        return url.includes('/my-posts') || url.includes('/researcher-myposts')
+        return url.includes('/my-posts') || url.includes('/my-posts')
       })
     })
 
@@ -374,7 +374,7 @@ describe('Authentication and RBAC Tests', () => {
       cy.loginAsResearcher()
       
       // Try to access another researcher's applications
-      cy.visit('/researcher-myposts/999/applications')
+      cy.visit('/my-posts/999/applications')
       
       // Should redirect or show error
       cy.url().should('satisfy', (url) => {
@@ -425,11 +425,11 @@ describe('Authentication and RBAC Tests', () => {
       cy.intercept('GET', '/api/posts/my-posts', { statusCode: 403 }).as('getMyPosts')
       cy.loginAsStudent()
       
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       
       // Should not be able to access
       cy.url().should('satisfy', (url) => {
-        return !url.includes('/researcher-myposts') || url.includes('/login')
+        return !url.includes('/my-posts') || url.includes('/login')
       })
     })
 
@@ -442,7 +442,7 @@ describe('Authentication and RBAC Tests', () => {
       
       // Should redirect
       cy.url().should('satisfy', (url) => {
-        return url.includes('/my-posts') || url.includes('/researcher-myposts')
+        return url.includes('/my-posts') || url.includes('/my-posts')
       })
     })
 
@@ -483,7 +483,7 @@ describe('Authentication and RBAC Tests', () => {
       
       // Should redirect researcher to my-posts
       cy.url().should('satisfy', (url) => {
-        return url.includes('/my-posts') || url.includes('/researcher-myposts')
+        return url.includes('/my-posts') || url.includes('/my-posts')
       })
     })
 
@@ -516,7 +516,7 @@ describe('Authentication and RBAC Tests', () => {
       
       // Should redirect to my-posts
       cy.url().should('satisfy', (url) => {
-        return url.includes('/my-posts') || url.includes('/researcher-myposts')
+        return url.includes('/my-posts') || url.includes('/my-posts')
       })
     })
   })
@@ -577,7 +577,7 @@ describe('Authentication and RBAC Tests', () => {
       cy.intercept('GET', '/api/auth/me', { fixture: 'researcher-user.json' }).as('getUser')
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
       cy.loginAsResearcher()
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       
       // Should NOT show "My Applications"
       cy.get('body').then(($body) => {

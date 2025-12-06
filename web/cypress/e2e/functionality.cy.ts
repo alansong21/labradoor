@@ -262,7 +262,7 @@ describe('Functionality Tests', () => {
 
     it('should navigate to post creation page', () => {
       cy.intercept('GET', '/api/posts/my-posts', { body: [] }).as('getMyPosts')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('Create New Post').click()
       cy.url().should('include', '/researcher-post-creation')
     })
@@ -409,32 +409,32 @@ describe('Functionality Tests', () => {
 
     it('should navigate to my posts page', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('My Posts').should('be.visible')
     })
 
     it('should display empty state when no posts', () => {
       cy.intercept('GET', '/api/posts/my-posts', { body: [] }).as('getMyPosts')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains("You haven't created any posts yet").should('be.visible')
     })
 
     it('should display posts list when posts exist', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.get('.post-card').should('have.length.at.least', 1)
     })
 
     it('should show application count for each post', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('Application').should('be.visible')
     })
 
     it('should navigate to applications page for a post', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
       cy.intercept('GET', '/api/posts/*/applications', { fixture: 'applications.json' }).as('getApplications')
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('View Applications').first().click()
       cy.url().should('include', '/applications')
     })

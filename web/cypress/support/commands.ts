@@ -62,8 +62,8 @@ Cypress.Commands.add('loginAsResearcher', () => {
   cy.get('input[name="email"]').type(credentials.researcher.email)
   cy.get('input[name="password"]').type(credentials.researcher.password)
   cy.get('button[type="submit"]').click()
-  // Wait for redirect or success
-  cy.url({ timeout: 10000 }).should('not.include', '/login')
+  // Wait for redirect to /my-posts (researcher homepage)
+  cy.url({ timeout: 10000 }).should('include', '/my-posts')
 })
 
 Cypress.Commands.add('loginAsAdmin', () => {

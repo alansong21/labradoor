@@ -7,6 +7,10 @@ export default defineConfig({
       // Custom log task for performance metrics
       on('task', {
         log(message) {
+          // Filter out hydration warnings from logs
+          if (typeof message === 'string' && message.includes('Hydration')) {
+            return null
+          }
           console.log(message)
           return null
         },
