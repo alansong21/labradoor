@@ -125,7 +125,7 @@ async function getUserById(req, res) {
 }
 
 //Helper function to delete student-related data
-async function deleteStudentData(tx, user, userId) {
+async function deleteUserData(tx, user, userId) {
   if (!user.student) {
     return;
   }
@@ -229,7 +229,7 @@ async function deleteUser(req, res) {
 
       // If user is a student, delete their applications and related data
       if(user.student) {
-        await deleteStudentData(tx, user, userId);
+        await deleteUserData(tx, user, userId);
       }
 
       // If user is a researcher, delete their posts and related data
