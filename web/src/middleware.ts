@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const PUBLIC_PATHS = ['/login', '/signup', '/verify', '/verify-signup', '/']
-const RESEARCHER_ONLY_PATHS = [/^\/my-posts(?:\/.*)?$/, /^\/researcher-myposts(?:\/.*)?$/, /^\/researcher-post-creation(?:\/.*)?$/]
+const RESEARCHER_ONLY_PATHS = [/^\/my-posts(?:\/.*)?$/, /^\/researcher-post-creation(?:\/.*)?$/]
 const STUDENT_ONLY_PATHS = [/^\/student_application(?:\/.*)?$/]
 const API_BASE_URLS = [
     process.env.INTERNAL_API_URL,
