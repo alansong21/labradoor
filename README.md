@@ -3,6 +3,20 @@ A job board for undergrad lab openings @UCLA
 
 Contributors: Kevin Yang, Alan Song, Kevin Yao, Amy Sun, Angela Zhang
 
+# Diagrams
+
+## Database Schema
+
+![Database schema](docs/ERD.png)
+
+Prisma database entity relationship diagram.
+
+## Researcher posting creation sequence
+
+![Post creation sequence](docs/Sequence.png)
+
+Complete flow when a researcher creates a new post with questions.
+
 # Docker Quickstart
 
 Run the **Next.js (web)** + **Express (server)** app with Docker.
@@ -13,25 +27,35 @@ Run the **Next.js (web)** + **Express (server)** app with Docker.
 
 ## 1) Environment variables
 
-Create `server/.env` with at least the Prisma connection strings below.
+Paste the following into `server/.env` (adjust values as needed):
 
-> The provided `docker-compose.yml` only launches the web and API containers. You must supply your own Postgres instance (local, cloud, Prisma Accelerate, etc.) and point the backend to it.
+```dotenv
+# Prisma / database
+DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/appdb?schema=public"
+DIRECT_URL="postgresql://postgres:postgres@host.docker.internal:5432/appdb?schema=public"
 
-* **Using a Postgres instance on your host machine** (common for local dev):
+# Optional: isolated DB for tests/e2e
+DATABASE_URL_TEST="postgresql://postgres:postgres@host.docker.internal:5432/appdb_test?schema=public"
+DIRECT_URL_TEST="postgresql://postgres:postgres@host.docker.internal:5432/appdb_test?schema=public"
 
-  ```dotenv
-  DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/appdb?schema=public"
-  DIRECT_URL="postgresql://postgres:postgres@host.docker.internal:5432/appdb?schema=public"
-  ```
+# App / service toggles
+SEND_VERIFICATION_EMAIL="false"
+ENABLE_DEV_TOOLS="true"
+APP_BASE_URL="http://localhost:3000"
 
-* **Using a managed Postgres / Prisma Accelerate**:
+# Third-party keys (examples)
+RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxxxxx"
+DOMAIN="labradoor.local"
+PORKBUN_PSW="changeme"
+```
 
-  ```dotenv
-  DATABASE_URL="postgresql://<user>:<pass>@<host>:<port>/<db>?schema=public"
-  DIRECT_URL="postgresql://<user>:<pass>@<host>:<port>/<db>?schema=public"
-  ```
+Paste the following into `web/.env.local` so the Next.js app knows how to reach the API:
 
-> `DIRECT_URL` is used by Prisma for migrations/introspection; `DATABASE_URL` is used at runtime. Add any other required secrets (e.g., `APP_BASE_URL`, email provider keys) to the same file.
+```dotenv
+NEXT_PUBLIC_API_URL="http://localhost:4000"
+```
+
+> The provided `docker-compose.yml` only launches the web and API containers. Start Postgres separately (local container, managed service, Prisma Accelerate, etc.) and update the URLs above to match it. Commit your real secrets to a safe store—these examples are placeholders.
 
 ## 2) Start services (dev with hot reload)
 
