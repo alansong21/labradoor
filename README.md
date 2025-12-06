@@ -108,6 +108,24 @@ docker compose exec web sh
 
 There is no dedicated `docker-compose.prod.yml` checked in. To create a production image, clone or adapt `Dockerfile.web` / `Dockerfile.server`, build them manually, and deploy alongside a managed Postgres database. If you need a compose file for prod, create one in your fork so it matches your hosting environment.
 
+## Testing
+For Jest Testing:
+```bash
+npm test
+```
+
+For Cucumber Testing: 
+```bash
+cd tests
+npm run tests
+```
+
+For Artillery Stress Testing:
+```bash
+cd tests
+npx artillery run stress/artillery.yml
+```
+
 ## Troubleshooting
 
 * **`Missing script: "dev"`**: Ensure `server/package.json` has `"dev": "nodemon index.js"` (or update compose to `npm start`).
