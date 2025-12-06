@@ -24,78 +24,172 @@ const createPostSchema = z.object({
     questions: z.array(questionInputSchema).optional(),
 });
 
-// QUESTION_TYPE_MAP - maps client-side question types to internal enum values
-
-const QUESTION_TYPE_MAP = {
-    text: "LONG_TEXT",
-    checkbox: "CHECKBOX",
-    "multiple-choice": "MULTIPLE_CHOICE",
-};
-
 // createPost - creates a new researcher post with optional tags and questions
 
-async function createPost(req, res) {
-    const parsed = createPostSchema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+// createPost helper functions
+function mapQuestionType(type) {
+    // Converts question type to database enum values
+    const TYPE_MAP = {
+        text: "LONG_TEXT",
+        checkbox: "CHECKBOX",
+        "multiple-choice": "MULTIPLE_CHOICE",
+    };
+    return TYPE_MAP[type];
+}
 
-    const { title, body, description, tags, questions } = parsed.data;
-    const resolvedBody = body ?? description ?? "";
-    const userId = req.user.id;
-    const formattedQuestions =
-        questions?.map(q => {
-            const mappedType = QUESTION_TYPE_MAP[q.type];
-            const requiresOptions = q.type === "multiple-choice" || q.type === "checkbox";
-            const sanitizedOptions = requiresOptions
-                ? (q.options ?? []).map(opt => opt.trim()).filter(Boolean)
-                : [];
-            return {
-                type: mappedType,
-                body: {
-                    prompt: q.question,
-                    description: q.description ?? "",
-                    options: sanitizedOptions,
-                },
-            };
-        }) ?? [];
+function requiresOptions(type) {
+    // Determine if a question type requires options (return bool)
+    // PRE: Must be a valid type
+    return type === "multiple-choice" || type === "checkbox";
+}
+
+
+function sanitizeOptions(options) {
+    // Trim options array
+    // Returns sanitized options 
+    if (!options) return []; // returns empty array if options is null
+    return options.map(opt => opt.trim()).filter(Boolean);
+}
+
+function formatQuestion(question) {
+    // Formats a single question to store in the db
+    // PRE: Question must be completely valid
+    // POST: Question fully formatted and sanitized
+    const mappedType = mapQuestionType(question.type);
+    const needsOptions = requiresOptions(question.type);
+    const options = needsOptions ? sanitizeOptions(question.options) : [];
+
+    return {
+        type: mappedType,
+        body: {
+            prompt: question.question,
+            description: question.description ?? "",
+            options,
+        },
+    };
+}
+
+function validateQuestionOptions(formattedQuestions) {
+    // Check validity of "options"-type questions
+    // PRE: formattedQuestions is an array of questions in the db format
+    // Returns null or error message if invalid
+    
     const invalidQuestion = formattedQuestions.find(
-        q => (q.type === "MULTIPLE_CHOICE" || q.type === "CHECKBOX") && (!q.body.options || q.body.options.length === 0)
+        q => (q.type === "MULTIPLE_CHOICE" || q.type === "CHECKBOX") && 
+             q.body.options.length === 0
     );
+
     if (invalidQuestion) {
-        return res.status(400).json({ error: "Multiple choice and checkbox questions require at least one option." });
+        return "Multiple choice and checkbox questions require at least one option.";
+    }
+    return null;
+}
+
+async function ensureVerifiedResearcher(userId) {
+    // Check that researcher is verified
+    // PRE: valid userId
+    // Returns 403 if the researcher is not verified
+    const researcher = await prisma.researcher.findUnique({ where: { userId } });
+    
+    if (researcher?.verifyStatus !== "VERIFIED") {
+        throw { status: 403, message: "Only verified researchers can create posts" };
+    }
+}
+
+function validateAndPreparePostData(requestBody, userId) {
+    // Post validation and preparation
+    // PRE: requestBody must be an object
+    // POST: Return validated object or error
+    
+    // GUARD: Validate input schema
+    const parsed = createPostSchema.safeParse(requestBody);
+    if (!parsed.success) {
+        throw { status: 400, error: parsed.error.flatten() };
     }
 
+    const { title, body, description, tags, questions } = parsed.data;
+
+    // Use description as body if not provided
+    const resolvedBody = body ?? description ?? "";
+
+    // Format questions for database
+    const formattedQuestions = questions ? questions.map(formatQuestion) : [];
+
+    // GUARD: Validate question options
+    const optionsError = validateQuestionOptions(formattedQuestions);
+    if (optionsError) {
+        throw { status: 400, error: optionsError };
+    }
+
+    return {
+        title,
+        resolvedBody,
+        userId,
+        tags: tags || [],
+        formattedQuestions,
+    };
+}
+
+async function createPostInDatabase(postData) {
+    // Create post in database with its questions/tags
+    // PRE: postData must be valid and preformatted
+    // POST: Return created post
+    
+    const { title, resolvedBody, userId, tags, formattedQuestions } = postData;
+
+    // GUARD: Ensure user is verified researcher
+    await ensureVerifiedResearcher(userId);
+
+    // Create post with questions in single transaction
+    const post = await prisma.post.create({
+        data: {
+            title,
+            body: resolvedBody,
+            researcherId: userId,
+            tags,
+            questions: formattedQuestions.length
+                ? { create: formattedQuestions }
+                : undefined,
+        },
+        include: {
+            questions: true,
+            researcher: {
+                include: { user: true },
+            },
+        },
+    });
+
+    return post;
+}
+
+// main createPost function
+
+async function createPost(req, res) {
+    // Creates a new research post with questions and tags if any.
+    //      > Validate input using schema
+    //      > Check that researcher is verified
+    //      > Format questions for database
+    //      > Create post and questions
+    //
+    // PRE: req.body and req.user.id must valid
+    // POST: Returns 201 on successful post creation, otherwise return error code
     try {
-        const researcher = await prisma.researcher.findUnique({ where: { userId } });
-        if (researcher?.verifyStatus !== "VERIFIED") {
-            return res.status(403).json({ error: "Only verified researchers can create posts" });
-        }
+        // Validate and prepare data
+        const postData = validateAndPreparePostData(req.body, req.user.id);
 
-        const post = await prisma.post.create({
-            data: {
-                title,
-                body: resolvedBody,
-                researcherId: userId,
-                tags: tags || [],
-                questions: formattedQuestions.length
-                    ? {
-                        create: formattedQuestions,
-                    }
-                    : undefined,
-            },
-            include: {
-                questions: true,
-                researcher: {
-                    include: {
-                        user: true,
-                    },
-                },
-            },
-        });
+        // Create post in database
+        const post = await createPostInDatabase(postData);
 
-        res.status(201).json(post);
+        return res.status(201).json(post);
     } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "Failed to create post" });
+        // Handle known errors
+        if (e.status) {
+            return res.status(e.status).json({ error: e.error || e.message });
+        }
+       
+        // Log unexpected errors
+        console.error("Failed to create post:", e);
+        return res.status(500).json({ error: "Failed to create post" });
     }
 }
 
