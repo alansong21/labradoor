@@ -9,6 +9,7 @@ jest.mock("../server/middleware/auth", () => ({
         req.user = { id: 1 };
         next();
     },
+    requireRole: () => (_req, _res, next) => next(),
 }));
 
 // Mock the prisma client
