@@ -983,7 +983,7 @@ The API uses cookie-based session authentication. After logging in, the session 
 - **Verified Researcher**: Researcher with `VERIFIED` status (required for creating posts)
 - **Admin**: Requires admin authentication
 
-## Running Tests
+## Testing
 
 This project uses Jest and Supertest for testing API controllers. The tests cover endpoints successes and failures, authorization, validadtion and database errors.
 
