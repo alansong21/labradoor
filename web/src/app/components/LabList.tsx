@@ -102,15 +102,16 @@ export default function LabList({ labs, userRole }: Props) {
   return (
     <>
       <Navbar isLoggedIn={true} role={userRole || undefined} />
-      <main className="lab-page">
-        <h1 className="title">Lab Openings</h1>
-        <div className="search-container">
-          <div className="lab-search">
+      <main className="lab-page" data-cy="lab-page">
+        <h1 className="title" data-cy="page-title">Lab Openings</h1>
+        <div className="search-container" data-cy="search-container">
+          <div className="lab-search" data-cy="lab-search">
             <input
               type="search"
               placeholder="Search by title or description"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              data-cy="search-input"
             />
           </div>
           <div className="tag-filter-search">
@@ -167,28 +168,29 @@ export default function LabList({ labs, userRole }: Props) {
             ))}
           </div>
         )}
-        <div className="card-container">
+        <div className="card-container" data-cy="lab-cards-container">
           {filtered.map((lab) => (
-            <div key={lab.id} className="lab-card">
-              <h2 className="lab-name">{lab.name}</h2>
-              <p className="lab-desc">{lab.desc}</p>
+            <div key={lab.id} className="lab-card" data-cy="lab-card">
+              <h2 className="lab-name" data-cy="lab-title">{lab.name}</h2>
+              <p className="lab-desc" data-cy="lab-description">{lab.desc}</p>
               {lab.tags && lab.tags.length > 0 && (
-                <div className="lab-tags">
+                <div className="lab-tags" data-cy="lab-tags">
                   {lab.tags.map((tag) => (
-                    <span key={tag} className="lab-tag">
+                    <span key={tag} className="lab-tag" data-cy="lab-tag">
                       {tag}
                     </span>
                   ))}
                 </div>
               )}
-              <ul className="lab-details">
+              <ul className="lab-details" data-cy="lab-details">
                 {lab.details.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line} data-cy="lab-detail-item">{line}</li>
                 ))}
               </ul>
               <Link 
                 href={`/labs/${lab.id}`} 
                 className="learn-more"
+                data-cy="learn-more-link"
                 prefetch={true}
                 onClick={() => {
                   setToast({ id: Date.now(), tone: "loading", message: "Loading..." });

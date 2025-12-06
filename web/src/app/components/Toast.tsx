@@ -32,14 +32,16 @@ export default function Toast({ toast, isDismissing, onDismiss, onAnimationEnd }
     <div
       className={`toast toast--${toast.tone} ${isDismissing ? "toast--dismissing" : ""}`}
       role="alert"
+      data-cy="toast"
       onAnimationEnd={onAnimationEnd}
     >
-      {toast.tone === "loading" && <span className="toast-spinner" />}
-      {toast.tone === "error" && <span className="toast-icon">⚠</span>}
+      {toast.tone === "loading" && <span className="toast-spinner" data-cy="toast-spinner" />}
+      {toast.tone === "error" && <span className="toast-icon" data-cy="toast-icon">⚠</span>}
       <span>{toast.message}</span>
       {toast.tone !== "loading" && (
         <button
           className="toast-close"
+          data-cy="toast-close"
           onClick={onDismiss}
           aria-label="Dismiss"
         >

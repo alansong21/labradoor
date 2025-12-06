@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "email": "balanbong@g.ucla.edu",
+    "name": "Test Student",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "uclaId": "123456789",
+    "student": {
+      "year": "Junior",
+      "major": "Computer Science"
+    },
+    "researcher": null
+  },
+  {
+    "id": 2,
+    "email": "research@ucla.edu",
+    "name": "Test Researcher",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "uclaId": "987654321",
+    "student": null,
+    "researcher": {
+      "department": "Computer Science",
+      "verifyStatus": "VERIFIED"
+    }
+  }
+]
+

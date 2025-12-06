@@ -10,6 +10,7 @@ const applications = require("./routes/applications");
 const answers = require("./routes/answers");
 const questions = require("./routes/questions");
 const admin = require("./routes/admin");
+const test = require("./routes/test");
 
 const app = express();
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
@@ -30,4 +31,8 @@ app.use("/api/applications", applications);
 app.use("/api/answers", answers);
 app.use("/api/questions", questions);
 app.use("/api/admin", admin);
+
+// Test routes (only available in non-production environments)
+app.use("/api/test", test);
+
 module.exports = app;

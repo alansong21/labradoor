@@ -1,3 +1,5 @@
+//Lazy loading feature implemented with aid of GPT4.1
+
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import Loading from "./components/Loading";

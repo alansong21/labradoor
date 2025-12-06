@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "title": "Research Assistant Position in AI Lab",
+    "content": "We are looking for undergraduate students to assist with machine learning research projects.",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "tags": ["AI", "Machine Learning"],
+    "_count": {
+      "applications": 5
+    }
+  },
+  {
+    "id": 2,
+    "title": "Biology Lab Research Opportunity",
+    "content": "We need students interested in molecular biology research.",
+    "createdAt": "2024-01-02T00:00:00.000Z",
+    "tags": ["Biology"],
+    "_count": {
+      "applications": 2
+    }
+  }
+]
+

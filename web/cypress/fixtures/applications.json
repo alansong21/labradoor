@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "createdAt": "2024-01-15T00:00:00.000Z",
+    "status": "SUBMITTED",
+    "post": {
+      "id": 1,
+      "title": "Research Assistant Position in AI Lab",
+      "summary": "Looking for motivated students to join our AI research team"
+    },
+    "answers": [
+      {
+        "id": 1,
+        "type": "text",
+        "body": {
+          "value": "I am interested in AI research and have experience with Python."
+        },
+        "questionId": 1,
+        "question": {
+          "id": 1,
+          "type": "text",
+          "body": {
+            "prompt": "Why are you interested in this position?"
+          }
+        }
+      }
+    ]
+  }
+]
+

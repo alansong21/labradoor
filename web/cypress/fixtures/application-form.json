@@ -1,0 +1,25 @@
+{
+  "post": {
+    "id": 1,
+    "title": "Research Assistant Position in AI Lab",
+    "questions": [
+      {
+        "id": 1,
+        "type": "text",
+        "body": {
+          "prompt": "Why are you interested in this position?",
+          "description": "Please provide a detailed answer."
+        }
+      },
+      {
+        "id": 2,
+        "type": "multiple-choice",
+        "body": {
+          "prompt": "What is your year?",
+          "options": ["Freshman", "Sophomore", "Junior", "Senior"]
+        }
+      }
+    ]
+  }
+}
+

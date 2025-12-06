@@ -1,0 +1,31 @@
+[
+  {
+    "userId": 2,
+    "verifyStatus": "VERIFIED",
+    "department": "Computer Science",
+    "user": {
+      "id": 2,
+      "email": "research@ucla.edu",
+      "name": "Test Researcher",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    "_count": {
+      "posts": 3
+    }
+  },
+  {
+    "userId": 3,
+    "verifyStatus": "PENDING",
+    "department": "Biology",
+    "user": {
+      "id": 3,
+      "email": "pending@ucla.edu",
+      "name": "Pending Researcher",
+      "createdAt": "2024-01-02T00:00:00.000Z"
+    },
+    "_count": {
+      "posts": 1
+    }
+  }
+]
+
