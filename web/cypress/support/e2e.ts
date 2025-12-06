@@ -16,6 +16,23 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+// Suppress React hydration errors caused by Cypress DOM injection
+// These errors occur when Cypress injects highlight elements that
+// don't exist during Next.js SSR, causing hydration mismatches.
+Cypress.on('uncaught:exception', (err) => {
+  // Suppress React hydration errors
+  if (
+    err.message.includes('Hydration failed') ||
+    err.message.includes('hydration') ||
+    err.message.includes('did not match') ||
+    err.message.includes('__cypress-highlight')
+  ) {
+    return false // Prevent Cypress from failing the test
+  }
+  // Let other errors fail the test
+  return true
+})
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 

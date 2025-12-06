@@ -180,7 +180,7 @@ describe('Acceptance Criteria Tests', () => {
       cy.url().should('not.include', '/login')
       // Should be on researcher dashboard or my posts
       cy.url().should('satisfy', (url) => {
-        return url.includes('/') || url.includes('/researcher-myposts') || url.includes('/my-posts')
+        return url.includes('/my-posts') || url.includes('/')
       })
     })
 
@@ -293,7 +293,7 @@ describe('Acceptance Criteria Tests', () => {
       
       // Should redirect to post detail or my posts page
       cy.url().should('satisfy', (url) => {
-        return url.includes('/researcher-myposts') || url.includes('/labs/') || url.includes('/my-posts')
+        return url.includes('/my-posts') || url.includes('/labs/')
       })
     })
 
@@ -395,7 +395,7 @@ describe('Acceptance Criteria Tests', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
       cy.intercept('GET', '/api/applications/post/1', { fixture: 'applications.json' }).as('getApplications')
       
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.wait('@getMyPosts')
       
       // Click to view applications
@@ -413,7 +413,7 @@ describe('Acceptance Criteria Tests', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
       cy.intercept('GET', '/api/applications/post/1', { fixture: 'applications.json' }).as('getApplications')
       
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('View Applications').first().click()
       cy.wait('@getApplications')
       
@@ -432,7 +432,7 @@ describe('Acceptance Criteria Tests', () => {
       }).as('getApplications')
       
       // Try to access applications page directly
-      cy.visit('/researcher-myposts/1/applications')
+      cy.visit('/my-posts/1/applications')
       
       // Should redirect or show error
       cy.url().should('satisfy', (url) => {
@@ -444,7 +444,7 @@ describe('Acceptance Criteria Tests', () => {
       cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
       cy.intercept('GET', '/api/applications/post/1', { body: [] }).as('getApplications')
       
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('View Applications').first().click()
       cy.wait('@getApplications')
       
@@ -467,7 +467,7 @@ describe('Acceptance Criteria Tests', () => {
         body: { id: 1, status: 'ACCEPTED', message: 'Status updated successfully' }
       }).as('acceptApplication')
       
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('View Applications').first().click()
       cy.wait('@getApplications')
       
@@ -489,7 +489,7 @@ describe('Acceptance Criteria Tests', () => {
         body: { id: 1, status: 'REJECTED', message: 'Status updated successfully' }
       }).as('rejectApplication')
       
-      cy.visit('/researcher-myposts')
+      cy.visit('/my-posts')
       cy.contains('View Applications').first().click()
       cy.wait('@getApplications')
       

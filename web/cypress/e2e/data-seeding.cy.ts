@@ -73,7 +73,7 @@ describe('Fixture-Driven Tests with Deterministic Data', () => {
     
     // Verify researcher can access their posts using fixture
     cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
-    cy.visit('/researcher-myposts')
+    cy.visit('/my-posts')
     cy.wait('@getMyPosts', { timeout: 5000 })
     cy.get('[data-cy="my-posts-page"], .my-posts-page, main', { timeout: 5000 }).should('exist')
   })
