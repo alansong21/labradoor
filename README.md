@@ -3,6 +3,20 @@ A job board for undergrad lab openings @UCLA
 
 Contributors: Kevin Yang, Alan Song, Kevin Yao, Amy Sun, Angela Zhang
 
+# Diagrams
+
+## Database Schema
+
+![Database schema](docs/ERD.png)
+
+Prisma database entity relationship diagram.
+
+## Researcher posting creation sequence
+
+![Post creation sequence](docs/Sequence.png)
+
+Complete flow when a researcher creates a new post with questions.
+
 # Docker Quickstart
 
 Run the **Next.js (web)** + **Express (server)** app with Docker.
