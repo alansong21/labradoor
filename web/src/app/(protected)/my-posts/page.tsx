@@ -98,7 +98,7 @@ export default function MyPostsPage() {
                       {post._count.applications} {post._count.applications === 1 ? 'Application' : 'Applications'}
                     </div>
                     <Link
-                      href={`/researcher-myposts/${post.id}/applications`}
+                      href={`/my-posts/${post.id}/applications`}
                       className="view-apps-button"
                       onClick={() => {
                         setToast({ id: Date.now(), tone: "loading", message: "Loading applications..." });
