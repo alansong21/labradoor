@@ -10,6 +10,7 @@ Development: `http://localhost:4000`
 
 ## Table of Contents
 
+- [Testing](#testing)
 - [Authentication](#authentication)
 - [Users](#users)
 - [Posts (Research Opportunities)](#posts-research-opportunities)
@@ -21,6 +22,41 @@ Development: `http://localhost:4000`
 - [Admin](#admin)
 
 ---
+## Testing
+
+This project uses Jest and Supertest for testing API controllers. The tests cover endpoints successes and failures, authorization, validadtion and database errors.
+
+### Testing structure
+```
+project/
+├── __tests__/
+│   ├── answerController.test.js
+│   ├── authController.test.js
+│   ├── questionController.test.js
+│   ├── userController.test.js
+│   └── postController.test.js
+├── __mocks__/
+│   └── prisma.js                     # mock Prisma client
+├── jest.config.js                    # jest configuration
+└── jest.setup.js                     # Ggobal test setup
+```
+
+### Running tests
+
+#### Dependencies:
+```bash
+npm install --save-dev jest supertest
+```
+
+#### Running tests:
+```bash
+npm test
+```
+
+#### Running specific test files:
+```bash
+npm test __test__/[file]Controller.test.js
+```
 
 ## Authentication
 
@@ -983,38 +1019,3 @@ The API uses cookie-based session authentication. After logging in, the session 
 - **Verified Researcher**: Researcher with `VERIFIED` status (required for creating posts)
 - **Admin**: Requires admin authentication
 
-## Testing
-
-This project uses Jest and Supertest for testing API controllers. The tests cover endpoints successes and failures, authorization, validadtion and database errors.
-
-### Testing structure
-```
-project/
-├── __tests__/
-│   ├── answerController.test.js
-│   ├── authController.test.js
-│   ├── questionController.test.js
-│   ├── userController.test.js
-│   └── postController.test.js
-├── __mocks__/
-│   └── prisma.js                     # mock Prisma client
-├── jest.config.js                    # jest configuration
-└── jest.setup.js                     # Ggobal test setup
-```
-
-### Running tests
-
-#### Dependencies:
-```bash
-npm install --save-dev jest supertest
-```
-
-#### Running tests:
-```bash
-npm test
-```
-
-#### Running specific test files:
-```bash
-npm test __test__/[file]Controller.test.js
-```
