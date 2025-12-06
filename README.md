@@ -17,6 +17,11 @@ Prisma database entity relationship diagram.
 
 Complete flow when a researcher creates a new post with questions.
 
+# Production
+
+Production code is currently on www.labradoor.app
+It is currently not tested, please run repository locally for a fully working version
+
 # Docker Quickstart
 
 Run the **Next.js (web)** + **Express (server)** app with Docker.
