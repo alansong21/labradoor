@@ -2,7 +2,7 @@
 
 The Labradoor backend is an Express.js server that provides REST API endpoints for managing research opportunities, applications, and user authentication.
 
-Note that these docs are largely written by Claude Sonnet 2.5. THe outline and routes were given, the details were filled out by AI.
+Note that these docs are largely written by Claude Sonnet 2.5. The outline and routes were given, the details were filled out by AI.
 
 ## Base URL
 
@@ -982,3 +982,39 @@ The API uses cookie-based session authentication. After logging in, the session 
 - **Researcher**: Requires authentication with researcher role
 - **Verified Researcher**: Researcher with `VERIFIED` status (required for creating posts)
 - **Admin**: Requires admin authentication
+
+## Running Tests
+
+This project uses Jest and Supertest for testing API controllers. The tests cover endpoints successes and failures, authorization, validadtion and database errors.
+
+### Testing structure
+```
+project/
+├── __tests__/
+│   ├── answerController.test.js
+│   ├── authController.test.js
+│   ├── questionController.test.js
+│   ├── userController.test.js
+│   └── postController.test.js
+├── __mocks__/
+│   └── prisma.js                     # mock Prisma client
+├── jest.config.js                    # jest configuration
+└── jest.setup.js                     # Ggobal test setup
+```
+
+### Running tests
+
+#### Dependencies:
+```bash
+npm install --save-dev jest supertest
+```
+
+#### Running tests:
+```bash
+npm test
+```
+
+#### Running specific test files:
+```bash
+npm test __test__/[file]Controller.test.js
+```
