@@ -124,10 +124,91 @@ async function getUserById(req, res) {
   }
 }
 
+//Helper function to delete student-related data
+async function deleteUserData(tx, user, userId) {
+  if (!user.student) {
+    return;
+  }
+  // Delete answers for this student's applications
+  await tx.answer.deleteMany({
+    where: {
+      application: {
+        studentId: userId,
+      },
+    },
+  });
+
+  // Delete student's applications
+  await tx.application.deleteMany({
+    where: { studentId: userId },
+  });
+
+  // Delete the student record
+  await tx.student.delete({
+    where: { userId: userId },
+  })
+}
+
+//Helper function to delete student-related data
+async function deleteResearcherData(tx, user, userId) {
+  if (!user.researcher) {
+    return;
+  }
+  // Get all post IDs for this researcher
+  const posts = await tx.post.findMany({
+    where: { researcherId: userId },
+    select: { id: true },
+  });
+  const postIds = posts.map((p) => p.id);
+
+  if (postIds.length > 0) {
+    // Delete answers for applications to these posts
+    await tx.answer.deleteMany({
+      where: {
+        application: {
+          postId: { in: postIds },
+        },
+      },
+    });
+
+    // Delete applications to these posts
+    await tx.application.deleteMany({
+      where: { postId: { in: postIds } },
+    });
+
+    // Delete questions for these posts
+    await tx.question.deleteMany({
+      where: { postId: { in: postIds } },
+    });
+
+    // Delete the posts
+    await tx.post.deleteMany({
+      where: { researcherId: userId },
+    });
+  }
+
+  // Delete the researcher record
+  await tx.researcher.delete({
+    where: { userId: userId },
+  });
+}
+
+async function deleteUserCommonData(tx, userId) {
+  // Delete verification tokens
+  await tx.verificationToken.deleteMany({
+    where: { userId: userId },
+  });
+
+  // Delete sessions
+  await tx.session.deleteMany({
+    where: { userId: userId },
+  });
+}
+
 // Delete a user (admin version)
 async function deleteUser(req, res) {
   const parsedParams = idParamSchema.safeParse(req.params);
-  if (!parsedParams.success) {
+  if(!parsedParams.success) {
     return res.status(400).json({ error: "Invalid user id" });
   }
 
@@ -146,78 +227,18 @@ async function deleteUser(req, res) {
         throw new Error("USER_NOT_FOUND");
       }
 
-      // If user is a student, delete their applications and answers
-      if (user.student) {
-        // Delete answers for this student's applications
-        await tx.answer.deleteMany({
-          where: {
-            application: {
-              studentId: userId,
-            },
-          },
-        });
-
-        // Delete student's applications
-        await tx.application.deleteMany({
-          where: { studentId: userId },
-        });
-
-        // Delete the student record
-        await tx.student.delete({
-          where: { userId: userId },
-        });
+      // If user is a student, delete their applications and related data
+      if(user.student) {
+        await deleteUserData(tx, user, userId);
       }
 
       // If user is a researcher, delete their posts and related data
       if (user.researcher) {
-        // Get all post IDs for this researcher
-        const posts = await tx.post.findMany({
-          where: { researcherId: userId },
-          select: { id: true },
-        });
-        const postIds = posts.map((p) => p.id);
-
-        if (postIds.length > 0) {
-          // Delete answers for applications to these posts
-          await tx.answer.deleteMany({
-            where: {
-              application: {
-                postId: { in: postIds },
-              },
-            },
-          });
-
-          // Delete applications to these posts
-          await tx.application.deleteMany({
-            where: { postId: { in: postIds } },
-          });
-
-          // Delete questions for these posts
-          await tx.question.deleteMany({
-            where: { postId: { in: postIds } },
-          });
-
-          // Delete the posts
-          await tx.post.deleteMany({
-            where: { researcherId: userId },
-          });
-        }
-
-        // Delete the researcher record
-        await tx.researcher.delete({
-          where: { userId: userId },
-        });
+        await deleteResearcherData(tx, user, userId);
       }
 
-      // Delete verification tokens
-      await tx.verificationToken.deleteMany({
-        where: { userId: userId },
-      });
-
-      // Delete sessions
-      await tx.session.deleteMany({
-        where: { userId: userId },
-      });
+      // Delete common user data
+      await deleteUserCommonData(tx, userId);
 
       // Finally, delete the user
       await tx.user.delete({
