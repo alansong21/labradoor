@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "title": "Research Assistant Position in AI Lab",
+    "summary": "Looking for motivated students to join our AI research team",
+    "body": "We are looking for undergraduate students to assist with machine learning research projects.",
+    "tags": ["AI", "Machine Learning", "Research"],
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "researcher": {
+      "user": {
+        "name": "Dr. Smith"
+      }
+    }
+  },
+  {
+    "id": 2,
+    "title": "Biology Lab Research Opportunity",
+    "summary": "Join our biology research team",
+    "body": "We need students interested in molecular biology research.",
+    "tags": ["Biology", "Research"],
+    "createdAt": "2024-01-02T00:00:00.000Z",
+    "researcher": {
+      "user": {
+        "name": "Dr. Johnson"
+      }
+    }
+  }
+]
+

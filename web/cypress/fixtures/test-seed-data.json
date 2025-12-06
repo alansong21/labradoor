@@ -1,0 +1,89 @@
+{
+  "users": {
+    "testStudent": {
+      "email": "teststudent@ucla.edu",
+      "password": "student123",
+      "name": "Test Student",
+      "uclaId": "123456789",
+      "student": {
+        "year": "Junior",
+        "major": "Computer Science",
+        "description": "Test student for E2E tests"
+      }
+    },
+    "testResearcher": {
+      "email": "testresearcher@ucla.edu",
+      "password": "researcher123",
+      "name": "Test Researcher",
+      "researcher": {
+        "department": "Computer Science",
+        "verifyStatus": "VERIFIED"
+      }
+    }
+  },
+  "posts": [
+    {
+      "title": "Test Lab Position - AI Research",
+      "body": "We are looking for motivated students to join our AI research team. This is a test post for E2E testing.",
+      "tags": ["AI", "Machine Learning", "Research"],
+      "questions": [
+        {
+          "type": "LONG_TEXT",
+          "body": {
+            "prompt": "Why are you interested in this position?",
+            "description": "Please provide a detailed answer."
+          }
+        },
+        {
+          "type": "MULTIPLE_CHOICE",
+          "body": {
+            "prompt": "What is your year?",
+            "options": ["Freshman", "Sophomore", "Junior", "Senior"]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Test Lab Position - Biology Research",
+      "body": "We need students interested in molecular biology research. This is a test post for E2E testing.",
+      "tags": ["Biology", "Research"],
+      "questions": [
+        {
+          "type": "SHORT_TEXT",
+          "body": {
+            "prompt": "What is your GPA?",
+            "description": "Enter your current GPA."
+          }
+        }
+      ]
+    }
+  ],
+  "applications": [
+    {
+      "status": "PENDING",
+      "answers": [
+        {
+          "questionIndex": 0,
+          "type": "LONG_TEXT",
+          "body": "I am interested because..."
+        },
+        {
+          "questionIndex": 1,
+          "type": "MULTIPLE_CHOICE",
+          "body": "Junior"
+        }
+      ]
+    },
+    {
+      "status": "ACCEPTED",
+      "answers": [
+        {
+          "questionIndex": 0,
+          "type": "SHORT_TEXT",
+          "body": "3.8"
+        }
+      ]
+    }
+  ]
+}
+

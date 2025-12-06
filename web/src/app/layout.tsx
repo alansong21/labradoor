@@ -1,3 +1,5 @@
+//Lazy loading feature implemented with aid of GPT4.1
+
 /**
  * Root Layout
  * Defines the global HTML structure and font settings for the application.

@@ -1,0 +1,15 @@
+{
+  "user": {
+    "id": 2,
+    "email": "research@ucla.edu",
+    "name": "Test Researcher",
+    "uclaId": "987654321",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "student": null,
+    "researcher": {
+      "department": "Computer Science",
+      "verifyStatus": "VERIFIED"
+    }
+  }
+}
+

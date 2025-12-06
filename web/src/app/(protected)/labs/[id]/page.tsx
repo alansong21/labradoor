@@ -94,9 +94,9 @@ function LabDetailContent() {
   return (
     <>
       <Navbar isLoggedIn={true} role={userRole || undefined} />
-      <div className="lab-detail-page">
-        <div className="lab-detail-card">
-          <h1 className="lab-title">{lab.name}</h1>
+      <div className="lab-detail-page" data-cy="lab-detail-page">
+        <div className="lab-detail-card" data-cy="lab-detail-card">
+          <h1 className="lab-title" data-cy="lab-detail-title">{lab.name}</h1>
 
           {lab.tags && lab.tags.length > 0 && (
             <div className="lab-tags">
@@ -127,6 +127,7 @@ function LabDetailContent() {
           <Link
             href={`/student_application/apply?lab=${lab.id}`}
             className="apply-button"
+            data-cy="apply-button"
             onClick={() => {
               setToast({ id: Date.now(), tone: "loading", message: "Loading..." });
               setIsDismissing(false);

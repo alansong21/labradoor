@@ -1,0 +1,16 @@
+{
+  "id": 1,
+  "title": "Research Assistant Position in AI Lab",
+  "summary": "Looking for motivated students to join our AI research team",
+  "body": "We are looking for undergraduate students to assist with machine learning research projects. This position offers hands-on experience with cutting-edge AI technologies.",
+  "tags": ["AI", "Machine Learning", "Research"],
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "researcher": {
+    "user": {
+      "name": "Dr. Smith",
+      "email": "research@ucla.edu"
+    }
+  },
+  "questions": []
+}
+

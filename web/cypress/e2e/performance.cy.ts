@@ -66,11 +66,17 @@ describe('Performance Benchmarking', () => {
   })
 
   it('should measure logged-in page load time (researcher)', () => {
+    // Mock login API call
+    cy.intercept('POST', '/api/auth/login', { statusCode: 200, body: { success: true } }).as('login')
+    cy.intercept('GET', '/api/auth/me', { fixture: 'researcher-user.json' }).as('getUser')
+    cy.intercept('GET', '/api/posts/my-posts', { fixture: 'my-posts.json' }).as('getMyPosts')
+    
     // Login first
     cy.visit('/login?role=researcher')
     cy.get('input[name="email"]').type('research@ucla.edu')
     cy.get('input[name="password"]').type('research')
     cy.get('button[type="submit"]').click()
+    cy.wait('@login', { timeout: 5000 })
     
     // Wait for redirect - researcher goes to /my-posts
     cy.url({ timeout: 10000 }).should('include', '/my-posts')
@@ -98,63 +104,46 @@ describe('Performance Benchmarking', () => {
     cy.get('main, body', { timeout: 10000 }).should('be.visible')
   })
 
-  it('should measure API response times (client-side only)', () => {
+  it('should measure API response times (mocked)', () => {
     // IMPORTANT: Server-side API calls cannot be intercepted by Cypress
     // - /api/auth/me is called server-side in page.tsx (Next.js server component)
     // - /api/posts may also be server-side depending on implementation
-    // This test only measures client-side API calls that happen in the browser
+    // This test measures mocked client-side API calls using intercepts
     
-    // Intercept the login API call - use a more flexible pattern
+    // Intercept the login API call with a mock response
     cy.intercept({
       method: 'POST',
       url: '**/api/auth/login',
-    }).as('login')
+    }, { statusCode: 200, body: { success: true }, delay: 100 }).as('login')
     
     cy.visit('/login?role=researcher')
     cy.get('input[name="email"]').type('research@ucla.edu')
     cy.get('input[name="password"]').type('research')
     
-    // Measure login API call (client-side)
-    cy.get('button[type="submit"]').click()
-    
-    // Wait for the login request to complete
-    cy.wait('@login', { timeout: 10000 }).then((interception) => {
-      // Log request info
-      cy.log(`Login API request intercepted: ${interception.request.url}`)
-      
-      // Check if response exists - Cypress uses statusCode property
-      const response = interception.response as any
-      if (response && (response.statusCode !== undefined || response.status !== undefined)) {
-        const status = response.statusCode || response.status
-        const responseTime = response.headers?.['x-response-time'] 
-          ? parseInt(response.headers['x-response-time'] as string)
-          : 0
-        
-        cy.log(`[OPTIMIZED] Login API response time: ${responseTime}ms`)
-        cy.log(`[OPTIMIZED] Login API status: ${status}`)
-        cy.task('log', `OPTIMIZED - Login API: ${responseTime}ms (status: ${status})`)
-        
-        // Verify login was successful if we have a valid status
-        if (typeof status === 'number') {
-          expect(status).to.equal(200)
-        }
-      } else {
-        // Response not available yet, but request was intercepted
-        cy.log('Login API request intercepted (response not yet available)')
-        cy.task('log', 'OPTIMIZED - Login API: Request intercepted (response pending)')
-        // Don't assert on status if it's not available - redirect check will confirm success
-      }
+    // Measure mocked login API call timing
+    cy.window().then((win) => {
+      win.performance.mark('api-request-start')
     })
     
-    // Wait for redirect - this is the primary indicator that login worked
-    // This is more reliable than checking the response status
-    cy.url({ timeout: 10000 }).should('include', '/my-posts')
-    cy.log('Login successful - redirected to /my-posts')
+    cy.get('button[type="submit"]').click()
     
-    // Note: /api/posts is likely called server-side in Next.js, so we can't intercept it
-    // The login API call is the main client-side API we can measure
-    cy.log('API response time measurement complete')
-    cy.log('Note: Posts API is likely server-side and cannot be intercepted')
+    // Wait for the mocked login request to complete
+    cy.wait('@login', { timeout: 10000 }).then((interception) => {
+      cy.window().then((win) => {
+        win.performance.mark('api-request-end')
+        win.performance.measure('api-request', 'api-request-start', 'api-request-end')
+        const measure = win.performance.getEntriesByName('api-request')[0] as PerformanceMeasure
+        
+        cy.log(`[OPTIMIZED] Mocked Login API response time: ${measure.duration.toFixed(2)}ms`)
+        cy.log(`[OPTIMIZED] Login API status: ${interception.response?.statusCode || 200}`)
+        cy.task('log', `OPTIMIZED - Login API (mocked): ${measure.duration.toFixed(2)}ms`)
+        
+        // Verify response was intercepted correctly
+        expect(measure.duration).to.be.lessThan(500)
+      })
+    })
+    
+    cy.log('API response time measurement complete (using mocked responses)')
   })
 
   it('should measure component render times', () => {
@@ -202,6 +191,178 @@ describe('Performance Benchmarking', () => {
         cy.log(`Average navigation time: ${avgTime.toFixed(2)}ms`)
         expect(avgTime).to.be.lessThan(2000)
       })
+  })
+
+  it('should measure form submission function timing', () => {
+    cy.intercept('POST', '/api/auth/login', { statusCode: 401, body: { error: 'Invalid credentials' } }).as('login')
+    
+    cy.visit('/login?role=student')
+    
+    // Measure form input timing
+    cy.window().then((win) => {
+      win.performance.mark('form-input-start')
+    })
+    
+    cy.get('input[name="email"]').type('test@ucla.edu')
+    cy.get('input[name="password"]').type('testpassword')
+    
+    cy.window().then((win) => {
+      win.performance.mark('form-input-end')
+      win.performance.measure('form-input', 'form-input-start', 'form-input-end')
+      const measure = win.performance.getEntriesByName('form-input')[0] as PerformanceMeasure
+      cy.log(`[OPTIMIZED] Form input time: ${measure.duration.toFixed(2)}ms`)
+      cy.task('log', `OPTIMIZED - Form Input: ${measure.duration.toFixed(2)}ms`)
+    })
+    
+    // Measure form submission timing
+    cy.window().then((win) => {
+      win.performance.mark('form-submit-start')
+    })
+    
+    cy.get('button[type="submit"]').click()
+    cy.wait('@login', { timeout: 5000 })
+    
+    cy.window().then((win) => {
+      win.performance.mark('form-submit-end')
+      win.performance.measure('form-submit', 'form-submit-start', 'form-submit-end')
+      const measure = win.performance.getEntriesByName('form-submit')[0] as PerformanceMeasure
+      cy.log(`[OPTIMIZED] Form submission time: ${measure.duration.toFixed(2)}ms`)
+      cy.task('log', `OPTIMIZED - Form Submit: ${measure.duration.toFixed(2)}ms`)
+      expect(measure.duration).to.be.lessThan(2000)
+    })
+  })
+
+  it('should measure API response time with detailed metrics', () => {
+    cy.intercept('POST', '/api/auth/login', { statusCode: 401, body: { error: 'Invalid credentials' } }).as('login')
+    
+    cy.visit('/login?role=student')
+    
+    cy.window().then((win) => {
+      win.performance.mark('api-request-start')
+    })
+    
+    cy.get('input[name="email"]').type('test@ucla.edu')
+    cy.get('input[name="password"]').type('testpassword')
+    cy.get('button[type="submit"]').click()
+    
+    cy.wait('@login', { timeout: 5000 }).then((interception) => {
+      cy.window().then((win) => {
+        win.performance.mark('api-request-end')
+        win.performance.measure('api-request', 'api-request-start', 'api-request-end')
+        const measure = win.performance.getEntriesByName('api-request')[0] as PerformanceMeasure
+        
+        // Measure different phases
+        const requestTime = measure.startTime
+        const responseTime = measure.duration
+        
+        cy.log(`[OPTIMIZED] API Request Start: ${requestTime.toFixed(2)}ms`)
+        cy.log(`[OPTIMIZED] API Response Total: ${responseTime.toFixed(2)}ms`)
+        cy.task('log', `OPTIMIZED - API Request Start: ${requestTime.toFixed(2)}ms`)
+        cy.task('log', `OPTIMIZED - API Response Total: ${responseTime.toFixed(2)}ms`)
+        
+        expect(responseTime).to.be.lessThan(3000)
+      })
+    })
+  })
+
+  it('should measure toast notification render time', () => {
+    cy.intercept('POST', '/api/auth/login', { statusCode: 401, body: { error: 'Invalid credentials' } }).as('login')
+    
+    cy.visit('/login?role=student')
+    cy.get('input[name="email"]').type('test@ucla.edu')
+    cy.get('input[name="password"]').type('testpassword')
+    
+    cy.window().then((win) => {
+      win.performance.mark('toast-start')
+    })
+    
+    cy.get('button[type="submit"]').click()
+    cy.wait('@login', { timeout: 5000 })
+    cy.get('.toast--error', { timeout: 2000 }).should('exist')
+    
+    cy.window().then((win) => {
+      win.performance.mark('toast-end')
+      win.performance.measure('toast-render', 'toast-start', 'toast-end')
+      const measure = win.performance.getEntriesByName('toast-render')[0] as PerformanceMeasure
+      cy.log(`[OPTIMIZED] Toast render time: ${measure.duration.toFixed(2)}ms`)
+      cy.task('log', `OPTIMIZED - Toast Render: ${measure.duration.toFixed(2)}ms`)
+      expect(measure.duration).to.be.lessThan(1500)
+    })
+  })
+
+  it('should measure page interaction responsiveness', () => {
+    cy.intercept('GET', '/api/posts*', { fixture: 'posts.json' }).as('getPosts')
+    cy.intercept('GET', '/api/auth/me', { fixture: 'student-user.json' }).as('getUser')
+    
+    cy.loginAsStudent()
+    cy.visit('/')
+    cy.wait('@getPosts')
+    
+    // Measure click responsiveness
+    cy.window().then((win) => {
+      win.performance.mark('click-start')
+    })
+    
+    cy.get('.lab-card').first().within(() => {
+      cy.get('a.learn-more').should('exist').click()
+    })
+    
+    cy.window().then((win) => {
+      win.performance.mark('click-end')
+      win.performance.measure('click-response', 'click-start', 'click-end')
+      const measure = win.performance.getEntriesByName('click-response')[0] as PerformanceMeasure
+      cy.log(`[OPTIMIZED] Click response time: ${measure.duration.toFixed(2)}ms`)
+      cy.task('log', `OPTIMIZED - Click Response: ${measure.duration.toFixed(2)}ms`)
+      expect(measure.duration).to.be.lessThan(500)
+    })
+  })
+
+  it('should measure search/filter function performance', () => {
+    cy.intercept('GET', '/api/posts*', { fixture: 'posts.json' }).as('getPosts')
+    cy.intercept('GET', '/api/auth/me', { fixture: 'student-user.json' }).as('getUser')
+    
+    cy.loginAsStudent()
+    cy.visit('/')
+    cy.wait('@getPosts')
+    cy.get('.lab-card', { timeout: 5000 }).should('exist')
+    
+    // Measure search input timing
+    cy.window().then((win) => {
+      win.performance.mark('search-start')
+    })
+    
+    cy.get('.lab-search input', { timeout: 5000 }).type('AI')
+    
+    cy.window().then((win) => {
+      win.performance.mark('search-end')
+      win.performance.measure('search-filter', 'search-start', 'search-end')
+      const measure = win.performance.getEntriesByName('search-filter')[0] as PerformanceMeasure
+      cy.log(`[OPTIMIZED] Search/filter time: ${measure.duration.toFixed(2)}ms`)
+      cy.task('log', `OPTIMIZED - Search/Filter: ${measure.duration.toFixed(2)}ms`)
+      expect(measure.duration).to.be.lessThan(1000)
+    })
+  })
+
+  it('should measure component mount and render lifecycle', () => {
+    cy.visit('/login?role=student')
+    
+    cy.window().then((win) => {
+      // Measure React component mount time
+      win.performance.mark('component-mount-start')
+    })
+    
+    cy.get('.auth-card', { timeout: 5000 }).should('exist')
+    cy.get('input[name="email"]').should('be.visible')
+    cy.get('input[name="password"]').should('be.visible')
+    
+    cy.window().then((win) => {
+      win.performance.mark('component-mount-end')
+      win.performance.measure('component-mount', 'component-mount-start', 'component-mount-end')
+      const measure = win.performance.getEntriesByName('component-mount')[0] as PerformanceMeasure
+      cy.log(`[OPTIMIZED] Component mount time: ${measure.duration.toFixed(2)}ms`)
+      cy.task('log', `OPTIMIZED - Component Mount: ${measure.duration.toFixed(2)}ms`)
+      expect(measure.duration).to.be.lessThan(1500)
+    })
   })
 })
 

@@ -1,0 +1,16 @@
+{
+  "user": {
+    "id": 1,
+    "email": "balanbong@g.ucla.edu",
+    "name": "Test Student",
+    "uclaId": "123456789",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "student": {
+      "year": "Junior",
+      "major": "Computer Science",
+      "description": "Test student description"
+    },
+    "researcher": null
+  }
+}
+
